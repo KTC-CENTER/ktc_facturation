@@ -31,48 +31,87 @@ Application web professionnelle de gestion de facturation développée avec Symf
 
 ## 🚀 Installation
 
-### 1. Cloner le projet
+### Installation rapide (recommandée)
 
 ```bash
-git clone https://github.com/votre-repo/ktc-invoice-pro.git
-cd ktc-invoice-pro
+git clone https://github.com/KTC-CENTER/ktc_facturation.git
+cd ktc_facturation
+make install
 ```
 
-### 2. Configurer l'environnement
+C'est tout ! L'application est accessible sur http://localhost:8080
+
+### Installation manuelle
+
+#### 1. Cloner le projet
+
+```bash
+git clone https://github.com/KTC-CENTER/ktc_facturation.git
+cd ktc_facturation
+```
+
+#### 2. Configurer l'environnement
 
 ```bash
 cp .env.example .env
 # Éditer .env avec vos configurations (API Brevo, etc.)
 ```
 
-### 3. Lancer les conteneurs Docker
+#### 3. Lancer les conteneurs Docker
 
 ```bash
 docker compose up -d --build
 ```
 
-### 4. Installer les dépendances
+#### 4. Installer les dépendances
 
 ```bash
 # PHP
 docker compose exec app composer install
 
-# JavaScript
-docker compose run --rm node sh -c "npm install && npm run build"
+# Les assets sont compilés automatiquement par le conteneur node
 ```
 
-### 5. Créer la base de données
+#### 5. Créer la base de données
 
 ```bash
-docker compose exec app php bin/console doctrine:migrations:migrate
-docker compose exec app php bin/console doctrine:fixtures:load
+docker compose exec app php bin/console doctrine:database:create --if-not-exists
+docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
+docker compose exec app php bin/console doctrine:fixtures:load --no-interaction
 ```
 
-### 6. Accéder à l'application
+#### 6. Accéder à l'application
 
 - **Application** : http://localhost:8080
 - **phpMyAdmin** : http://localhost:8081
 - **MailHog** : http://localhost:8025
+
+## 🔧 Commandes Make utiles
+
+```bash
+make help           # Affiche toutes les commandes disponibles
+make start          # Démarre les conteneurs
+make stop           # Arrête les conteneurs
+make restart        # Redémarre les conteneurs
+make logs           # Affiche les logs
+make shell          # Accède au shell PHP
+make db-migrate     # Exécute les migrations
+make db-fixtures    # Charge les fixtures
+make db-reset       # Reset complet de la base
+make cache-clear    # Vide le cache
+make test           # Lance les tests
+```
+
+## 🔄 Hot-Reload (Développement)
+
+Les modifications sont automatiquement prises en compte :
+- **PHP/Twig** : Rechargez simplement la page
+- **CSS/JS** : Le conteneur `node` compile automatiquement en mode watch
+
+Pour voir les logs de compilation :
+```bash
+make logs-node
+```
 
 ## 👤 Comptes par défaut (fixtures)
 

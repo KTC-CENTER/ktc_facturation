@@ -13,8 +13,8 @@ webpack_encore:
     # Crossorigin value when assets are loaded from another domain
     # crossorigin: 'anonymous'
 
-    # Preload & prefetch
-    preload: true
+    # Preload & prefetch (requires symfony/web-link)
+    preload: false
 
     # Throw an exception if the entrypoints.json file is missing or an entry is missing
     strict_mode: true
