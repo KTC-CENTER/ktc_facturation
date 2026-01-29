@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modèles d'emails - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- En-tête -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Modèles d'emails</h1>
+            <p class="mt-1 text-sm text-gray-500">Templates pour l'envoi de documents par email</p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <a href="{{ path('app_settings_index') }}" class="btn btn-secondary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Retour
+            </a>
+            <a href="{{ path('app_settings_email_template_new') }}" class="btn btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Nouveau modèle
+            </a>
+        </div>
+    </div>
+
+    <!-- Liste des modèles -->
+    <div class="card overflow-hidden">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Sujet</th>
+                    <th>Statut</th>
+                    <th>Modifié le</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for template in templates %}
+                <tr>
+                    <td class="font-medium text-gray-900">{{ template.name }}</td>
+                    <td class="text-gray-500">{{ template.subject|length > 50 ? template.subject|slice(0, 50) ~ '...' : template.subject }}</td>
+                    <td>
+                        {% if template.isActive %}
+                            <span class="badge badge-success">Actif</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-sm text-gray-500">{{ template.updatedAt|date('d/m/Y H:i') }}</td>
+                    <td class="text-right">
+                        <div class="flex items-center justify-end space-x-2">
+                            <a href="{{ path('app_settings_email_template_edit', {id: template.id}) }}" 
+                               class="text-blue-400 hover:text-blue-600" title="Modifier">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </a>
+                            <form action="{{ path('app_settings_email_template_delete', {id: template.id}) }}" method="post" 
+                                  class="inline" onsubmit="return confirm('Supprimer ce modèle ?')">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ template.id) }}">
+                                <button type="submit" class="text-red-400 hover:text-red-600" title="Supprimer">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-8">
+                        <div class="text-gray-400">
+                            <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                            <p class="mt-2">Aucun modèle d'email</p>
+                            <a href="{{ path('app_settings_email_template_new') }}" class="mt-4 inline-block text-primary-600 hover:text-primary-800">
+                                Créer votre premier modèle
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Variables disponibles -->
+    <div class="card bg-gray-50">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Variables disponibles</h3>
+        <p class="text-sm text-gray-600 mb-4">Utilisez ces variables dans vos modèles. Elles seront remplacées automatiquement lors de l'envoi.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-white p-3 rounded border">
+                <code class="text-sm text-primary-600">{{ '{{client_name}}' }}</code>
+                <p class="text-xs text-gray-500 mt-1">Nom du client</p>
+            </div>
+            <div class="bg-white p-3 rounded border">
+                <code class="text-sm text-primary-600">{{ '{{document_reference}}' }}</code>
+                <p class="text-xs text-gray-500 mt-1">Référence du document</p>
+            </div>
+            <div class="bg-white p-3 rounded border">
+                <code class="text-sm text-primary-600">{{ '{{document_type}}' }}</code>
+                <p class="text-xs text-gray-500 mt-1">Type (Proforma/Facture)</p>
+            </div>
+            <div class="bg-white p-3 rounded border">
+                <code class="text-sm text-primary-600">{{ '{{total_ttc}}' }}</code>
+                <p class="text-xs text-gray-500 mt-1">Montant TTC</p>
+            </div>
+            <div class="bg-white p-3 rounded border">
+                <code class="text-sm text-primary-600">{{ '{{due_date}}' }}</code>
+                <p class="text-xs text-gray-500 mt-1">Date d'échéance</p>
+            </div>
+            <div class="bg-white p-3 rounded border">
+                <code class="text-sm text-primary-600">{{ '{{company_name}}' }}</code>
+                <p class="text-xs text-gray-500 mt-1">Nom de votre entreprise</p>
+            </div>
+            <div class="bg-white p-3 rounded border">
+                <code class="text-sm text-primary-600">{{ '{{share_link}}' }}</code>
+                <p class="text-xs text-gray-500 mt-1">Lien de consultation</p>
+            </div>
+            <div class="bg-white p-3 rounded border">
+                <code class="text-sm text-primary-600">{{ '{{sender_name}}' }}</code>
+                <p class="text-xs text-gray-500 mt-1">Nom de l'expéditeur</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

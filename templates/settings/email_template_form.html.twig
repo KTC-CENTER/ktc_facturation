@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ template.id ? 'Modifier' : 'Nouveau' }} modèle d'email - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- En-tête -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ template.id ? 'Modifier le modèle' : 'Nouveau modèle d\'email' }}</h1>
+            <p class="mt-1 text-sm text-gray-500">{{ template.id ? template.name : 'Créez un nouveau template pour vos envois' }}</p>
+        </div>
+        <a href="{{ path('app_settings_email_templates') }}" class="btn btn-secondary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour
+        </a>
+    </div>
+
+    <!-- Formulaire -->
+    {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+    
+    <div class="card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Informations générales</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form_label(form.name, 'Nom du modèle', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.name, {'attr': {'class': 'form-input', 'placeholder': 'Ex: Envoi proforma'}}) }}
+                {{ form_errors(form.name) }}
+            </div>
+            <div class="flex items-end">
+                <label class="flex items-center">
+                    {{ form_widget(form.isActive, {'attr': {'class': 'form-checkbox'}}) }}
+                    <span class="ml-2 text-sm text-gray-700">Modèle actif</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Contenu de l'email</h3>
+        <div class="space-y-6">
+            <div>
+                {{ form_label(form.subject, 'Sujet', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.subject, {'attr': {'class': 'form-input', 'placeholder': 'Ex: Votre {{document_type}} {{document_reference}}'}}) }}
+                {{ form_errors(form.subject) }}
+            </div>
+            <div>
+                {{ form_label(form.body, 'Corps du message', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.body, {'attr': {'class': 'form-textarea font-mono text-sm', 'rows': '12', 'placeholder': 'Bonjour,
+
+Veuillez trouver ci-joint votre {{document_type}} n°{{document_reference}}.
+
+Montant TTC : {{total_ttc}}
+
+Vous pouvez consulter ce document en ligne : {{share_link}}
+
+Cordialement,
+{{sender_name}}
+{{company_name}}'}}) }}
+                {{ form_errors(form.body) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Variables disponibles -->
+    <div class="card bg-blue-50 border-blue-200">
+        <h3 class="text-lg font-medium text-blue-900 mb-4">Variables disponibles</h3>
+        <div class="flex flex-wrap gap-2">
+            {% set variables = [
+                '{{client_name}}',
+                '{{document_reference}}',
+                '{{document_type}}',
+                '{{total_ttc}}',
+                '{{due_date}}',
+                '{{company_name}}',
+                '{{share_link}}',
+                '{{sender_name}}'
+            ] %}
+            {% for variable in variables %}
+            <button type="button" class="px-3 py-1 bg-white rounded border border-blue-300 text-sm text-blue-700 hover:bg-blue-100 transition-colors variable-btn" data-variable="{{ variable }}">
+                {{ variable }}
+            </button>
+            {% endfor %}
+        </div>
+        <p class="mt-3 text-xs text-blue-600">Cliquez sur une variable pour l'insérer à la position du curseur</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end space-x-4">
+        <a href="{{ path('app_settings_email_templates') }}" class="btn btn-secondary">Annuler</a>
+        <button type="submit" class="btn btn-primary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            {{ template.id ? 'Enregistrer' : 'Créer le modèle' }}
+        </button>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.querySelectorAll('.variable-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const variable = this.dataset.variable;
+        const textarea = document.querySelector('textarea[name*="body"]');
+        const input = document.querySelector('input[name*="subject"]');
+        
+        // Priorité au textarea s'il est actif, sinon au sujet
+        const target = document.activeElement === input ? input : textarea;
+        
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+        const text = target.value;
+        
+        target.value = text.substring(0, start) + variable + text.substring(end);
+        target.focus();
+        target.setSelectionRange(start + variable.length, start + variable.length);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

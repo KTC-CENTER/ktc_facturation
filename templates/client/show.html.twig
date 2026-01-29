@@ -1,0 +1,309 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ client.name }} - {{ app_name }}{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    {# En-tête #}
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ client.name }}</h1>
+            <p class="text-gray-600">
+                {% if client.isArchived %}
+                    <span class="badge badge-danger">Archivé</span>
+                {% else %}
+                    <span class="badge badge-success">Actif</span>
+                {% endif %}
+                · Créé le {{ client.createdAt|date('d/m/Y') }}
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ path('app_client_index') }}" class="btn btn-secondary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Retour
+            </a>
+            <a href="{{ path('app_client_edit', {'id': client.id}) }}" class="btn btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Modifier
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {# Informations client #}
+        <div class="lg:col-span-2 space-y-6">
+            {# Coordonnées #}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-medium">Coordonnées</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Email</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {% if client.email %}
+                                    <a href="mailto:{{ client.email }}" class="text-primary-600 hover:underline">{{ client.email }}</a>
+                                {% else %}
+                                    <span class="text-gray-400">Non renseigné</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Téléphone</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {% if client.phone %}
+                                    <a href="tel:{{ client.phone }}" class="text-primary-600 hover:underline">{{ client.phone }}</a>
+                                {% else %}
+                                    <span class="text-gray-400">Non renseigné</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div class="md:col-span-2">
+                            <dt class="text-sm font-medium text-gray-500">Adresse</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {% if client.fullAddress %}
+                                    {{ client.fullAddress|nl2br }}
+                                {% else %}
+                                    <span class="text-gray-400">Non renseignée</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            {# Informations légales #}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-medium">Informations légales</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">N° Contribuable</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ client.taxId ?: '-' }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">RCCM</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ client.rccm ?: '-' }}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            {# Contact #}
+            {% if client.contactPerson %}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-medium">Personne de contact</h3>
+                </div>
+                <div class="card-body">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Nom</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ client.contactPerson }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Téléphone</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {% if client.contactPhone %}
+                                    <a href="tel:{{ client.contactPhone }}" class="text-primary-600 hover:underline">{{ client.contactPhone }}</a>
+                                {% else %}
+                                    <span class="text-gray-400">Non renseigné</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+
+            {# Notes #}
+            {% if client.notes %}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-medium">Notes</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-sm text-gray-700 whitespace-pre-line">{{ client.notes }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {# Sidebar #}
+        <div class="space-y-6">
+            {# Statistiques #}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-medium">Statistiques</h3>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">Total documents</span>
+                        <span class="text-lg font-semibold">{{ client.documentsCount }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">Proformas</span>
+                        <span class="text-lg font-semibold">{{ client.proformas|length }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">Factures</span>
+                        <span class="text-lg font-semibold">{{ client.invoices|length }}</span>
+                    </div>
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-500">Chiffre d'affaires</span>
+                            <span class="text-lg font-semibold text-success-600">
+                                {{ client.totalRevenue|number_format(0, ',', ' ') }} {{ default_currency }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Actions rapides #}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-medium">Actions rapides</h3>
+                </div>
+                <div class="card-body space-y-2">
+                    <a href="{{ path('app_proforma_new', {'client': client.id}) }}" class="btn btn-success w-full justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Nouvelle proforma
+                    </a>
+                    <a href="{{ path('app_invoice_new', {'client': client.id}) }}" class="btn btn-primary w-full justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Nouvelle facture
+                    </a>
+                    <a href="{{ path('app_client_documents', {'id': client.id}) }}" class="btn btn-secondary w-full justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Voir tous les documents
+                    </a>
+                </div>
+            </div>
+
+            {# Actions #}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-medium">Gestion</h3>
+                </div>
+                <div class="card-body space-y-2">
+                    <form action="{{ path('app_client_archive', {'id': client.id}) }}" method="post">
+                        <input type="hidden" name="_token" value="{{ csrf_token('archive' ~ client.id) }}">
+                        <button type="submit" class="btn btn-warning w-full justify-center">
+                            {% if client.isArchived %}
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Restaurer
+                            {% else %}
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                                </svg>
+                                Archiver
+                            {% endif %}
+                        </button>
+                    </form>
+                    {% if client.documentsCount == 0 %}
+                    <form action="{{ path('app_client_delete', {'id': client.id}) }}" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce client ?')">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ client.id) }}">
+                        <button type="submit" class="btn btn-danger w-full justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Supprimer
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Documents récents #}
+    <div class="card">
+        <div class="card-header flex justify-between items-center">
+            <h3 class="text-lg font-medium">Documents récents</h3>
+            <a href="{{ path('app_client_documents', {'id': client.id}) }}" class="text-sm text-primary-600 hover:underline">
+                Voir tout
+            </a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Référence</th>
+                        <th>Date</th>
+                        <th>Montant TTC</th>
+                        <th>Statut</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set documents = [] %}
+                    {% for proforma in client.proformas|slice(0, 5) %}
+                        {% set documents = documents|merge([{'type': 'proforma', 'doc': proforma, 'date': proforma.issueDate}]) %}
+                    {% endfor %}
+                    {% for invoice in client.invoices|slice(0, 5) %}
+                        {% set documents = documents|merge([{'type': 'invoice', 'doc': invoice, 'date': invoice.issueDate}]) %}
+                    {% endfor %}
+                    
+                    {% if documents|length == 0 %}
+                        <tr>
+                            <td colspan="6" class="text-center text-gray-500 py-8">
+                                Aucun document pour ce client
+                            </td>
+                        </tr>
+                    {% else %}
+                        {% for item in documents|sort((a, b) => b.date <=> a.date)|slice(0, 10) %}
+                            <tr>
+                                <td>
+                                    {% if item.type == 'proforma' %}
+                                        <span class="badge badge-info">Proforma</span>
+                                    {% else %}
+                                        <span class="badge badge-primary">Facture</span>
+                                    {% endif %}
+                                </td>
+                                <td class="font-medium">{{ item.doc.reference }}</td>
+                                <td>{{ item.doc.issueDate|date('d/m/Y') }}</td>
+                                <td>{{ item.doc.totalTTCFloat|number_format(0, ',', ' ') }} {{ default_currency }}</td>
+                                <td>
+                                    <span class="badge badge-{{ item.doc.statusColor }}">{{ item.doc.statusLabel }}</span>
+                                </td>
+                                <td class="text-right">
+                                    {% if item.type == 'proforma' %}
+                                        <a href="{{ path('app_proforma_show', {'id': item.doc.id}) }}" class="text-primary-600 hover:underline">
+                                            Voir
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ path('app_invoice_show', {'id': item.doc.id}) }}" class="text-primary-600 hover:underline">
+                                            Voir
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

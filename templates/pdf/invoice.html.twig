@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ invoice.reference }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 10px; line-height: 1.4; color: #333; padding: 20px; }
+        
+        .header { display: table; width: 100%; margin-bottom: 20px; border-bottom: 3px solid #2563eb; padding-bottom: 15px; }
+        .header-left, .header-right { display: table-cell; vertical-align: top; }
+        .header-right { text-align: right; }
+        .company-name { font-size: 22px; font-weight: bold; color: #2563eb; margin-bottom: 5px; }
+        .company-info { font-size: 9px; color: #666; line-height: 1.6; }
+        .company-legal { font-size: 8px; color: #888; margin-top: 5px; }
+        
+        .doc-title { background: #2563eb; color: white; padding: 10px 20px; margin-bottom: 20px; }
+        .doc-title h1 { font-size: 18px; font-weight: bold; margin: 0; }
+        .doc-title .ref { font-size: 14px; }
+        
+        .info-section { display: table; width: 100%; margin-bottom: 20px; }
+        .info-box { display: table-cell; width: 50%; vertical-align: top; padding-right: 15px; }
+        .info-box:last-child { padding-right: 0; padding-left: 15px; }
+        .client-name { font-size: 14px; font-weight: bold; color: #2563eb; }
+        .client-info { font-size: 9px; color: #666; margin-top: 5px; }
+        .doc-info { font-size: 10px; background: #f8fafc; padding: 10px; border-radius: 4px; }
+        
+        .status-notice { padding: 8px 12px; margin-bottom: 20px; font-size: 10px; }
+        .status-paid { background: #d1fae5; border: 1px solid #10b981; color: #065f46; }
+        .status-overdue { background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; }
+        .status-pending { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; }
+        
+        table.items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        table.items th { background: #2563eb; color: white; padding: 10px 8px; text-align: left; font-size: 10px; text-transform: uppercase; }
+        table.items td { padding: 10px 8px; border-bottom: 1px solid #e5e7eb; font-size: 10px; }
+        table.items tr:nth-child(even) { background: #f9fafb; }
+        table.items .center { text-align: center; }
+        table.items .right { text-align: right; }
+        .item-name { font-weight: 500; }
+        .item-desc { font-size: 8px; color: #666; margin-top: 3px; }
+        
+        .totals-section { display: table; width: 100%; margin-bottom: 20px; }
+        .notes-box { display: table-cell; width: 55%; vertical-align: top; padding-right: 20px; }
+        .totals-box { display: table-cell; width: 45%; vertical-align: top; }
+        
+        table.totals { width: 100%; border-collapse: collapse; }
+        table.totals td { padding: 8px 10px; font-size: 11px; border-bottom: 1px solid #e5e7eb; }
+        table.totals tr.total-row { background: #2563eb; color: white; }
+        table.totals tr.total-row td { font-size: 14px; font-weight: bold; border: none; }
+        table.totals tr.paid-row { background: #d1fae5; }
+        table.totals tr.due-row { background: #fee2e2; }
+        
+        .notes h4 { color: #2563eb; margin-bottom: 5px; font-size: 11px; }
+        .notes p { font-size: 9px; color: #666; }
+        
+        .conditions { margin-top: 20px; padding: 10px; background: #f1f5f9; font-size: 8px; color: #64748b; }
+        .conditions h4 { color: #475569; margin-bottom: 5px; }
+        
+        .bank-details { margin-top: 15px; padding: 10px; background: #eff6ff; border: 1px solid #bfdbfe; font-size: 9px; }
+        .bank-details h4 { color: #1e40af; margin-bottom: 5px; }
+        
+        .amount-words { background: #e8f4f8; padding: 10px; margin-bottom: 15px; border-left: 4px solid #94a3b8; font-size: 10px; }
+        .amount-words strong { color: #2563eb; }
+        
+        .footer { position: fixed; bottom: 20px; left: 20px; right: 20px; text-align: center; font-size: 8px; color: #888; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <!-- En-tête -->
+    <div class="header">
+        <div class="header-left">
+            <div class="company-name">{{ settings.companyName }}</div>
+            <div class="company-info">
+                {{ settings.address }}<br>
+                {% if settings.postalCode %}BP : {{ settings.postalCode }} {% endif %}{{ settings.city }}, {{ settings.country }}<br>
+                Tél : {{ settings.phones }}<br>
+                Email : {{ settings.email }}
+                {% if settings.website %}<br>Web : {{ settings.website }}{% endif %}
+            </div>
+            <div class="company-legal">
+                {% if settings.rccm %}RCCM : {{ settings.rccm }}{% endif %}
+                {% if settings.taxId %}<br>N° Contrib. : {{ settings.taxId }}{% endif %}
+            </div>
+        </div>
+        <div class="header-right">
+            {% if settings.logoPath %}
+            <img src="{{ asset('uploads/logo/' ~ settings.logoPath) }}" alt="Logo" style="max-height: 80px;">
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Titre du document -->
+    <div class="doc-title">
+        <h1>FACTURE</h1>
+        <div class="ref">N° {{ invoice.reference }}</div>
+    </div>
+
+    <!-- Informations client et document -->
+    <div class="info-section">
+        <div class="info-box">
+            <div class="client-name">{{ invoice.client.name }}</div>
+            <div class="client-info">
+                {% if invoice.client.address %}{{ invoice.client.address }}<br>{% endif %}
+                {% if invoice.client.city %}{{ invoice.client.city }}{% endif %}
+                {% if invoice.client.country %}, {{ invoice.client.country }}{% endif %}
+                {% if invoice.client.phone %}<br>Tél : {{ invoice.client.phone }}{% endif %}
+                {% if invoice.client.email %}<br>Email : {{ invoice.client.email }}{% endif %}
+            </div>
+        </div>
+        <div class="info-box">
+            <div class="doc-info">
+                <strong>Date :</strong> {{ invoice.issueDate|date('d/m/Y') }}<br>
+                <strong>Échéance :</strong> {{ invoice.dueDate|date('d/m/Y') }}<br>
+                {% if invoice.client.taxId %}<strong>NUI :</strong> {{ invoice.client.taxId }}<br>{% endif %}
+                {% if invoice.client.rccm %}<strong>RCCM :</strong> {{ invoice.client.rccm }}{% endif %}
+                {% if invoice.proforma %}<br><strong>Proforma :</strong> {{ invoice.proforma.reference }}{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Notice de statut -->
+    {% if invoice.status == 'paid' %}
+    <div class="status-notice status-paid">
+        <strong>✓ FACTURE RÉGLÉE</strong> - Paiement reçu le {{ invoice.paidAt|date('d/m/Y') }}
+        {% if invoice.paymentMethod %} par {{ invoice.paymentMethod }}{% endif %}
+    </div>
+    {% elseif invoice.isOverdue %}
+    <div class="status-notice status-overdue">
+        <strong>⚠ FACTURE EN RETARD</strong> - Échéance dépassée depuis {{ invoice.daysOverdue }} jours
+    </div>
+    {% else %}
+    <div class="status-notice status-pending">
+        <strong>⏳ À régler avant le {{ invoice.dueDate|date('d/m/Y') }}</strong>
+    </div>
+    {% endif %}
+
+    {% if invoice.object %}
+    <div style="margin-bottom: 15px; font-size: 11px;">
+        <strong>Objet :</strong> {{ invoice.object }}
+    </div>
+    {% endif %}
+
+    <!-- Tableau des articles -->
+    <table class="items">
+        <thead>
+            <tr>
+                <th style="width: 45%">Désignation</th>
+                <th style="width: 10%" class="center">Qté</th>
+                <th style="width: 15%" class="right">P.U. ({{ settings.currency }})</th>
+                <th style="width: 10%" class="center">Remise</th>
+                <th style="width: 20%" class="right">Total ({{ settings.currency }})</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.items %}
+            <tr>
+                <td>
+                    <div class="item-name">{{ item.designation }}</div>
+                    {% if item.description %}
+                    <div class="item-desc">{{ item.description }}</div>
+                    {% endif %}
+                </td>
+                <td class="center">{{ item.quantityFloat|number_format(2, ',', ' ') }}</td>
+                <td class="right">{{ item.unitPriceFloat|number_format(0, ',', ' ') }}</td>
+                <td class="center">{{ item.discountFloat > 0 ? item.discountFloat ~ '%' : '-' }}</td>
+                <td class="right">{{ item.totalFloat|number_format(0, ',', ' ') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totaux et notes -->
+    <div class="totals-section">
+        <div class="notes-box">
+            {% if invoice.notes %}
+            <div class="notes">
+                <h4>Notes</h4>
+                <p>{{ invoice.notes|nl2br }}</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="totals-box">
+            <table class="totals">
+                <tr>
+                    <td>Total HT</td>
+                    <td class="right">{{ invoice.totalHTFloat|number_format(0, ',', ' ') }} {{ settings.currency }}</td>
+                </tr>
+                {% if invoice.taxRateFloat > 0 %}
+                <tr>
+                    <td>{{ settings.taxLabel }} ({{ invoice.taxRateFloat }}%)</td>
+                    <td class="right">{{ invoice.totalTVAFloat|number_format(0, ',', ' ') }} {{ settings.currency }}</td>
+                </tr>
+                {% endif %}
+                <tr class="total-row">
+                    <td>TOTAL TTC</td>
+                    <td class="right">{{ invoice.totalTTCFloat|number_format(0, ',', ' ') }} {{ settings.currency }}</td>
+                </tr>
+                {% if invoice.amountPaidFloat > 0 %}
+                <tr class="paid-row">
+                    <td>Déjà payé</td>
+                    <td class="right">- {{ invoice.amountPaidFloat|number_format(0, ',', ' ') }} {{ settings.currency }}</td>
+                </tr>
+                <tr class="due-row">
+                    <td><strong>Reste à payer</strong></td>
+                    <td class="right"><strong>{{ invoice.remainingAmount|number_format(0, ',', ' ') }} {{ settings.currency }}</strong></td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    <!-- Montant en lettres -->
+    <div class="amount-words">
+        <strong>Arrêté la présente facture à la somme de :</strong>
+        {{ invoice.totalTTCFloat|number_format(0, ',', ' ') }} {{ settings.currency }}
+    </div>
+
+    <!-- Coordonnées bancaires -->
+    {% if settings.bankDetails %}
+    <div class="bank-details">
+        <h4>Coordonnées bancaires</h4>
+        <p>{{ settings.bankDetails|nl2br }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Conditions -->
+    {% if invoice.conditions %}
+    <div class="conditions">
+        <h4>Conditions de paiement</h4>
+        <p>{{ invoice.conditions|nl2br }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Pied de page -->
+    <div class="footer">
+        {{ settings.companyName }} - {{ settings.address }}, {{ settings.city }}<br>
+        {% if settings.rccm %}RCCM : {{ settings.rccm }} | {% endif %}
+        Tél : {{ settings.phones }} | Email : {{ settings.email }}
+    </div>
+</body>
+</html>

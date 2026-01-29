@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ proforma.reference }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <nav class="text-sm text-gray-500 mb-2">
+            <a href="{{ path('app_proforma_index') }}" class="hover:text-primary-600">Proformas</a>
+            <span class="mx-2">/</span>
+            <a href="{{ path('app_proforma_show', {id: proforma.id}) }}" class="hover:text-primary-600">{{ proforma.reference }}</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-700">Modifier</span>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900">Modifier la proforma</h1>
+    </div>
+
+    {{ include('proforma/_form.html.twig', {button_label: 'Enregistrer les modifications'}) }}
+</div>
+{% endblock %}

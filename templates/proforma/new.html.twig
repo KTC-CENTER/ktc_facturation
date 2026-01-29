@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle proforma{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <nav class="text-sm text-gray-500 mb-2">
+            <a href="{{ path('app_proforma_index') }}" class="hover:text-primary-600">Proformas</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-700">Nouvelle</span>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900">Nouvelle proforma</h1>
+    </div>
+
+    {{ include('proforma/_form.html.twig', {button_label: 'Créer la proforma'}) }}
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Informations principales -->
+    <div class="lg:col-span-2 space-y-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">Informations générales</h3>
+            </div>
+            <div class="card-body space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        {{ form_row(form.name) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.code) }}
+                    </div>
+                    <div>
+                        <div x-data="{ type: '{{ form.vars.value.type ?? 'LOGICIEL' }}' }">
+                            {{ form_label(form.type) }}
+                            {{ form_widget(form.type, {'attr': {'x-model': 'type', '@change': 'type = $event.target.value'}}) }}
+                            {{ form_errors(form.type) }}
+                        </div>
+                    </div>
+                    <div>
+                        {{ form_row(form.unitPrice) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.unit) }}
+                    </div>
+                </div>
+                <div>
+                    {{ form_row(form.description) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Caractéristiques selon le type -->
+        <div class="card" x-data="{ type: '{{ form.vars.value.type ?? 'LOGICIEL' }}' }" 
+             x-init="$watch('type', val => { 
+                 document.querySelector('[name=\'{{ form.type.vars.full_name }}\']').addEventListener('change', e => type = e.target.value);
+             })">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">Caractéristiques spécifiques</h3>
+            </div>
+            <div class="card-body">
+                <!-- Logiciel -->
+                <div x-show="type === 'LOGICIEL'" x-cloak class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            {{ form_row(form.version) }}
+                        </div>
+                        <div>
+                            {{ form_row(form.licenseType) }}
+                        </div>
+                        <div>
+                            {{ form_row(form.licenseDuration) }}
+                        </div>
+                        <div>
+                            {{ form_row(form.maxUsers) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matériel -->
+                <div x-show="type === 'MATERIEL'" x-cloak class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            {{ form_row(form.brand) }}
+                        </div>
+                        <div>
+                            {{ form_row(form.model) }}
+                        </div>
+                        <div>
+                            {{ form_row(form.warrantyMonths) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service -->
+                <div x-show="type === 'SERVICE'" x-cloak class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            {{ form_row(form.durationHours) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    {{ form_row(form.characteristics) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">Statut</h3>
+            </div>
+            <div class="card-body">
+                {{ form_row(form.isActive) }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body space-y-3">
+                <button type="submit" class="btn btn-primary w-full">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    {{ button_label|default('Enregistrer') }}
+                </button>
+                <a href="{{ path('app_product_index') }}" class="btn btn-secondary w-full">
+                    Annuler
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ form_end(form) }}

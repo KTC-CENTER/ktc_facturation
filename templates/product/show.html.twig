@@ -1,0 +1,202 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.name }} - Produit{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <nav class="text-sm text-gray-500 mb-2">
+                <a href="{{ path('app_product_index') }}" class="hover:text-primary-600">Produits</a>
+                <span class="mx-2">/</span>
+                <span class="text-gray-700">{{ product.name }}</span>
+            </nav>
+            <h1 class="text-2xl font-bold text-gray-900">{{ product.name }}</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ path('app_product_edit', {id: product.id}) }}" class="btn btn-secondary">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Modifier
+            </a>
+            <form action="{{ path('app_product_toggle', {id: product.id}) }}" method="POST" class="inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ product.id) }}">
+                <button type="submit" class="btn {{ product.isActive ? 'btn-warning' : 'btn-success' }}">
+                    {{ product.isActive ? 'Désactiver' : 'Activer' }}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Informations principales -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card">
+                <div class="card-header flex items-center justify-between">
+                    <h3 class="font-semibold text-gray-900">Informations générales</h3>
+                    <span class="badge {{ product.isActive ? 'badge-success' : 'badge-danger' }}">
+                        {{ product.isActive ? 'Actif' : 'Inactif' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Code</dt>
+                            <dd class="mt-1 text-sm text-gray-900 font-mono">{{ product.code }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Type</dt>
+                            <dd class="mt-1">
+                                {% if product.type == 'LOGICIEL' %}
+                                    <span class="badge badge-info">Logiciel</span>
+                                {% elseif product.type == 'MATERIEL' %}
+                                    <span class="badge badge-warning">Matériel</span>
+                                {% else %}
+                                    <span class="badge badge-success">Service</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Prix unitaire</dt>
+                            <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ product.unitPrice|number_format(0, ',', ' ') }} {{ default_currency }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Unité</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.unit ?: '-' }}</dd>
+                        </div>
+                    </dl>
+                    
+                    {% if product.description %}
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <dt class="text-sm font-medium text-gray-500">Description</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ product.description|nl2br }}</dd>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Caractéristiques spécifiques -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold text-gray-900">Caractéristiques</h3>
+                </div>
+                <div class="card-body">
+                    {% if product.type == 'LOGICIEL' %}
+                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Version</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.version ?: '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Type de licence</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.licenseType ?: '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Durée de licence</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.licenseDuration ? product.licenseDuration ~ ' mois' : '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Utilisateurs max</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.maxUsers ?: 'Illimité' }}</dd>
+                        </div>
+                    </dl>
+                    {% elseif product.type == 'MATERIEL' %}
+                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Marque</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.brand ?: '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Modèle</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.model ?: '-' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Garantie</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.warrantyMonths ? product.warrantyMonths ~ ' mois' : '-' }}</dd>
+                        </div>
+                    </dl>
+                    {% elseif product.type == 'SERVICE' %}
+                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Durée estimée</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ product.durationHours ? product.durationHours ~ ' heures' : '-' }}</dd>
+                        </div>
+                    </dl>
+                    {% endif %}
+                    
+                    {% if product.characteristics %}
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <dt class="text-sm font-medium text-gray-500">Caractéristiques supplémentaires</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ product.characteristics|nl2br }}</dd>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Statistiques -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold text-gray-900">Statistiques</h3>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Proformas</span>
+                        <span class="text-sm font-medium text-gray-900">{{ product.documentItems|filter(i => i.proforma is not null)|length }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Factures</span>
+                        <span class="text-sm font-medium text-gray-900">{{ product.documentItems|filter(i => i.invoice is not null)|length }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dates -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold text-gray-900">Dates</h3>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Créé le</span>
+                        <span class="text-sm text-gray-900">{{ product.createdAt|date('d/m/Y H:i') }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Modifié le</span>
+                        <span class="text-sm text-gray-900">{{ product.updatedAt|date('d/m/Y H:i') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold text-gray-900">Actions</h3>
+                </div>
+                <div class="card-body space-y-3">
+                    <a href="{{ path('app_proforma_new', {product: product.id}) }}" class="btn btn-primary w-full">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Créer une proforma
+                    </a>
+                    <button type="button" class="btn btn-danger w-full" 
+                            onclick="if(confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) document.getElementById('delete-form').submit()">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Supprimer
+                    </button>
+                    <form id="delete-form" action="{{ path('app_product_delete', {id: product.id}) }}" method="POST" class="hidden">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

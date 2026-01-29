@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres entreprise - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- En-tête -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Paramètres entreprise</h1>
+            <p class="mt-1 text-sm text-gray-500">Informations de votre société affichées sur les documents</p>
+        </div>
+        <a href="{{ path('app_settings_index') }}" class="btn btn-secondary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour
+        </a>
+    </div>
+
+    <!-- Formulaire -->
+    {{ form_start(form, {'attr': {'class': 'space-y-6', 'enctype': 'multipart/form-data'}}) }}
+        
+        <!-- Identité -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Identité</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    {{ form_label(form.companyName, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.companyName) }}
+                    {{ form_errors(form.companyName) }}
+                </div>
+                <div>
+                    {{ form_label(form.rccm, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.rccm) }}
+                    {{ form_errors(form.rccm) }}
+                </div>
+                <div>
+                    {{ form_label(form.taxId, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.taxId) }}
+                    {{ form_errors(form.taxId) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Coordonnées -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Coordonnées</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    {{ form_label(form.address, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.address) }}
+                    {{ form_errors(form.address) }}
+                </div>
+                <div>
+                    {{ form_label(form.city, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.city) }}
+                    {{ form_errors(form.city) }}
+                </div>
+                <div>
+                    {{ form_label(form.country, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.country) }}
+                    {{ form_errors(form.country) }}
+                </div>
+                <div>
+                    {{ form_label(form.phone, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.phone) }}
+                    {{ form_errors(form.phone) }}
+                </div>
+                <div>
+                    {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.email) }}
+                    {{ form_errors(form.email) }}
+                </div>
+                <div class="md:col-span-2">
+                    {{ form_label(form.website, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.website) }}
+                    {{ form_errors(form.website) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Logo -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Logo</h3>
+            <div class="flex items-start space-x-6">
+                {% if settings.logoPath %}
+                <div class="flex-shrink-0">
+                    <img src="{{ asset('uploads/logo/' ~ settings.logoPath) }}" alt="Logo actuel" class="h-24 w-auto border rounded">
+                </div>
+                {% endif %}
+                <div class="flex-1">
+                    {{ form_label(form.logoFile, settings.logoPath ? 'Changer le logo' : 'Téléverser un logo', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.logoFile) }}
+                    {{ form_errors(form.logoFile) }}
+                    <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF ou WebP. Max 2 Mo. Recommandé : 300x100 pixels</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end space-x-4">
+            <a href="{{ path('app_settings_index') }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Enregistrer
+            </button>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

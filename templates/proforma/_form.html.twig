@@ -1,0 +1,137 @@
+{{ form_start(form, {'attr': {'class': 'space-y-6', 'data-controller': 'document-items', 'data-document-items-tax-rate-value': form.taxRate.vars.value|default(19.25), 'data-document-items-currency-value': default_currency}}) }}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Contenu principal -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Informations générales -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">Informations générales</h3>
+            </div>
+            <div class="card-body space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        {{ form_row(form.client) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.template) }}
+                    </div>
+                </div>
+                <div>
+                    {{ form_row(form.object) }}
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        {{ form_row(form.issueDate) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.validUntil) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.taxRate) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lignes du document -->
+        <div class="card">
+            <div class="card-header flex items-center justify-between">
+                <h3 class="font-semibold text-gray-900">
+                    Lignes du document
+                    <span class="text-sm font-normal text-gray-500" data-document-items-target="itemCount">(0 lignes)</span>
+                </h3>
+                <button type="button" class="btn btn-primary btn-sm" data-action="document-items#addItem">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Ajouter une ligne
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="overflow-x-auto">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="w-8"></th>
+                                <th>Produit</th>
+                                <th>Désignation</th>
+                                <th class="w-24">Qté</th>
+                                <th class="w-32">Prix unit.</th>
+                                <th class="w-20">Remise %</th>
+                                <th class="w-32 text-right">Total HT</th>
+                                <th class="w-16"></th>
+                            </tr>
+                        </thead>
+                        <tbody data-document-items-target="items">
+                            {% for item in form.items %}
+                                {{ include('proforma/_item_row.html.twig', {item: item, index: loop.index0}) }}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Template pour nouvelles lignes -->
+                <template data-document-items-target="template">
+                    {{ include('proforma/_item_row.html.twig', {item: form.items.vars.prototype, index: '__name__'}) }}
+                </template>
+            </div>
+        </div>
+
+        <!-- Notes et conditions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">Notes et conditions</h3>
+            </div>
+            <div class="card-body space-y-4">
+                <div>
+                    {{ form_row(form.notes) }}
+                </div>
+                <div>
+                    {{ form_row(form.conditions) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Totaux -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">Récapitulatif</h3>
+            </div>
+            <div class="card-body space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Total HT</span>
+                    <span class="font-medium" data-document-items-target="totalHT">0 {{ default_currency }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">TVA</span>
+                    <span class="font-medium" data-document-items-target="totalTVA">0 {{ default_currency }}</span>
+                </div>
+                <div class="flex justify-between text-lg border-t pt-3">
+                    <span class="font-bold">Total TTC</span>
+                    <span class="font-bold text-primary-600" data-document-items-target="totalTTC">0 {{ default_currency }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-body space-y-3">
+                <button type="submit" class="btn btn-primary w-full">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    {{ button_label|default('Enregistrer') }}
+                </button>
+                <a href="{{ path('app_proforma_index') }}" class="btn btn-secondary w-full">
+                    Annuler
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ form_end(form) }}

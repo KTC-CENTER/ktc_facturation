@@ -1,0 +1,142 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres facturation - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- En-tête -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Paramètres facturation</h1>
+            <p class="mt-1 text-sm text-gray-500">Configuration des valeurs par défaut pour vos documents</p>
+        </div>
+        <a href="{{ path('app_settings_index') }}" class="btn btn-secondary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour
+        </a>
+    </div>
+
+    <!-- Formulaire -->
+    {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+        
+        <!-- Devise et TVA -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Devise et TVA</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    {{ form_label(form.currency, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.currency) }}
+                    {{ form_errors(form.currency) }}
+                </div>
+                <div>
+                    {{ form_label(form.defaultTaxRate, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.defaultTaxRate) }}
+                    {{ form_errors(form.defaultTaxRate) }}
+                    <p class="mt-1 text-xs text-gray-500">TVA Cameroun : 19.25%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Délais -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Délais par défaut</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    {{ form_label(form.defaultValidityDays, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.defaultValidityDays) }}
+                    {{ form_errors(form.defaultValidityDays) }}
+                    <p class="mt-1 text-xs text-gray-500">Durée de validité par défaut des devis/proformas</p>
+                </div>
+                <div>
+                    {{ form_label(form.defaultPaymentDays, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.defaultPaymentDays) }}
+                    {{ form_errors(form.defaultPaymentDays) }}
+                    <p class="mt-1 text-xs text-gray-500">Délai de paiement par défaut (0 = paiement immédiat)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Numérotation -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Numérotation</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    {{ form_label(form.proformaPrefix, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.proformaPrefix) }}
+                    {{ form_errors(form.proformaPrefix) }}
+                    <p class="mt-1 text-xs text-gray-500">Ex: PROV → PROV2026001</p>
+                </div>
+                <div>
+                    {{ form_label(form.invoicePrefix, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.invoicePrefix) }}
+                    {{ form_errors(form.invoicePrefix) }}
+                    <p class="mt-1 text-xs text-gray-500">Ex: FAC → FAC2026001</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Textes par défaut -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Textes par défaut</h3>
+            <div class="space-y-6">
+                <div>
+                    {{ form_label(form.defaultProformaConditions, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.defaultProformaConditions) }}
+                    {{ form_errors(form.defaultProformaConditions) }}
+                    <p class="mt-1 text-xs text-gray-500">Apparaîtront en bas des proformas</p>
+                </div>
+                <div>
+                    {{ form_label(form.defaultInvoiceConditions, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.defaultInvoiceConditions) }}
+                    {{ form_errors(form.defaultInvoiceConditions) }}
+                    <p class="mt-1 text-xs text-gray-500">Apparaîtront en bas des factures</p>
+                </div>
+                <div>
+                    {{ form_label(form.defaultPaymentTerms, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.defaultPaymentTerms) }}
+                    {{ form_errors(form.defaultPaymentTerms) }}
+                    <p class="mt-1 text-xs text-gray-500">Modalités de paiement</p>
+                </div>
+                <div>
+                    {{ form_label(form.bankDetails, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.bankDetails) }}
+                    {{ form_errors(form.bankDetails) }}
+                    <p class="mt-1 text-xs text-gray-500">Coordonnées bancaires pour les paiements</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aperçu -->
+        <div class="card bg-gray-50">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Aperçu</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-lg border">
+                    <dt class="text-sm font-medium text-gray-500">Proforma exemple</dt>
+                    <dd class="mt-1 text-lg font-mono text-gray-900">{{ settings.proformaPrefix }}{{ "now"|date("Y") }}001</dd>
+                </div>
+                <div class="bg-white p-4 rounded-lg border">
+                    <dt class="text-sm font-medium text-gray-500">Facture exemple</dt>
+                    <dd class="mt-1 text-lg font-mono text-gray-900">{{ settings.invoicePrefix }}{{ "now"|date("Y") }}001</dd>
+                </div>
+                <div class="bg-white p-4 rounded-lg border">
+                    <dt class="text-sm font-medium text-gray-500">Format montant</dt>
+                    <dd class="mt-1 text-lg font-mono text-gray-900">1 500 000 {{ settings.currency }}</dd>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end space-x-4">
+            <a href="{{ path('app_settings_index') }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Enregistrer
+            </button>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

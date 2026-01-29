@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau produit - {{ app_name }}{% endblock %}
+
+{% block body %}
+<div class="space-y-6">
+    {# En-tête #}
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Nouveau produit</h1>
+            <p class="text-gray-600">Ajouter un produit ou service au catalogue</p>
+        </div>
+        <a href="{{ path('app_product_index') }}" class="btn btn-secondary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour
+        </a>
+    </div>
+
+    {# Formulaire #}
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'space-y-6', 'data-controller': 'product-form'}}) }}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {# Informations principales #}
+                <div class="md:col-span-2">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Informations principales</h3>
+                </div>
+                
+                <div class="md:col-span-2">
+                    {{ form_row(form.name) }}
+                </div>
+                
+                <div>
+                    {{ form_row(form.code) }}
+                </div>
+                
+                <div>
+                    {{ form_row(form.type) }}
+                </div>
+                
+                <div class="md:col-span-2">
+                    {{ form_row(form.description) }}
+                </div>
+                
+                {# Prix #}
+                <div class="md:col-span-2">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4 mt-4">Tarification</h3>
+                </div>
+                
+                <div>
+                    {{ form_row(form.unitPrice) }}
+                </div>
+                
+                <div>
+                    {{ form_row(form.unit) }}
+                </div>
+                
+                {# Champs spécifiques LOGICIEL #}
+                <div class="md:col-span-2 product-fields product-fields-logiciel" style="display: none;">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4 mt-4">Informations logiciel</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if form.version is defined %}
+                            <div>{{ form_row(form.version) }}</div>
+                        {% endif %}
+                        {% if form.licenseType is defined %}
+                            <div>{{ form_row(form.licenseType) }}</div>
+                        {% endif %}
+                        {% if form.licenseDuration is defined %}
+                            <div>{{ form_row(form.licenseDuration) }}</div>
+                        {% endif %}
+                        {% if form.maxUsers is defined %}
+                            <div>{{ form_row(form.maxUsers) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {# Champs spécifiques MATERIEL #}
+                <div class="md:col-span-2 product-fields product-fields-materiel" style="display: none;">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4 mt-4">Informations matériel</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if form.brand is defined %}
+                            <div>{{ form_row(form.brand) }}</div>
+                        {% endif %}
+                        {% if form.model is defined %}
+                            <div>{{ form_row(form.model) }}</div>
+                        {% endif %}
+                        {% if form.warrantyMonths is defined %}
+                            <div>{{ form_row(form.warrantyMonths) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {# Champs spécifiques SERVICE #}
+                <div class="md:col-span-2 product-fields product-fields-service" style="display: none;">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4 mt-4">Informations service</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if form.durationHours is defined %}
+                            <div>{{ form_row(form.durationHours) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {# Caractéristiques #}
+                <div class="md:col-span-2">
+                    {% if form.characteristics is defined %}
+                        {{ form_row(form.characteristics) }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-4 pt-6 border-t">
+                <a href="{{ path('app_product_index') }}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Créer le produit
+                </button>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.querySelector('[name="product[type]"]');
+    
+    function updateFields() {
+        const type = typeSelect.value.toLowerCase();
+        document.querySelectorAll('.product-fields').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        if (type) {
+            const fields = document.querySelector('.product-fields-' + type);
+            if (fields) {
+                fields.style.display = 'block';
+            }
+        }
+    }
+    
+    if (typeSelect) {
+        typeSelect.addEventListener('change', updateFields);
+        updateFields();
+    }
+});
+</script>
+{% endblock %}

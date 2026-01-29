@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres email - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- En-tête -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Paramètres email</h1>
+            <p class="mt-1 text-sm text-gray-500">Configuration de l'envoi d'emails via Brevo</p>
+        </div>
+        <a href="{{ path('app_settings_index') }}" class="btn btn-secondary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour
+        </a>
+    </div>
+
+    <!-- Formulaire -->
+    {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+        
+        <!-- Configuration API -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Configuration Brevo</h3>
+            <div class="space-y-6">
+                <div>
+                    {{ form_label(form.brevoApiKey, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.brevoApiKey) }}
+                    {{ form_errors(form.brevoApiKey) }}
+                    <p class="mt-1 text-xs text-gray-500">
+                        <a href="https://app.brevo.com/settings/keys/api" target="_blank" class="text-primary-600 hover:underline">
+                            Obtenir une clé API sur Brevo
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expéditeur -->
+        <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Informations expéditeur</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    {{ form_label(form.senderEmail, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.senderEmail) }}
+                    {{ form_errors(form.senderEmail) }}
+                    <p class="mt-1 text-xs text-gray-500">Email vérifié dans Brevo</p>
+                </div>
+                <div>
+                    {{ form_label(form.senderName, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.senderName) }}
+                    {{ form_errors(form.senderName) }}
+                </div>
+                <div class="md:col-span-2">
+                    {{ form_label(form.replyToEmail, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.replyToEmail) }}
+                    {{ form_errors(form.replyToEmail) }}
+                    <p class="mt-1 text-xs text-gray-500">Les réponses des clients seront envoyées à cette adresse</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test -->
+        <div class="card bg-blue-50 border-blue-200">
+            <h3 class="text-lg font-medium text-blue-900 mb-4">Test de configuration</h3>
+            <p class="text-sm text-blue-700 mb-4">
+                Après avoir enregistré vos paramètres, vous pourrez tester l'envoi d'emails en partageant un document.
+            </p>
+            <div class="bg-white p-4 rounded-lg border border-blue-200">
+                <h4 class="font-medium text-gray-900 mb-2">Instructions de configuration Brevo :</h4>
+                <ol class="list-decimal list-inside text-sm text-gray-600 space-y-1">
+                    <li>Créez un compte sur <a href="https://www.brevo.com" target="_blank" class="text-primary-600 hover:underline">brevo.com</a></li>
+                    <li>Allez dans Paramètres → Clés SMTP & API</li>
+                    <li>Créez une nouvelle clé API</li>
+                    <li>Copiez la clé et collez-la ci-dessus</li>
+                    <li>Vérifiez votre domaine expéditeur dans Brevo</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end space-x-4">
+            <a href="{{ path('app_settings_index') }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Enregistrer
+            </button>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}
