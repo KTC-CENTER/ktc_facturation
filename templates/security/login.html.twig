@@ -1,91 +1,115 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion - KTC Invoice Pro{% endblock %}
+{% block title %}Connexion - {{ app_name }}{% endblock %}
 
 {% block body %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-ktc-dark to-ktc-blue py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-        <div>
-            <div class="flex justify-center">
-                <div class="h-20 w-20 rounded-full bg-white flex items-center justify-center shadow-lg">
-                    <span class="text-3xl font-bold text-ktc-dark">KTC</span>
+<div class="min-h-screen flex">
+    {# Left side - Branding #}
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-ktc-dark via-blue-800 to-ktc-blue relative overflow-hidden">
+        {# Decorative shapes #}
+        <div class="absolute inset-0">
+            <div style="position:absolute;top:-10%;left:-10%;width:50%;height:50%;background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 70%);"></div>
+            <div style="position:absolute;bottom:-15%;right:-15%;width:60%;height:60%;background:radial-gradient(circle,rgba(255,255,255,0.05) 0%,transparent 70%);"></div>
+            <div style="position:absolute;top:50%;left:50%;width:40%;height:40%;background:radial-gradient(circle,rgba(46,134,171,0.3) 0%,transparent 70%);transform:translate(-50%,-50%);"></div>
+        </div>
+        <div class="relative z-10 flex flex-col justify-center px-12 xl:px-20">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-8 border border-white/20">
+                <span class="text-2xl font-bold text-white">K</span>
+            </div>
+            <h1 class="text-4xl xl:text-5xl font-bold text-white leading-tight">
+                KTC-Invoice<br>
+                <span class="text-ktc-light">Pro</span>
+            </h1>
+            <p class="mt-4 text-lg text-blue-200 max-w-md">
+                Gérez vos proformas et factures de manière simple, rapide et professionnelle.
+            </p>
+            <div class="mt-10 grid grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-white">100%</div>
+                    <div class="text-sm text-blue-300 mt-1">Sécurisé</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-white">PDF</div>
+                    <div class="text-sm text-blue-300 mt-1">Génération</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-white">24/7</div>
+                    <div class="text-sm text-blue-300 mt-1">Accessible</div>
                 </div>
             </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
-                KTC-Invoice Pro
-            </h2>
-            <p class="mt-2 text-center text-sm text-ktc-light">
-                Connectez-vous à votre compte
-            </p>
         </div>
-        
-        {% if error %}
-            <div class="rounded-md bg-red-50 p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+    </div>
+
+    {# Right side - Login form #}
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
+        <div class="max-w-md w-full">
+            {# Mobile logo #}
+            <div class="lg:hidden text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-ktc-dark to-ktc-blue mb-4">
+                    <span class="text-2xl font-bold text-white">K</span>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900">KTC-Invoice Pro</h1>
+            </div>
+
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900">Connexion</h2>
+                <p class="mt-2 text-sm text-gray-500">Entrez vos identifiants pour accéder à votre espace</p>
+            </div>
+
+            {% if error %}
+                <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 text-red-500 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
                         </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800">
+                        <p class="text-sm font-medium text-red-800">
                             {{ error.messageKey|trans(error.messageData, 'security') }}
-                        </h3>
+                        </p>
                     </div>
                 </div>
-            </div>
-        {% endif %}
+            {% endif %}
 
-        <form class="mt-8 space-y-6 bg-white rounded-lg shadow-xl p-8" method="post">
-            <div class="space-y-4">
+            {% for message in app.flashes('success') %}
+                <div class="mb-6 rounded-lg bg-emerald-50 border border-emerald-200 p-4">
+                    <p class="text-sm text-emerald-800">{{ message }}</p>
+                </div>
+            {% endfor %}
+
+            <form method="post" class="space-y-5">
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Adresse email</label>
-                    <input type="email" name="_username" id="email" value="{{ last_username }}" required 
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-ktc-blue focus:border-ktc-blue"
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Adresse email</label>
+                    <input type="email" name="email" id="email" value="{{ last_username }}" required autofocus
+                           class="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
                            placeholder="votre@email.com">
                 </div>
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-                    <input type="password" name="_password" id="password" required 
-                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-ktc-blue focus:border-ktc-blue"
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                        <a href="{{ path('app_forgot_password') }}" class="text-xs font-medium text-blue-600 hover:text-blue-800">Mot de passe oublié ?</a>
+                    </div>
+                    <input type="password" name="password" id="password" required
+                           class="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors"
                            placeholder="••••••••">
                 </div>
-            </div>
 
-            <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <input type="checkbox" name="_remember_me" id="remember_me" 
-                           class="h-4 w-4 text-ktc-blue focus:ring-ktc-blue border-gray-300 rounded">
-                    <label for="remember_me" class="ml-2 block text-sm text-gray-900">
-                        Se souvenir de moi
-                    </label>
+                    <input type="checkbox" name="_remember_me" id="remember_me"
+                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="remember_me" class="ml-2 text-sm text-gray-600">Se souvenir de moi</label>
                 </div>
 
-                <div class="text-sm">
-                    <a href="{{ path('app_forgot_password') }}" class="font-medium text-ktc-blue hover:text-ktc-dark">
-                        Mot de passe oublié ?
-                    </a>
-                </div>
-            </div>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-            <div>
-                <button type="submit" 
-                        class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-ktc-blue hover:bg-ktc-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ktc-blue transition-colors duration-200">
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-ktc-light group-hover:text-white" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                        </svg>
-                    </span>
+                <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-ktc-dark to-ktc-blue hover:from-blue-800 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all">
                     Se connecter
                 </button>
-            </div>
-        </form>
-        
-        <p class="text-center text-sm text-ktc-light">
-            &copy; {{ "now"|date("Y") }} KTC-Center Sarl. Tous droits réservés.
-        </p>
+            </form>
+
+            <p class="mt-8 text-center text-xs text-gray-400">
+                &copy; {{ "now"|date("Y") }} KTC-Center Sarl. Tous droits réservés.
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}

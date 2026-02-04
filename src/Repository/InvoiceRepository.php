@@ -173,4 +173,43 @@ class InvoiceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Total TTC des factures par statut
+     */
+    public function getTotalByStatus(string $status): float
+    {
+        $result = $this->createQueryBuilder('i')
+            ->select('SUM(i.totalTTC) as total')
+            ->andWhere('i.status = :status')
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (float) ($result ?? 0);
+    }
+
+    /**
+     * Chiffre d'affaires total par période (alias pour le Dashboard)
+     */
+    public function getTotalRevenueByPeriod(\DateTimeInterface $from, \DateTimeInterface $to): float
+    {
+        return $this->getRevenueByPeriod($from, $to);
+    }
+
+    /**
+     * Chiffre d'affaires par type de produit
+     */
+    public function getRevenueByProductType(): array
+    {
+        return $this->createQueryBuilder('i')
+            ->select('p.type as productType, SUM(di.unitPrice * di.quantity) as total')
+            ->join('i.items', 'di')
+            ->join('di.product', 'p')
+            ->andWhere('i.status = :status')
+            ->setParameter('status', Invoice::STATUS_PAID)
+            ->groupBy('p.type')
+            ->getQuery()
+            ->getResult();
+    }
 }

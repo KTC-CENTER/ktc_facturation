@@ -129,6 +129,27 @@ class CompanySettingsType extends AbstractType
                     ]),
                 ],
             ])
+            ->add('faviconFile', FileType::class, [
+                'label' => 'Favicon',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'accept' => 'image/png,image/x-icon,image/svg+xml',
+                    'class' => 'form-input',
+                ],
+                'constraints' => [
+                    new File([
+                        'maxSize' => '512k',
+                        'mimeTypes' => [
+                            'image/png',
+                            'image/x-icon',
+                            'image/svg+xml',
+                            'image/vnd.microsoft.icon',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez télécharger un favicon valide (PNG, ICO, SVG)',
+                    ]),
+                ],
+            ])
         ;
     }
 
@@ -194,6 +215,15 @@ class CompanySettingsType extends AbstractType
                     'rows' => 5,
                 ],
             ])
+            ->add('defaultInvoiceConditions', TextareaType::class, [
+                'label' => 'Conditions factures',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Conditions spécifiques aux factures',
+                    'class' => 'form-textarea',
+                    'rows' => 5,
+                ],
+            ])
             ->add('defaultPaymentTerms', TextareaType::class, [
                 'label' => 'Notes par défaut',
                 'required' => false,
@@ -201,6 +231,15 @@ class CompanySettingsType extends AbstractType
                     'placeholder' => 'Notes à inclure sur les documents',
                     'class' => 'form-textarea',
                     'rows' => 3,
+                ],
+            ])
+            ->add('bankDetails', TextareaType::class, [
+                'label' => 'Coordonnées bancaires',
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'IBAN, nom de la banque, etc.',
+                    'class' => 'form-textarea',
+                    'rows' => 4,
                 ],
             ])
         ;

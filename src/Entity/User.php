@@ -24,10 +24,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
 
     public const ROLES = [
-        'Visualiseur' => self::ROLE_VIEWER,
-        'Commercial' => self::ROLE_COMMERCIAL,
-        'Administrateur' => self::ROLE_ADMIN,
-        'Super Administrateur' => self::ROLE_SUPER_ADMIN,
+        self::ROLE_VIEWER => 'Visualiseur',
+        self::ROLE_COMMERCIAL => 'Commercial',
+        self::ROLE_ADMIN => 'Administrateur',
+        self::ROLE_SUPER_ADMIN => 'Super Administrateur',
     ];
 
     #[ORM\Id]
@@ -72,13 +72,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $lastLoginAt = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $resetTokenExpiresAt = null;
+
     #[ORM\OneToMany(targetEntity: Proforma::class, mappedBy: 'createdBy')]
     private Collection $proformas;
 
     #[ORM\OneToMany(targetEntity: Invoice::class, mappedBy: 'createdBy')]
     private Collection $invoices;
 
-    #[ORM\OneToMany(targetEntity: DocumentShare::class, mappedBy: 'sharedBy')]
+    #[ORM\OneToMany(targetEntity: DocumentShare::class, mappedBy: 'createdBy')]
     private Collection $documentShares;
 
     public function __construct()
@@ -161,7 +167,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getMainRoleLabel(): string
     {
-        return array_search($this->getMainRole(), self::ROLES) ?: 'Visualiseur';
+        return self::ROLES[$this->getMainRole()] ?? 'Visualiseur';
     }
 
     /**
@@ -375,6 +381,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+
+        return $this;
+    }
+
+    public function getResetTokenExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->resetTokenExpiresAt;
+    }
+
+    public function setResetTokenExpiresAt(?\DateTimeInterface $resetTokenExpiresAt): static
+    {
+        $this->resetTokenExpiresAt = $resetTokenExpiresAt;
+
+        return $this;
+    }
+
+    public function isResetTokenValid(): bool
+    {
+        if (!$this->resetToken || !$this->resetTokenExpiresAt) {
+            return false;
+        }
+
+        return $this->resetTokenExpiresAt > new \DateTime();
     }
 
     public function __toString(): string

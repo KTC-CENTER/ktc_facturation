@@ -9,7 +9,7 @@
     <div class="sm:flex sm:items-center sm:justify-between">
         <div>
             <h2 class="text-xl font-semibold text-gray-900">Liste des clients</h2>
-            <p class="mt-1 text-sm text-gray-500">{{ clients.getTotalItemCount }} client(s) trouvé(s)</p>
+            <p class="mt-1 text-sm text-gray-500">{{ clients.totalItemCount }} client(s) trouvé(s)</p>
         </div>
         {% if is_granted('ROLE_COMMERCIAL') %}
         <div class="mt-4 sm:mt-0">
@@ -149,7 +149,7 @@
     </div>
 
     {# Pagination #}
-    {% if clients.getTotalItemCount > 15 %}
+    {% if clients.totalItemCount > 15 %}
     <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-lg shadow">
         {{ knp_pagination_render(clients) }}
     </div>

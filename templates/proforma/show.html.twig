@@ -22,7 +22,7 @@
                 </svg>
                 Aperçu
             </a>
-            <a href="{{ path('app_proforma_download_pdf', {id: proforma.id}) }}" class="btn btn-secondary">
+            <a href="{{ path('app_proforma_pdf', {id: proforma.id}) }}" class="btn btn-secondary">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -222,7 +222,7 @@
                 <div class="card-body space-y-2">
                     {% for status, label in statuses %}
                         {% if status != proforma.status and status != 'INVOICED' %}
-                        <form action="{{ path('app_proforma_change_status', {id: proforma.id, status: status}) }}" method="POST">
+                        <form action="{{ path('app_proforma_status', {id: proforma.id, status: status}) }}" method="POST">
                             <input type="hidden" name="_token" value="{{ csrf_token('status' ~ proforma.id) }}">
                             <button type="submit" class="btn btn-secondary w-full text-sm">
                                 {{ label }}

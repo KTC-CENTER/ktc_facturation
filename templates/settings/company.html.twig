@@ -80,20 +80,38 @@
             </div>
         </div>
 
-        <!-- Logo -->
+        <!-- Logo & Favicon -->
         <div class="card">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Logo</h3>
-            <div class="flex items-start space-x-6">
-                {% if settings.logoPath %}
-                <div class="flex-shrink-0">
-                    <img src="{{ asset('uploads/logo/' ~ settings.logoPath) }}" alt="Logo actuel" class="h-24 w-auto border rounded">
-                </div>
-                {% endif %}
-                <div class="flex-1">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Logo & Favicon</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Logo -->
+                <div class="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Logo de l'entreprise</h4>
+                    {% if settings.logoPath %}
+                    <div class="mb-3">
+                        <img src="{{ asset('uploads/logo/' ~ settings.logoPath) }}" alt="Logo actuel" class="h-20 w-auto border rounded bg-white p-2">
+                    </div>
+                    {% endif %}
                     {{ form_label(form.logoFile, settings.logoPath ? 'Changer le logo' : 'Téléverser un logo', {'label_attr': {'class': 'form-label'}}) }}
                     {{ form_widget(form.logoFile) }}
                     {{ form_errors(form.logoFile) }}
-                    <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF ou WebP. Max 2 Mo. Recommandé : 300x100 pixels</p>
+                    <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF ou WebP. Max 2 Mo. Recommandé : 300x100 px</p>
+                </div>
+
+                <!-- Favicon -->
+                <div class="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Favicon (icône navigateur)</h4>
+                    {% if settings.faviconPath is defined and settings.faviconPath %}
+                    <div class="mb-3">
+                        <img src="{{ asset('uploads/logo/' ~ settings.faviconPath) }}" alt="Favicon actuel" class="h-10 w-10 border rounded bg-white p-1">
+                    </div>
+                    {% else %}
+                    <div class="mb-3 flex items-center justify-center w-10 h-10 rounded bg-blue-900 text-white font-bold text-lg">K</div>
+                    {% endif %}
+                    {{ form_label(form.faviconFile, (settings.faviconPath is defined and settings.faviconPath) ? 'Changer le favicon' : 'Téléverser un favicon', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.faviconFile) }}
+                    {{ form_errors(form.faviconFile) }}
+                    <p class="mt-1 text-xs text-gray-500">PNG, ICO ou SVG. Max 512 Ko. Recommandé : 32x32 ou 64x64 px</p>
                 </div>
             </div>
         </div>

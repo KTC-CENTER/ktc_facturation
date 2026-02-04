@@ -32,8 +32,9 @@ class PdfGeneratorService
 
     /**
      * Génère le PDF d'une proforma
+     * @param bool $saveToFile Si true, sauvegarde et retourne le chemin. Si false, retourne le contenu brut.
      */
-    public function generateProformaPdf(Proforma $proforma): string
+    public function generateProformaPdf(Proforma $proforma, bool $saveToFile = true): string
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
         
@@ -42,13 +43,14 @@ class PdfGeneratorService
             'settings' => $settings,
         ]);
 
-        return $this->generatePdf($html, "proforma_{$proforma->getReference()}.pdf");
+        return $this->generatePdf($html, "proforma_{$proforma->getReference()}.pdf", $saveToFile);
     }
 
     /**
      * Génère le PDF d'une facture
+     * @param bool $saveToFile Si true, sauvegarde et retourne le chemin. Si false, retourne le contenu brut.
      */
-    public function generateInvoicePdf(Invoice $invoice): string
+    public function generateInvoicePdf(Invoice $invoice, bool $saveToFile = true): string
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
         
@@ -57,13 +59,39 @@ class PdfGeneratorService
             'settings' => $settings,
         ]);
 
-        return $this->generatePdf($html, "facture_{$invoice->getReference()}.pdf");
+        return $this->generatePdf($html, "facture_{$invoice->getReference()}.pdf", $saveToFile);
+    }
+
+    /**
+     * Génère un aperçu HTML d'une proforma (pour affichage navigateur)
+     */
+    public function generateProformaPreview(Proforma $proforma): string
+    {
+        $settings = $this->settingsRepository->getOrCreateSettings();
+        
+        return $this->twig->render('pdf/proforma.html.twig', [
+            'proforma' => $proforma,
+            'settings' => $settings,
+        ]);
+    }
+
+    /**
+     * Génère un aperçu HTML d'une facture (pour affichage navigateur)
+     */
+    public function generateInvoicePreview(Invoice $invoice): string
+    {
+        $settings = $this->settingsRepository->getOrCreateSettings();
+        
+        return $this->twig->render('pdf/invoice.html.twig', [
+            'invoice' => $invoice,
+            'settings' => $settings,
+        ]);
     }
 
     /**
      * Génère un PDF à partir de HTML
      */
-    private function generatePdf(string $html, string $filename): string
+    private function generatePdf(string $html, string $filename, bool $saveToFile = true): string
     {
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
@@ -76,6 +104,12 @@ class PdfGeneratorService
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
+        $output = $dompdf->output();
+
+        if (!$saveToFile) {
+            return $output;
+        }
+
         // Sauvegarder le PDF
         $pdfDir = $this->uploadsDir . '/pdf';
         if (!is_dir($pdfDir)) {
@@ -83,7 +117,7 @@ class PdfGeneratorService
         }
 
         $filepath = $pdfDir . '/' . $filename;
-        file_put_contents($filepath, $dompdf->output());
+        file_put_contents($filepath, $output);
 
         return $filepath;
     }

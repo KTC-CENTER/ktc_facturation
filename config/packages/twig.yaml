@@ -1,13 +1,11 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
     
-    # Variables globales
     globals:
         app_name: '%app.name%'
         default_currency: '%app.default_currency%'
         default_tax_rate: '%app.default_tax_rate%'
     
-    # Options de formatage
     date:
         format: 'd/m/Y'
         interval_format: '%d jours'
@@ -18,10 +16,8 @@ twig:
         decimal_point: ','
         thousands_separator: ' '
 
-    # Mode strict pour les variables
-    strict_variables: true
+    strict_variables: false
 
-    # Extensions
     form_themes:
         - 'form/tailwind_theme.html.twig'
 

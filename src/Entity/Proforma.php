@@ -21,12 +21,12 @@ class Proforma
     public const STATUS_INVOICED = 'INVOICED';
 
     public const STATUSES = [
-        'Brouillon' => self::STATUS_DRAFT,
-        'Envoyée' => self::STATUS_SENT,
-        'Acceptée' => self::STATUS_ACCEPTED,
-        'Refusée' => self::STATUS_REFUSED,
-        'Expirée' => self::STATUS_EXPIRED,
-        'Facturée' => self::STATUS_INVOICED,
+        self::STATUS_DRAFT => 'Brouillon',
+        self::STATUS_SENT => 'Envoyée',
+        self::STATUS_ACCEPTED => 'Acceptée',
+        self::STATUS_REFUSED => 'Refusée',
+        self::STATUS_EXPIRED => 'Expirée',
+        self::STATUS_INVOICED => 'Facturée',
     ];
 
     public const STATUS_COLORS = [
@@ -150,7 +150,7 @@ class Proforma
 
     public function getStatusLabel(): string
     {
-        return array_search($this->status, self::STATUSES) ?: $this->status;
+        return self::STATUSES[$this->status] ?? $this->status;
     }
 
     public function getStatusColor(): string

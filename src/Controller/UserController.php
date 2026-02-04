@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
-use App\Form\UserPasswordType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
@@ -30,13 +29,16 @@ class UserController extends AbstractController
     {
         $search = $request->query->get('search', '');
         $role = $request->query->get('role', '');
-        $showInactive = $request->query->getBoolean('inactive', false);
+        $status = $request->query->get('status', '');
 
         $queryBuilder = $this->userRepository->createQueryBuilder('u');
 
-        if (!$showInactive) {
+        if ($status === 'active') {
             $queryBuilder->andWhere('u.isActive = :active')
                 ->setParameter('active', true);
+        } elseif ($status === 'inactive') {
+            $queryBuilder->andWhere('u.isActive = :active')
+                ->setParameter('active', false);
         }
 
         if ($search) {
@@ -62,7 +64,7 @@ class UserController extends AbstractController
             'users' => $pagination,
             'search' => $search,
             'role' => $role,
-            'showInactive' => $showInactive,
+            'status' => $status,
             'roles' => User::ROLES,
         ]);
     }
@@ -72,7 +74,7 @@ class UserController extends AbstractController
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
-            'require_password' => true,
+            'is_edit' => false,
         ]);
         $form->handleRequest($request);
 
@@ -113,7 +115,7 @@ class UserController extends AbstractController
         }
 
         $form = $this->createForm(UserType::class, $user, [
-            'require_password' => false,
+            'is_edit' => true,
         ]);
         $form->handleRequest($request);
 
@@ -157,7 +159,7 @@ class UserController extends AbstractController
             }
         }
 
-        return $this->render('user/password.html.twig', [
+        return $this->render('user/change_password.html.twig', [
             'user' => $user,
         ]);
     }

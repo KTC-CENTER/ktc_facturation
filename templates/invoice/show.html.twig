@@ -22,7 +22,7 @@
                 </svg>
                 Aperçu
             </a>
-            <a href="{{ path('app_invoice_download_pdf', {id: invoice.id}) }}" class="btn btn-secondary">
+            <a href="{{ path('app_invoice_pdf', {id: invoice.id}) }}" class="btn btn-secondary">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -233,7 +233,7 @@
                 <div class="card-body space-y-2">
                     {% for status, label in statuses %}
                         {% if status != invoice.status %}
-                        <form action="{{ path('app_invoice_change_status', {id: invoice.id, status: status}) }}" method="POST">
+                        <form action="{{ path('app_invoice_status', {id: invoice.id, status: status}) }}" method="POST">
                             <input type="hidden" name="_token" value="{{ csrf_token('status' ~ invoice.id) }}">
                             <button type="submit" class="btn btn-secondary w-full text-sm">
                                 {{ label }}
@@ -251,7 +251,7 @@
                 </div>
                 <div class="card-body space-y-2">
                     {% if invoice.canBePaid %}
-                    <a href="{{ path('app_invoice_record_payment', {id: invoice.id}) }}" class="btn btn-success w-full">
+                    <a href="{{ path('app_invoice_payment', {id: invoice.id}) }}" class="btn btn-success w-full">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>

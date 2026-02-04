@@ -75,6 +75,31 @@ class SettingsController extends AbstractController
                 }
             }
 
+            // Gestion du favicon
+            $faviconFile = $form->get('faviconFile')->getData();
+            if ($faviconFile) {
+                $newFilename = 'favicon-' . uniqid() . '.' . $faviconFile->guessExtension();
+
+                try {
+                    $faviconFile->move(
+                        $this->uploadsDirectory . '/logo',
+                        $newFilename
+                    );
+                    
+                    // Supprimer l'ancien favicon si existe
+                    if ($settings->getFaviconPath()) {
+                        $oldFaviconPath = $this->uploadsDirectory . '/logo/' . $settings->getFaviconPath();
+                        if (file_exists($oldFaviconPath)) {
+                            unlink($oldFaviconPath);
+                        }
+                    }
+                    
+                    $settings->setFaviconPath($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload du favicon.');
+                }
+            }
+
             $this->entityManager->flush();
 
             $this->addFlash('success', 'Paramètres de l\'entreprise mis à jour.');

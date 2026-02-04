@@ -1,0 +1,107 @@
+services:
+  # Application PHP-FPM
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: ktc_invoice_app
+    restart: unless-stopped
+    user: "1000:1000"
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./church3-app:/var/www/symfony_docker
+    env_file:
+      - .env.local
+    depends_on:
+        mysql:
+          condition: service_healthy
+    networks:
+      - ktc_invoice_network
+
+  # Serveur Web Nginx
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: ktc_invoice_nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - ktc_invoice_network
+    depends_on:
+      - app
+
+  # Base de données MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: ktc_invoice_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_NAME:-ktc_invoice}
+      MYSQL_USER: ${DB_USER:-ktc_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-ktc_password}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - ktc_invoice_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ktc_invoice_network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ktc_invoice_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "${PMA_PORT:-8091}:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: ${DB_USER:-ktc_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-ktc_password}
+      UPLOAD_LIMIT: 100M
+    networks:
+      - ktc_invoice_network
+    depends_on:
+      - mysql
+
+  # MailHog pour les tests email en développement
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: ktc_invoice_mailhog
+    restart: unless-stopped
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1026}:1025"
+      - "${MAILHOG_WEB_PORT:-8026}:8025"
+    networks:
+      - ktc_invoice_network
+
+  # Node.js pour Webpack Encore
+  node:
+    image: node:20-alpine
+    container_name: ktc_invoice_node
+    user: "1000:1000"
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    networks:
+      - ktc_invoice_network
+    command: sh -c "npm install && npm run watch"
+    stdin_open: true
+    tty: true
+
+networks:
+  ktc_invoice_network:
+    driver: bridge
+
+volumes:
+  ktc_invoice_mysql_data:
+    driver: local

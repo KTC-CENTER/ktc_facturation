@@ -47,8 +47,8 @@
                 {{ form_errors(form.subject) }}
             </div>
             <div>
-                {{ form_label(form.body, 'Corps du message', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.body, {'attr': {'class': 'form-textarea font-mono text-sm', 'rows': '12', 'placeholder': 'Bonjour,
+                {{ form_label(form.bodyHtml, 'Corps du message', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.bodyHtml, {'attr': {'class': 'form-textarea font-mono text-sm', 'rows': '12', 'placeholder': 'Bonjour,
 
 Veuillez trouver ci-joint votre {{document_type}} n°{{document_reference}}.
 
@@ -59,7 +59,7 @@ Vous pouvez consulter ce document en ligne : {{share_link}}
 Cordialement,
 {{sender_name}}
 {{company_name}}'}}) }}
-                {{ form_errors(form.body) }}
+                {{ form_errors(form.bodyHtml) }}
             </div>
         </div>
     </div>
@@ -107,7 +107,7 @@ Cordialement,
 document.querySelectorAll('.variable-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const variable = this.dataset.variable;
-        const textarea = document.querySelector('textarea[name*="body"]');
+        const textarea = document.querySelector('textarea[name*="bodyHtml"]');
         const input = document.querySelector('input[name*="subject"]');
         
         // Priorité au textarea s'il est actif, sinon au sujet

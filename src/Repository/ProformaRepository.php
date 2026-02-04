@@ -73,6 +73,26 @@ class ProformaRepository extends ServiceEntityRepository
     }
 
     /**
+     * Proformas qui expirent bientôt (dans les N prochains jours)
+     * @return Proforma[]
+     */
+    public function findExpiringSoon(int $days = 7): array
+    {
+        $now = new \DateTime();
+        $limit = new \DateTime("+{$days} days");
+
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.validUntil BETWEEN :now AND :limit')
+            ->andWhere('p.status NOT IN (:excludedStatuses)')
+            ->setParameter('now', $now)
+            ->setParameter('limit', $limit)
+            ->setParameter('excludedStatuses', [Proforma::STATUS_INVOICED, Proforma::STATUS_EXPIRED, Proforma::STATUS_REFUSED])
+            ->orderBy('p.validUntil', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Proformas expirées non converties
      * @return Proforma[]
      */

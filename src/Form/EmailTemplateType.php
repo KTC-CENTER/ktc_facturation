@@ -30,7 +30,7 @@ class EmailTemplateType extends AbstractType
                 ],
                 'help' => 'Variables disponibles: {reference}, {client_name}, {total}, {date}',
             ])
-            ->add('body', TextareaType::class, [
+            ->add('bodyHtml', TextareaType::class, [
                 'label' => 'Corps de l\'email',
                 'attr' => [
                     'placeholder' => 'Contenu de l\'email...',

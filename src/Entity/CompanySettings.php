@@ -60,6 +60,9 @@ class CompanySettings
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $logoBase64 = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $faviconPath = null;
+
     // Paramètres de facturation
     #[ORM\Column(length: 10)]
     private string $currency = 'FCFA';
@@ -304,6 +307,18 @@ class CompanySettings
     public function setLogoBase64(?string $logoBase64): static
     {
         $this->logoBase64 = $logoBase64;
+        return $this;
+    }
+
+    // Favicon
+    public function getFaviconPath(): ?string
+    {
+        return $this->faviconPath;
+    }
+
+    public function setFaviconPath(?string $faviconPath): static
+    {
+        $this->faviconPath = $faviconPath;
         return $this;
     }
 

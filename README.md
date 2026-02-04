@@ -67,7 +67,7 @@ docker compose up -d --build
 
 ```bash
 # PHP
-docker compose exec app composer install
+docker compose exec ktc-invoice-app composer install
 
 # Les assets sont compilés automatiquement par le conteneur node
 ```
@@ -75,9 +75,9 @@ docker compose exec app composer install
 #### 5. Créer la base de données
 
 ```bash
-docker compose exec app php bin/console doctrine:database:create --if-not-exists
-docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
-docker compose exec app php bin/console doctrine:fixtures:load --no-interaction
+docker compose exec ktc-invoice-app php bin/console doctrine:database:create --if-not-exists
+docker compose exec ktc-invoice-app php bin/console doctrine:migrations:migrate --no-interaction
+docker compose exec ktc-invoice-app php bin/console doctrine:fixtures:load --no-interaction
 ```
 
 #### 6. Accéder à l'application
@@ -159,26 +159,26 @@ docker compose up -d
 docker compose down
 
 # Voir les logs
-docker compose logs -f app
+docker compose logs -f ktc-invoice-app
 
 # Accéder au conteneur PHP
-docker compose exec app bash
+docker compose exec ktc-invoice-app bash
 ```
 
 ### Symfony
 
 ```bash
 # Vider le cache
-docker compose exec app php bin/console cache:clear
+docker compose exec ktc-invoice-app php bin/console cache:clear
 
 # Créer une migration
-docker compose exec app php bin/console make:migration
+docker compose exec ktc-invoice-app php bin/console make:migration
 
 # Exécuter les migrations
-docker compose exec app php bin/console doctrine:migrations:migrate
+docker compose exec ktc-invoice-app php bin/console doctrine:migrations:migrate
 
 # Charger les fixtures
-docker compose exec app php bin/console doctrine:fixtures:load
+docker compose exec ktc-invoice-app php bin/console doctrine:fixtures:load
 ```
 
 ### Assets
@@ -198,10 +198,10 @@ docker compose run --rm node npm run watch
 
 ```bash
 # Exécuter tous les tests
-docker compose exec app php bin/phpunit
+docker compose exec ktc-invoice-app php bin/phpunit
 
 # Tests avec couverture
-docker compose exec app php bin/phpunit --coverage-html coverage
+docker compose exec ktc-invoice-app php bin/phpunit --coverage-html coverage
 ```
 
 ## 📧 Configuration Email (Brevo)

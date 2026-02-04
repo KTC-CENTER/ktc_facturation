@@ -3,9 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\LoginFormType;
-use App\Form\ForgotPasswordFormType;
-use App\Form\ResetPasswordFormType;
 use App\Repository\UserRepository;
 use App\Service\BrevoMailerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,10 +11,20 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
+    #[Route('/', name: 'app_home')]
+    public function home(): Response
+    {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_dashboard');
+        }
+        return $this->redirectToRoute('app_login');
+    }
+
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -69,7 +76,8 @@ class SecurityController extends AbstractController
 
                 // Envoyer l'email
                 try {
-                    $mailerService->sendPasswordResetEmail($user, $token);
+                    $resetUrl = $this->generateUrl('app_reset_password', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
+                    $mailerService->sendPasswordResetEmail($user, $resetUrl);
                     $this->addFlash('success', 'Un email de réinitialisation a été envoyé à votre adresse.');
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer.');

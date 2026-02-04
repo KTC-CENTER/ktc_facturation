@@ -168,6 +168,14 @@ class EmailTemplate
         return $this;
     }
 
+    /**
+     * Alias for getBodyHtml() - backward compatibility
+     */
+    public function getBody(): ?string
+    {
+        return $this->bodyHtml;
+    }
+
     public function isDefault(): bool
     {
         return $this->isDefault;

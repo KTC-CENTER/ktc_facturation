@@ -141,7 +141,7 @@
             </table>
         </div>
         
-        {% if users.haveToPaginate %}
+        {% if users.totalItemCount > 10 %}
         <div class="card-footer">
             <div class="pagination">
                 {{ knp_pagination_render(users) }}

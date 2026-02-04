@@ -8,9 +8,12 @@ use App\Repository\InvoiceRepository;
 use App\Repository\ProductRepository;
 use App\Entity\Proforma;
 use App\Entity\Invoice;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -68,6 +71,46 @@ class DashboardController extends AbstractController
             'recentInvoices' => $recentInvoices,
             'expiringProformas' => $expiringProformas,
             'unpaidInvoices' => $unpaidInvoices,
+        ]);
+    }
+
+    #[Route('/profile', name: 'app_profile')]
+    public function profile(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $user = $this->getUser();
+
+        // Update profile
+        if ($request->isMethod('POST') && $request->request->get('_action') === 'update_profile') {
+            $user->setFirstName($request->request->get('firstName', $user->getFirstName()));
+            $user->setLastName($request->request->get('lastName', $user->getLastName()));
+            $user->setPhone($request->request->get('phone', $user->getPhone()));
+            $em->flush();
+            $this->addFlash('success', 'Profil mis à jour avec succès.');
+            return $this->redirectToRoute('app_profile');
+        }
+
+        // Change password
+        if ($request->isMethod('POST') && $request->request->get('_action') === 'change_password') {
+            $current = $request->request->get('current_password');
+            $newPass = $request->request->get('new_password');
+            $confirm = $request->request->get('confirm_password');
+
+            if (!$passwordHasher->isPasswordValid($user, $current)) {
+                $this->addFlash('error', 'Mot de passe actuel incorrect.');
+            } elseif ($newPass !== $confirm) {
+                $this->addFlash('error', 'Les mots de passe ne correspondent pas.');
+            } elseif (strlen($newPass) < 6) {
+                $this->addFlash('error', 'Le mot de passe doit contenir au moins 6 caractères.');
+            } else {
+                $user->setPassword($passwordHasher->hashPassword($user, $newPass));
+                $em->flush();
+                $this->addFlash('success', 'Mot de passe modifié avec succès.');
+            }
+            return $this->redirectToRoute('app_profile');
+        }
+
+        return $this->render('dashboard/profile.html.twig', [
+            'user' => $user,
         ]);
     }
 

@@ -18,9 +18,9 @@ class Product
     public const TYPE_SERVICE = 'SERVICE';
 
     public const TYPES = [
-        'Logiciel' => self::TYPE_LOGICIEL,
-        'Matériel' => self::TYPE_MATERIEL,
-        'Service' => self::TYPE_SERVICE,
+        self::TYPE_LOGICIEL => 'Logiciel',
+        self::TYPE_MATERIEL => 'Matériel',
+        self::TYPE_SERVICE => 'Service',
     ];
 
     #[ORM\Id]
@@ -154,7 +154,7 @@ class Product
 
     public function getTypeLabel(): string
     {
-        return array_search($this->type, self::TYPES) ?: $this->type;
+        return self::TYPES[$this->type] ?? $this->type;
     }
 
     public function getDescription(): ?string

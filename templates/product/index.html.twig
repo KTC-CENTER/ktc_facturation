@@ -2,7 +2,7 @@
 
 {% block title %}Produits & Services - {{ app_name }}{% endblock %}
 
-{% block body %}
+{% block content %}
 <div class="space-y-6">
     {# En-tête #}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -31,7 +31,7 @@
         <div class="card-body">
             <form method="get" class="flex flex-col sm:flex-row gap-4">
                 <div class="flex-1">
-                    <input type="text" name="q" value="{{ app.request.query.get('q') }}" 
+                    <input type="text" name="search" value="{{ search|default('') }}" 
                            placeholder="Rechercher par nom, code..." 
                            class="form-input w-full">
                 </div>
@@ -39,18 +39,17 @@
                     <select name="type" class="form-select">
                         <option value="">Tous les types</option>
                         {% for key, label in types %}
-                            <option value="{{ key }}" {{ app.request.query.get('type') == key ? 'selected' : '' }}>
+                            <option value="{{ key }}" {{ type|default('') == key ? 'selected' : '' }}>
                                 {{ label }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
                 <div>
-                    <select name="status" class="form-select">
-                        <option value="">Tous les statuts</option>
-                        <option value="active" {{ app.request.query.get('status') == 'active' ? 'selected' : '' }}>Actifs</option>
-                        <option value="inactive" {{ app.request.query.get('status') == 'inactive' ? 'selected' : '' }}>Inactifs</option>
-                    </select>
+                    <label class="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-600 cursor-pointer">
+                        <input type="checkbox" name="inactive" value="1" {{ showInactive|default(false) ? 'checked' : '' }} class="form-checkbox" onchange="this.form.submit()">
+                        Afficher inactifs
+                    </label>
                 </div>
                 <button type="submit" class="btn btn-secondary">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +152,7 @@
         </div>
         
         {# Pagination #}
-        {% if products.haveToPaginate %}
+        {% if products.totalItemCount > 10 %}
             <div class="card-footer">
                 {{ knp_pagination_render(products) }}
             </div>

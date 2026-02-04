@@ -1,6 +1,6 @@
 {# Template pour le modal de partage (chargé en AJAX) #}
 <div class="space-y-6">
-    <form action="{{ path(is_proforma ? 'app_share_proforma' : 'app_share_invoice', {id: document.id}) }}" method="post" class="space-y-6">
+    <form action="{{ path(is_proforma ? 'app_proforma_share' : 'app_invoice_share', {id: document.id}) }}" method="post" class="space-y-6">
         <input type="hidden" name="_token" value="{{ csrf_token('share' ~ document.id) }}">
 
         <!-- Type de partage -->

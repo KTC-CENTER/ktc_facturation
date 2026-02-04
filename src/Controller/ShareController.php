@@ -32,7 +32,7 @@ class ShareController extends AbstractController
     #[Route('/share/{token}', name: 'app_share_view', methods: ['GET'])]
     public function view(string $token): Response
     {
-        $share = $this->shareService->validateShare($token);
+        $share = $this->shareService->validateAndTrack($token);
 
         if (!$share) {
             return $this->render('share/expired.html.twig');
@@ -45,7 +45,7 @@ class ShareController extends AbstractController
             'share' => $share,
             'document' => $document,
             'type' => $type,
-            'qrCode' => $this->shareService->generateQrCode($share),
+            'qrCode' => $share->getQrCodePath(),
         ]);
     }
 
@@ -55,7 +55,7 @@ class ShareController extends AbstractController
     #[Route('/share/{token}/pdf', name: 'app_share_pdf', methods: ['GET'])]
     public function downloadPdf(string $token): Response
     {
-        $share = $this->shareService->validateShare($token);
+        $share = $this->shareService->validateAndTrack($token);
 
         if (!$share) {
             return $this->render('share/expired.html.twig');
@@ -102,7 +102,6 @@ class ShareController extends AbstractController
             $validityHours
         );
 
-        // Actions selon le type de partage
         if ($shareType === DocumentShare::TYPE_EMAIL && $recipientEmail) {
             try {
                 $this->mailerService->sendDocumentShare($share, $message);
@@ -111,11 +110,9 @@ class ShareController extends AbstractController
                 $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email: ' . $e->getMessage());
             }
         } elseif ($shareType === DocumentShare::TYPE_WHATSAPP) {
-            // Rediriger vers WhatsApp
-            return $this->redirect($this->shareService->getWhatsAppUrl($share, $message));
+            return $this->redirect($this->shareService->getWhatsAppLink($share));
         } else {
-            // Partage par lien - afficher l'URL
-            $shareUrl = $this->shareService->getShareUrl($share);
+            $shareUrl = $share->getShareUrl();
             $this->addFlash('success', 'Lien de partage créé: ' . $shareUrl);
         }
 
@@ -149,7 +146,6 @@ class ShareController extends AbstractController
             $validityHours
         );
 
-        // Actions selon le type de partage
         if ($shareType === DocumentShare::TYPE_EMAIL && $recipientEmail) {
             try {
                 $this->mailerService->sendDocumentShare($share, $message);
@@ -158,11 +154,9 @@ class ShareController extends AbstractController
                 $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email: ' . $e->getMessage());
             }
         } elseif ($shareType === DocumentShare::TYPE_WHATSAPP) {
-            // Rediriger vers WhatsApp
-            return $this->redirect($this->shareService->getWhatsAppUrl($share, $message));
+            return $this->redirect($this->shareService->getWhatsAppLink($share));
         } else {
-            // Partage par lien - afficher l'URL
-            $shareUrl = $this->shareService->getShareUrl($share);
+            $shareUrl = $share->getShareUrl();
             $this->addFlash('success', 'Lien de partage créé: ' . $shareUrl);
         }
 
@@ -170,13 +164,13 @@ class ShareController extends AbstractController
     }
 
     /**
-     * Liste des partages d'un document
+     * Liste des partages d'une proforma
      */
     #[Route('/proformas/{id}/shares', name: 'app_proforma_shares', methods: ['GET'])]
     #[IsGranted('ROLE_COMMERCIAL')]
     public function proformaShares(Proforma $proforma): Response
     {
-        $shares = $this->shareRepository->findByProforma($proforma->getId());
+        $shares = $this->shareRepository->findByProforma($proforma);
 
         return $this->render('share/list.html.twig', [
             'shares' => $shares,
@@ -192,7 +186,7 @@ class ShareController extends AbstractController
     #[IsGranted('ROLE_COMMERCIAL')]
     public function invoiceShares(Invoice $invoice): Response
     {
-        $shares = $this->shareRepository->findByInvoice($invoice->getId());
+        $shares = $this->shareRepository->findByInvoice($invoice);
 
         return $this->render('share/list.html.twig', [
             'shares' => $shares,
@@ -216,7 +210,6 @@ class ShareController extends AbstractController
         $this->shareService->revokeShare($share);
         $this->addFlash('success', 'Partage révoqué.');
 
-        // Rediriger vers le document approprié
         if ($share->getProforma()) {
             return $this->redirectToRoute('app_proforma_shares', ['id' => $share->getProforma()->getId()]);
         } else {
@@ -244,7 +237,7 @@ class ShareController extends AbstractController
         return $this->render('share/_modal.html.twig', [
             'document' => $document,
             'type' => $type,
-            'shareTypes' => DocumentShare::SHARE_TYPES,
+            'shareTypes' => DocumentShare::TYPES,
         ]);
     }
 }

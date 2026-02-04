@@ -1,33 +1,23 @@
-# see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
-    
-    # Désactiver CSRF par défaut, activer uniquement pour les formulaires
     csrf_protection: true
-
     http_method_override: false
     handle_all_throwables: true
 
-    # Validation
     validation:
         email_validation_mode: html5
 
-    # Session
     session:
         handler_id: null
         cookie_secure: auto
         cookie_samesite: lax
         storage_factory_id: session.storage.factory.native
 
-    # PHP templates (désactivé, on utilise Twig)
     php_errors:
         log: true
 
-    # Assets
-    assets:
-        json_manifest_path: '%kernel.project_dir%/public/build/manifest.json'
+    assets: ~
 
-    # Traductions
     default_locale: '%env(APP_LOCALE)%'
     translator:
         default_path: '%kernel.project_dir%/translations'
@@ -35,7 +25,6 @@ framework:
             - fr
             - en
 
-    # Profiler
     profiler:
         dsn: 'file:%kernel.cache_dir%/profiler'
 

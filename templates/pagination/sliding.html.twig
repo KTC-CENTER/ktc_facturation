@@ -1,0 +1,60 @@
+{# Custom Tailwind pagination for KnpPaginatorBundle v6 #}
+{% if pageCount > 1 %}
+<nav class="flex items-center justify-between py-3" aria-label="Pagination">
+    <div class="hidden sm:block">
+        <p class="text-sm text-gray-700">
+            Résultats <span class="font-semibold">{{ firstItemNumber }}</span> à 
+            <span class="font-semibold">{{ lastItemNumber }}</span> sur 
+            <span class="font-semibold">{{ totalCount }}</span>
+        </p>
+    </div>
+    <ul class="inline-flex items-center -space-x-px text-sm">
+        {# Previous button #}
+        {% if previous is defined %}
+            <li>
+                <a href="{{ previous }}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100" rel="prev">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <span class="flex items-center justify-center px-3 h-8 leading-tight text-gray-300 bg-gray-50 border border-gray-300 rounded-l-lg cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </span>
+            </li>
+        {% endif %}
+
+        {# Page numbers #}
+        {% for page in pagesInRange %}
+            {% if page != current %}
+                <li>
+                    <a href="{{ pages[page] }}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-800">
+                        {{ page }}
+                    </a>
+                </li>
+            {% else %}
+                <li>
+                    <span class="flex items-center justify-center px-3 h-8 leading-tight text-white bg-blue-600 border border-blue-600 font-semibold">
+                        {{ page }}
+                    </span>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {# Next button #}
+        {% if next is defined %}
+            <li>
+                <a href="{{ next }}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100" rel="next">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </li>
+        {% else %}
+            <li>
+                <span class="flex items-center justify-center px-3 h-8 leading-tight text-gray-300 bg-gray-50 border border-gray-300 rounded-r-lg cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </span>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

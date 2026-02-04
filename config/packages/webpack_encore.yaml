@@ -1,20 +1,5 @@
 webpack_encore:
-    # The path where Encore is building the assets - i.e. Encore.setOutputPath()
     output_path: '%kernel.project_dir%/public/build'
-    
-    # If multiple builds are defined (as shown below), set the default build
-    # by setting script_attributes or link_attributes.
-    # script_attributes:
-    #    defer: true
-    
-    # Cache options
     cache: true
-
-    # Crossorigin value when assets are loaded from another domain
-    # crossorigin: 'anonymous'
-
-    # Preload & prefetch (requires symfony/web-link)
     preload: false
-
-    # Throw an exception if the entrypoints.json file is missing or an entry is missing
-    strict_mode: true
+    strict_mode: false

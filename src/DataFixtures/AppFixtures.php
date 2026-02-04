@@ -34,7 +34,7 @@ class AppFixtures extends Fixture
         $products = $this->createProducts($manager);
 
         // Modèles préconfigurés
-        $this->createTemplates($manager, $products);
+        $this->createTemplates($manager, $products, $users['super_admin']);
 
         $manager->flush();
     }
@@ -369,7 +369,7 @@ class AppFixtures extends Fixture
         return $products;
     }
 
-    private function createTemplates(ObjectManager $manager, array $products): void
+    private function createTemplates(ObjectManager $manager, array $products, User $createdBy): void
     {
         // Template CHURCH 3.0 EN LIGNE
         $template = new ProformaTemplate();
@@ -379,6 +379,7 @@ class AppFixtures extends Fixture
         $template->setDefaultNotes('Ce pack comprend tout le nécessaire pour démarrer avec CHURCH 3.0');
         $template->setDefaultConditions("Validité de l'offre : 30 jours\nPaiement : 100% à la commande");
         $template->setIsActive(true);
+        $template->setCreatedBy($createdBy);
 
         // Ajouter les éléments du template
         $items = [
@@ -414,6 +415,7 @@ class AppFixtures extends Fixture
         $template2->setDescription('Solution comptable complète pour PME');
         $template2->setCategory('Entreprises');
         $template2->setIsActive(true);
+        $template2->setCreatedBy($createdBy);
 
         $items2 = [
             ['code' => 'LOG-COMPTA', 'quantity' => 1, 'optional' => false, 'sortOrder' => 1],

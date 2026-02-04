@@ -72,7 +72,7 @@ class ProformaTemplate
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $createdBy = null;
 
     #[ORM\OneToMany(mappedBy: 'template', targetEntity: TemplateItem::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
