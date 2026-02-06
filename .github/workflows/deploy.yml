@@ -82,7 +82,7 @@ jobs:
       
       - name: Create deployment directories
         run: |
-          ssh root@${{ env.VPS_IP }} "mkdir -p ${{ env.APP_DIR }} /etc/letsencrypt ${{ env.APP_DIR }}/certbot/www ${{ env.APP_DIR }}/var/cache ${{ env.APP_DIR }}/var/log ${{ env.APP_DIR }}/public/uploads/logo ${{ env.APP_DIR }}/public/uploads/pdf ${{ env.APP_DIR }}/public/build"
+          ssh root@${{ env.VPS_IP }} "mkdir -p ${{ env.APP_DIR }} /etc/letsencrypt ${{ env.APP_DIR }}/certbot/www ${{ env.APP_DIR }}/var/cache ${{ env.APP_DIR }}/var/log ${{ env.APP_DIR }}/public/uploads/logo ${{ env.APP_DIR }}/public/uploads/pdf"
       
       - name: Sync application files
         run: |
@@ -111,7 +111,7 @@ jobs:
       - name: Create environment file and deploy
         run: |
           ssh root@${{ env.VPS_IP }} "cd ${{ env.APP_DIR }} && \
-            cat > .env << 'ENVEOF'
+            cat > .env << EOF
               DB_PASSWORD=${{ secrets.DB_PASSWORD }}
               DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
               APP_SECRET=${{ secrets.APP_SECRET }}
@@ -124,7 +124,7 @@ jobs:
               BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
               BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
               BREVO_SENDER_NAME=${{ secrets.BREVO_SENDER_NAME }}
-            ENVEOF"
+            EOF
       
       - name: Deploy with Docker
         run: |
