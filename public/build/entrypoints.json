@@ -1,0 +1,21 @@
+{
+  "entrypoints": {
+    "app": {
+      "js": [
+        "/build/runtime.js",
+        "/build/app.js"
+      ]
+    },
+    "dashboard": {
+      "js": [
+        "/build/runtime.js",
+        "/build/dashboard.js"
+      ]
+    },
+    "styles": {
+      "js": [
+        "/build/runtime.js"
+      ]
+    }
+  }
+}
