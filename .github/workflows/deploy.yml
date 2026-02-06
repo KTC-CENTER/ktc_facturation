@@ -77,20 +77,14 @@ jobs:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
         run: |
-          ssh root@${{ env.VPS_IP }} "cat > ${{ env.APP_DIR }}/.env.local" << EOF
-          APP_ENV=prod
-          APP_DEBUG=0
-          APP_SECRET=${APP_SECRET}
-          DATABASE_URL=mysql://admin:${DB_PASSWORD}@ktc-invoice-db:3306/ktc_invoice?serverVersion=8.0
-          MAILER_DSN=${MAILER_DSN}
-          BREVO_API_KEY=${BREVO_API_KEY}
-          BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
+          ssh root@${{ env.VPS_IP }} "cat > ${{ env.APP_DIR }}/.env" << 'EOF'
+          APP_SECRET=${{ secrets.APP_SECRET }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+          MAILER_DSN=${{ secrets.MAILER_DSN }}
+          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
           BREVO_SENDER_NAME=KTC-Center
-          EOF
-          
-          ssh root@${{ env.VPS_IP }} "cat > ${{ env.APP_DIR }}/.env" << EOF
-          DB_PASSWORD=${DB_PASSWORD}
-          DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
           EOF
       
       - name: Install SSL Certificate
