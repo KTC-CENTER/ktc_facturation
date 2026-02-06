@@ -65,7 +65,7 @@ class Proforma
     private string $totalTTC = '0';
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    private string $taxRate = '19.25';
+    private string $taxRate = '0.00';
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
@@ -461,7 +461,7 @@ class Proforma
         $totalHT = 0;
 
         foreach ($this->items as $item) {
-            $totalHT += $item->getTotalPriceFloat();
+            $totalHT += $item->getTotalFloat();
         }
 
         $totalTVA = $totalHT * ($this->getTaxRateFloat() / 100);

@@ -70,7 +70,7 @@ class Invoice
     private string $amountPaid = '0.00';
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    private string $taxRate = '19.25';
+    private string $taxRate = '0.00';
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;

@@ -185,10 +185,17 @@ class InvoiceController extends AbstractController
         return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
     }
 
-    #[Route('/{id}/payment', name: 'app_invoice_payment', methods: ['POST'])]
+    #[Route('/{id}/payment', name: 'app_invoice_payment', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_COMMERCIAL')]
     public function recordPayment(Request $request, Invoice $invoice): Response
     {
+        // Si GET, afficher le formulaire
+        if ($request->isMethod('GET')) {
+            return $this->render('invoice/payment.html.twig', [
+                'invoice' => $invoice,
+            ]);
+        }
+
         if (!$this->isCsrfTokenValid('payment' . $invoice->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Token CSRF invalide.');
             return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
@@ -200,7 +207,7 @@ class InvoiceController extends AbstractController
 
         if ($amount <= 0) {
             $this->addFlash('error', 'Le montant doit être positif.');
-            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+            return $this->redirectToRoute('app_invoice_payment', ['id' => $invoice->getId()]);
         }
 
         $currentPaid = $invoice->getAmountPaidFloat();
