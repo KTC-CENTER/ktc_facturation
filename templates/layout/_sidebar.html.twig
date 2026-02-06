@@ -115,6 +115,17 @@
                         </a>
                     </li>
 
+                    <!-- Notifications -->
+                    <li>
+                        <a href="{{ path('app_notification_index') }}" 
+                           class="{{ 'app_notification_' in app.request.attributes.get('_route') ? 'bg-ktc-blue text-white' : 'text-gray-200 hover:text-white hover:bg-ktc-blue' }} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
+                            <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg>
+                            Notifications
+                        </a>
+                    </li>
+
                     <!-- Paramètres -->
                     <li>
                         <a href="{{ path('app_settings_index') }}" 

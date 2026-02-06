@@ -150,4 +150,65 @@ class ClientController extends AbstractController
             'type' => $type,
         ]);
     }
+
+    #[Route('/{id}/email', name: 'app_client_email', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function sendEmail(Request $request, Client $client, \App\Service\BrevoMailerService $mailer, \App\Repository\CompanySettingsRepository $settingsRepo): Response
+    {
+        if (!$client->getEmail()) {
+            $this->addFlash('error', 'Ce client n\'a pas d\'adresse email.');
+            return $this->redirectToRoute('app_client_show', ['id' => $client->getId()]);
+        }
+
+        if ($request->isMethod('POST')) {
+            $subject = $request->request->get('subject', '');
+            $message = $request->request->get('message', '');
+
+            if (empty($subject) || empty($message)) {
+                $this->addFlash('error', 'Le sujet et le message sont obligatoires.');
+            } else {
+                $settings = $settingsRepo->getOrCreateSettings();
+                $companyName = $settings->getCompanyName() ?? 'KTC-Center';
+
+                $htmlBody = $this->buildClientEmailHtml($companyName, $client->getName(), $subject, $message);
+                $success = $mailer->send($client->getEmail(), $subject, $htmlBody);
+
+                if ($success) {
+                    $this->addFlash('success', 'Email envoyé avec succès à ' . $client->getEmail());
+                    return $this->redirectToRoute('app_client_show', ['id' => $client->getId()]);
+                } else {
+                    $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email.');
+                }
+            }
+        }
+
+        return $this->render('client/email.html.twig', [
+            'client' => $client,
+        ]);
+    }
+
+    private function buildClientEmailHtml(string $companyName, string $clientName, string $subject, string $message): string
+    {
+        $safeCompany = htmlspecialchars($companyName);
+        $safeClient = htmlspecialchars($clientName);
+        $safeSubject = htmlspecialchars($subject);
+        $htmlMessage = nl2br(htmlspecialchars($message));
+        $year = date('Y');
+
+        return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>'
+            . '<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:\'Segoe UI\',Roboto,Arial,sans-serif;">'
+            . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f6f9;"><tr><td style="padding:30px 20px;">'
+            . '<table role="presentation" width="600" cellspacing="0" cellpadding="0" style="margin:0 auto;max-width:600px;">'
+            . '<tr><td style="background:linear-gradient(135deg,#1E3A5F 0%,#2E86AB 100%);padding:30px 40px;border-radius:12px 12px 0 0;text-align:center;">'
+            . '<h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:700;">' . $safeCompany . '</h1>'
+            . '<p style="color:#A3C4DC;margin:8px 0 0;font-size:13px;">' . $safeSubject . '</p></td></tr>'
+            . '<tr><td style="background-color:#ffffff;padding:35px 40px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;">'
+            . '<p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 20px;">Bonjour <strong>' . $safeClient . '</strong>,</p>'
+            . '<div style="color:#374151;font-size:15px;line-height:1.7;">' . $htmlMessage . '</div>'
+            . '</td></tr>'
+            . '<tr><td style="background-color:#f9fafb;padding:25px 40px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;text-align:center;">'
+            . '<p style="color:#6b7280;font-size:12px;margin:0;">' . $safeCompany . '</p>'
+            . '<p style="color:#9ca3af;font-size:11px;margin:8px 0 0;">&copy; ' . $year . ' ' . $safeCompany . '</p>'
+            . '</td></tr></table></td></tr></table></body></html>';
+    }
 }
