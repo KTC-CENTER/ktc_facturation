@@ -111,7 +111,7 @@ jobs:
       - name: Create environment file and deploy
         run: |
           ssh root@${{ env.VPS_IP }} "cd ${{ env.APP_DIR }} && \
-            cat > .env << 'EOF'
+            cat > .env << "EOF"
               DB_PASSWORD=${{ secrets.DB_PASSWORD }}
               DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
               APP_SECRET=${{ secrets.APP_SECRET }}
