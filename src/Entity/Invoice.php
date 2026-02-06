@@ -261,9 +261,9 @@ class Invoice
         return $this->taxRate;
     }
 
-    public function setTaxRate(string $taxRate): static
+    public function setTaxRate(?string $taxRate): static
     {
-        $this->taxRate = $taxRate;
+        $this->taxRate = $taxRate ?? '0.00';
         return $this;
     }
 

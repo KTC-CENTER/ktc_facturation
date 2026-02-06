@@ -5,55 +5,57 @@
     <title>Catalogue produits</title>
     <style>
         @page { 
-            margin: 15mm 15mm 20mm 15mm;
+            margin: 15mm 15mm 18mm 15mm;
             size: A4;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 9px; color: #1f2937; }
+        body { 
+            font-family: 'DejaVu Sans', Arial, sans-serif; 
+            font-size: 8pt; 
+            color: #333;
+        }
         
         /* Header with company info */
         .header-top {
             display: table;
             width: 100%;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #0066CC;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1.5px solid #5B8BA0;
         }
         .header-left { display: table-cell; width: 60%; vertical-align: middle; }
         .header-right { display: table-cell; width: 40%; vertical-align: middle; text-align: right; }
-        .logo { max-height: 50px; max-width: 140px; }
-        .company-name { font-size: 16pt; font-weight: bold; color: #0066CC; }
-        .company-slogan { font-size: 8pt; color: #0066CC; font-style: italic; margin-top: 2px; }
-        .company-details { font-size: 8pt; color: #555; line-height: 1.4; }
+        .logo { max-height: 45px; max-width: 130px; }
+        .company-name { font-size: 14pt; font-weight: bold; color: #5B8BA0; }
+        .company-slogan { font-size: 7pt; color: #5B8BA0; font-style: italic; margin-top: 2px; }
+        .company-details { font-size: 7pt; color: #555; line-height: 1.4; }
         
         /* Title banner */
         .title-banner {
-            background: #0066CC;
+            background: #5B8BA0;
             color: white;
-            padding: 12px 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border-radius: 3px;
         }
-        .title-banner h1 { font-size: 16px; margin: 0; }
-        .title-banner p { font-size: 9px; opacity: 0.9; margin-top: 3px; }
-        
-        .meta { font-size: 8px; color: #6b7280; margin-bottom: 10px; }
+        .title-banner h1 { font-size: 12pt; margin: 0; }
+        .title-banner p { font-size: 8pt; opacity: 0.9; margin-top: 3px; }
         
         table { width: 100%; border-collapse: collapse; }
         th { 
-            background: #0066CC; 
+            background: #5B8BA0; 
             color: white; 
-            padding: 8px; 
+            padding: 6px 5px; 
             text-align: left; 
-            font-size: 8px; 
+            font-size: 7pt; 
             text-transform: uppercase; 
-            letter-spacing: 0.5px; 
+            letter-spacing: 0.3px; 
         }
-        td { padding: 7px 8px; border-bottom: 1px solid #e5e7eb; font-size: 8.5px; }
+        td { padding: 6px 5px; border-bottom: 1px solid #e5e7eb; font-size: 8pt; }
         tr:nth-child(even) { background: #f9fafb; }
         .right { text-align: right; }
         .center { text-align: center; }
-        .price { font-weight: 600; color: #0066CC; }
+        .price { font-weight: 600; color: #5B8BA0; }
         
         .footer {
             position: fixed;
@@ -61,15 +63,15 @@
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 7pt;
+            font-size: 6.5pt;
             color: #555;
-            border-top: 2px solid #0066CC;
-            padding: 8px 15mm;
+            border-top: 1px solid #5B8BA0;
+            padding: 5px 15mm;
             background: #fff;
         }
-        .footer-company { font-weight: bold; color: #0066CC; }
+        .footer-company { font-weight: bold; color: #5B8BA0; }
         
-        .count { text-align: right; font-size: 9px; color: #6b7280; margin-top: 10px; font-weight: bold; }
+        .count { text-align: right; font-size: 8pt; color: #666; margin-top: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -116,7 +118,7 @@
                 <td>{{ product.code }}</td>
                 <td>
                     <strong>{{ product.name }}</strong>
-                    {% if product.description %}<br><span style="font-size:7.5px;color:#6b7280;">{{ product.description|slice(0,80) }}{{ product.description|length > 80 ? '...' : '' }}</span>{% endif %}
+                    {% if product.description %}<br><span style="font-size:7pt;color:#666;">{{ product.description|slice(0,80) }}{{ product.description|length > 80 ? '...' : '' }}</span>{% endif %}
                 </td>
                 <td>{{ product.type }}</td>
                 <td class="right price">{{ product.unitPriceFloat|number_format(0, ',', ' ') }} {{ settings.currency ?? 'FCFA' }}</td>

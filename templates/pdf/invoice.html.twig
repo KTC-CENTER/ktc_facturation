@@ -5,7 +5,7 @@
     <title>Facture {{ invoice.reference }}</title>
     <style>
         @page {
-            margin: 15mm 15mm 20mm 15mm;
+            margin: 15mm 15mm 18mm 15mm;
             size: A4;
         }
         
@@ -13,16 +13,17 @@
         
         body {
             font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
-            font-size: 10pt;
+            font-size: 9pt;
             color: #333;
-            line-height: 1.4;
+            line-height: 1.25;
+            margin: 25px;
         }
 
         /* HEADER */
         .header {
             display: table;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         
         .header-left {
@@ -38,23 +39,23 @@
             text-align: right;
         }
         
-        .logo { max-height: 55px; max-width: 150px; }
+        .logo { max-height: 45px; max-width: 130px; }
         
-        .company-text { font-size: 20pt; font-weight: bold; color: #0066CC; }
+        .company-text { font-size: 14pt; font-weight: bold; color: #5B8BA0; }
         
-        .slogan { font-size: 8pt; color: #0066CC; font-style: italic; margin-top: 3px; }
+        .slogan { font-size: 7pt; color: #5B8BA0; font-style: italic; margin-top: 2px; }
         
-        .doc-type { font-size: 18pt; font-weight: bold; color: #C00000; }
+        .doc-type { font-size: 12pt; font-weight: bold; color: #8B6914; }
         
-        .doc-meta { font-size: 9pt; color: #333; margin-top: 5px; line-height: 1.5; }
+        .doc-meta { font-size: 8pt; color: #444; margin-top: 4px; line-height: 1.4; }
         
         .status-badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: 8pt;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 7pt;
             font-weight: bold;
-            margin-top: 5px;
+            margin-top: 3px;
         }
         .status-paid { background: #d4edda; color: #155724; }
         .status-pending { background: #fff3cd; color: #856404; }
@@ -66,7 +67,7 @@
         .parties {
             display: table;
             width: 100%;
-            margin: 15px 0;
+            margin: 8px 0;
         }
         
         .party-left, .party-right {
@@ -77,96 +78,102 @@
         
         .party-spacer { display: table-cell; width: 4%; }
         
-        .party-label { font-size: 9pt; color: #666; margin-bottom: 5px; }
+        .party-label { font-size: 7pt; color: #666; margin-bottom: 2px; }
         
         .emetteur-box {
-            border: 2px solid #0066CC;
-            border-radius: 5px;
-            padding: 10px 12px;
+            border: 1px solid #5B8BA0;
+            border-radius: 3px;
+            padding: 6px 8px;
         }
         
-        .emetteur-name { font-size: 11pt; font-weight: bold; color: #000; margin-bottom: 5px; }
+        .emetteur-name { font-size: 9pt; font-weight: bold; color: #333; margin-bottom: 3px; }
         
-        .emetteur-details { font-size: 9pt; color: #333; line-height: 1.5; }
+        .emetteur-details { font-size: 7.5pt; color: #444; line-height: 1.35; }
         
-        .client-name { font-size: 14pt; font-weight: bold; color: #0066CC; margin-top: 10px; }
+        .client-name { font-size: 10pt; font-weight: bold; color: #5B8BA0; margin-top: 3px; }
         
-        .client-details { font-size: 10pt; color: #333; margin-top: 5px; line-height: 1.5; }
+        .client-details { font-size: 8pt; color: #444; margin-top: 3px; line-height: 1.35; }
 
         /* OBJECT */
         .object-banner {
-            background: #0066CC;
+            background: #5B8BA0;
             color: #fff;
             text-align: center;
-            padding: 10px 15px;
-            margin: 15px 0;
+            padding: 6px 10px;
+            margin: 8px 0;
         }
         
-        .object-text { font-size: 12pt; font-weight: bold; }
+        .object-text { font-size: 9pt; font-weight: bold; }
 
         /* TABLE */
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
         
         .items-table th {
-            background: #0066CC;
+            background: #5B8BA0;
             color: #fff;
-            font-size: 9pt;
+            font-size: 7.5pt;
             font-weight: bold;
-            padding: 8px 6px;
+            padding: 5px 4px;
             text-align: center;
-            border: 1px solid #0055AA;
+            border: 1px solid #4A7A90;
         }
         
-        .items-table th:first-child { text-align: left; padding-left: 10px; }
+        .items-table th:first-child { text-align: left; padding-left: 6px; }
         
         .items-table td {
-            padding: 8px 6px;
-            font-size: 9pt;
+            padding: 5px 4px;
+            font-size: 8pt;
             border: 1px solid #ccc;
             vertical-align: top;
         }
         
-        .items-table tbody tr:nth-child(even) { background: #f8f8f8; }
+        .items-table tbody tr:nth-child(even) { background: #f9f9f9; }
         
-        .col-designation { width: 22%; font-weight: bold; padding-left: 10px !important; }
-        .col-caracteristiques { width: 38%; }
+        .col-designation { width: 24%; font-weight: bold; padding-left: 6px !important; }
+        .col-caracteristiques { width: 36%; font-size: 7pt; }
         .col-qte { width: 8%; text-align: center; }
-        .col-pu { width: 16%; text-align: right; }
-        .col-pt { width: 16%; text-align: right; }
+        .col-pu { width: 16%; text-align: right; font-size: 7.5pt; }
+        .col-pt { width: 16%; text-align: right; font-size: 7.5pt; }
         
         .subtotal-row td {
             background: #f0f0f0 !important;
             font-weight: bold;
+            font-size: 7.5pt;
+            padding: 4px;
         }
         
         .total-row td {
-            background: #0066CC !important;
+            background: #5B8BA0 !important;
             color: #fff !important;
             font-weight: bold;
-            font-size: 11pt;
-            padding: 10px 6px;
+            font-size: 8pt;
+            padding: 6px 4px;
         }
         
         .paid-row td {
             background: #d4edda !important;
             color: #155724 !important;
             font-weight: bold;
+            font-size: 7.5pt;
+            padding: 4px;
         }
         
         .due-row td {
             background: #f8d7da !important;
             color: #721c24 !important;
             font-weight: bold;
+            font-size: 7.5pt;
+            padding: 4px;
         }
 
         /* AMOUNT */
         .amount-section {
-            margin: 15px 0;
-            font-size: 10pt;
+            margin: 8px 0;
+            font-size: 8pt;
             font-style: italic;
         }
         
@@ -174,23 +181,23 @@
 
         /* BANK */
         .bank-section {
-            margin: 15px 0;
-            padding: 10px;
+            margin: 8px 0;
+            padding: 6px 8px;
             background: #f8f9fa;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 2px;
         }
         
-        .bank-title { font-weight: bold; margin-bottom: 5px; font-size: 9pt; }
-        .bank-details { font-size: 9pt; }
+        .bank-title { font-weight: bold; margin-bottom: 3px; font-size: 7.5pt; }
+        .bank-details { font-size: 7.5pt; line-height: 1.35; }
 
         /* NOTES */
         .notes-section {
-            margin: 15px 0;
+            margin: 8px 0;
         }
         
-        .notes-title { font-weight: bold; margin-bottom: 5px; font-size: 9pt; }
-        .notes-content { font-size: 9pt; }
+        .notes-title { font-weight: bold; margin-bottom: 3px; font-size: 7.5pt; }
+        .notes-content { font-size: 7.5pt; line-height: 1.35; }
 
         /* FOOTER */
         .footer {
@@ -199,13 +206,13 @@
             left: 0;
             right: 0;
             text-align: center;
-            padding: 8px 15mm;
-            border-top: 2px solid #0066CC;
-            font-size: 8pt;
+            padding: 5px 15mm;
+            border-top: 1px solid #5B8BA0;
+            font-size: 7pt;
         }
         
-        .footer-company { font-weight: bold; color: #0066CC; }
-        .footer-legal { font-size: 7pt; color: #666; }
+        .footer-company { font-weight: bold; color: #5B8BA0; }
+        .footer-legal { font-size: 6pt; color: #666; margin-top: 1px; }
     </style>
 </head>
 <body>
@@ -240,8 +247,7 @@
                     {% if settings.address %}{{ settings.address }}<br>{% endif %}
                     {% if settings.postalCode %}BP : {{ settings.postalCode }} {% endif %}{{ settings.city ?? 'Yaoundé' }}<br>
                     {% if settings.phone %}Tél.: {{ settings.phone }}{% if settings.phone2 %} / {{ settings.phone2 }}{% endif %}<br>{% endif %}
-                    {% if settings.email %}Email: {{ settings.email }}<br>{% endif %}
-                    {% if settings.website %}Web: {{ settings.website }}{% endif %}
+                    {% if settings.email %}{{ settings.email }}{% endif %}
                 </div>
             </div>
         </div>
@@ -269,7 +275,7 @@
             <tr>
                 <th class="col-designation">Désignation</th>
                 <th class="col-caracteristiques">Caractéristiques</th>
-                <th class="col-qte">Qtés</th>
+                <th class="col-qte">Qté</th>
                 <th class="col-pu">P.U</th>
                 <th class="col-pt">P.T</th>
             </tr>
@@ -280,37 +286,37 @@
                 <td class="col-designation">{{ item.designation }}</td>
                 <td class="col-caracteristiques">{{ item.description ?? '' }}</td>
                 <td class="col-qte">{{ item.quantityFloat|number_format(0, ',', ' ') }}</td>
-                <td class="col-pu">{{ item.unitPriceFloat|number_format(0, ' ', ' ') }} FCFA</td>
-                <td class="col-pt">{{ item.totalFloat|number_format(0, ' ', ' ') }} FCFA</td>
+                <td class="col-pu">{{ item.unitPriceFloat|number_format(0, ' ', ' ') }}</td>
+                <td class="col-pt">{{ item.totalFloat|number_format(0, ' ', ' ') }}</td>
             </tr>
             {% endfor %}
             
             {% if invoice.taxRateFloat > 0 %}
             <tr class="subtotal-row">
-                <td colspan="4" style="text-align: right;">Total HT</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">Total HT</td>
                 <td class="col-pt">{{ invoice.totalHTFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             <tr class="subtotal-row">
-                <td colspan="4" style="text-align: right;">TVA ({{ invoice.taxRateFloat }}%)</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">TVA ({{ invoice.taxRateFloat }}%)</td>
                 <td class="col-pt">{{ invoice.totalTaxFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             {% endif %}
             
             <tr class="total-row">
-                <td colspan="4" style="text-align: center;">Total{% if invoice.taxRateFloat > 0 %} TTC{% endif %}</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">Total{% if invoice.taxRateFloat > 0 %} TTC{% endif %}</td>
                 <td class="col-pt">{{ invoice.totalTTCFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             
             {% if invoice.amountPaidFloat > 0 %}
             <tr class="paid-row">
-                <td colspan="4" style="text-align: right;">Montant payé</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">Payé</td>
                 <td class="col-pt">{{ invoice.amountPaidFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             {% endif %}
             
             {% if invoice.remainingAmountFloat > 0 %}
             <tr class="due-row">
-                <td colspan="4" style="text-align: right;">Reste à payer</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">Reste</td>
                 <td class="col-pt">{{ invoice.remainingAmountFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             {% endif %}
@@ -319,7 +325,7 @@
 
     <!-- AMOUNT -->
     <div class="amount-section">
-        Arrêté la présente facture à la somme de : <span class="amount-value">{{ invoice.amountInWords ?? (invoice.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
+        Arrêté à : <span class="amount-value">{{ invoice.amountInWords ?? (invoice.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
     </div>
 
     <!-- BANK INFO -->
@@ -328,8 +334,7 @@
         <div class="bank-title">Coordonnées bancaires :</div>
         <div class="bank-details">
             {% if settings.bankName %}Banque : {{ settings.bankName }}<br>{% endif %}
-            {% if settings.bankAccountNumber %}N° Compte : {{ settings.bankAccountNumber }}<br>{% endif %}
-            {% if settings.bankIban %}IBAN : {{ settings.bankIban }}{% endif %}
+            {% if settings.bankAccountNumber %}N° Compte : {{ settings.bankAccountNumber }}{% endif %}
         </div>
     </div>
     {% endif %}
