@@ -18,6 +18,7 @@ services:
           condition: service_healthy
     networks:
       - ktc-invoice-local
+      
 
   # Base de données MySQL
   ktc-invoice-db:
