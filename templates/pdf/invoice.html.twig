@@ -4,655 +4,641 @@
     <meta charset="UTF-8">
     <title>Facture {{ invoice.reference }}</title>
     <style>
+        @page {
+            margin: 8mm 10mm 15mm 10mm;
+            size: A4;
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         
-        @page {
-            margin: 12mm 15mm 20mm 15mm;
-            size: A4;
-        }
-        
         body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
             font-size: 9pt;
             color: #1a1a1a;
-            line-height: 1.4;
+            line-height: 1.35;
             background: #fff;
         }
-        
-        /* Header */
+
+        /* ==================== HEADER ==================== */
         .header {
-            margin-bottom: 20px;
+            display: table;
+            width: 100%;
+            margin-bottom: 12px;
+            border-bottom: 3px solid #0066CC;
+            padding-bottom: 10px;
         }
         
-        .header-top {
+        .header-left {
+            display: table-cell;
+            width: 50%;
+            vertical-align: middle;
+        }
+        
+        .header-right {
+            display: table-cell;
+            width: 50%;
+            vertical-align: middle;
+            text-align: right;
+        }
+        
+        .logo-container {
+            display: inline-block;
+        }
+        
+        .logo {
+            max-height: 55px;
+            max-width: 160px;
+        }
+        
+        .company-text-logo {
+            font-size: 22pt;
+            font-weight: bold;
+            color: #0066CC;
+            letter-spacing: -0.5px;
+        }
+        
+        .company-text-logo span {
+            color: #FF6600;
+        }
+        
+        .slogan {
+            font-size: 7.5pt;
+            color: #0066CC;
+            font-style: italic;
+            margin-top: 2px;
+        }
+        
+        .doc-type {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #CC0000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .doc-meta {
+            margin-top: 6px;
+            font-size: 8.5pt;
+            color: #444;
+        }
+        
+        .doc-meta-row {
+            margin: 2px 0;
+        }
+        
+        .doc-meta-label {
+            color: #666;
+        }
+        
+        .doc-meta-value {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+        }
+        
+        .status-paid {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: #fff;
+        }
+        
+        .status-pending {
+            background: linear-gradient(135deg, #ffc107 0%, #d39e00 100%);
+            color: #333;
+        }
+        
+        .status-overdue {
+            background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+            color: #fff;
+        }
+        
+        .status-partial {
+            background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+            color: #fff;
+        }
+        
+        .status-cancelled {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+            color: #fff;
+        }
+
+        /* ==================== PARTIES ==================== */
+        .parties {
             display: table;
             width: 100%;
             margin-bottom: 15px;
         }
         
-        .logo-section {
-            display: table-cell;
-            width: 25%;
-            vertical-align: top;
-        }
-        
-        .logo-section img {
-            max-width: 80px;
-            max-height: 60px;
-        }
-        
-        .title-section {
-            display: table-cell;
-            width: 75%;
-            vertical-align: middle;
-            text-align: right;
-        }
-        
-        .doc-title {
-            font-size: 22pt;
-            font-weight: bold;
-            color: #1E3A5F;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 5px;
-        }
-        
-        .doc-ref {
-            font-size: 11pt;
-            color: #2E86AB;
-            font-weight: 600;
-        }
-        
-        /* Info boxes */
-        .info-row {
-            display: table;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        
-        .info-box {
+        .party-emetteur {
             display: table-cell;
             width: 48%;
             vertical-align: top;
-            padding: 12px 15px;
-            background: #f8fafc;
-            border-radius: 6px;
         }
         
-        .info-box.left {
-            border-left: 4px solid #1E3A5F;
-        }
-        
-        .info-box.right {
-            border-left: 4px solid #2E86AB;
-        }
-        
-        .info-spacer {
+        .party-spacer {
             display: table-cell;
             width: 4%;
         }
         
-        .info-title {
-            font-size: 8pt;
-            text-transform: uppercase;
-            color: #6b7280;
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #e5e7eb;
+        .party-client {
+            display: table-cell;
+            width: 48%;
+            vertical-align: top;
         }
         
-        .company-name {
+        .party-label {
+            font-size: 8pt;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        
+        .emetteur-box {
+            border: 2px solid #0066CC;
+            border-radius: 8px;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
+        }
+        
+        .emetteur-name {
             font-size: 11pt;
             font-weight: bold;
-            color: #1E3A5F;
-            margin-bottom: 5px;
+            color: #0066CC;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 4px;
         }
         
-        .info-text {
-            font-size: 8.5pt;
-            color: #374151;
+        .emetteur-details {
+            font-size: 8pt;
+            color: #333;
             line-height: 1.5;
         }
         
-        /* Meta info */
-        .meta-row {
-            display: table;
-            width: 100%;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #1E3A5F 0%, #2E86AB 100%);
-            border-radius: 6px;
-            padding: 12px 20px;
+        .emetteur-details strong {
+            color: #0066CC;
         }
         
-        .meta-item {
-            display: table-cell;
-            text-align: center;
+        .client-box {
+            padding: 10px 0;
+        }
+        
+        .client-name {
+            font-size: 15pt;
+            font-weight: bold;
+            color: #0066CC;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+        
+        .client-details {
+            font-size: 9pt;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        /* ==================== OBJECT BANNER ==================== */
+        .object-banner {
+            background: linear-gradient(135deg, #0088FF 0%, #0055CC 50%, #003399 100%);
             color: #fff;
-        }
-        
-        .meta-label {
-            font-size: 7pt;
-            text-transform: uppercase;
-            opacity: 0.8;
-            letter-spacing: 1px;
-        }
-        
-        .meta-value {
-            font-size: 10pt;
-            font-weight: bold;
-            margin-top: 3px;
-        }
-        
-        /* Status badge */
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 8pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .status-paid {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status-overdue {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .status-partial {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        
-        /* Object */
-        .object-section {
-            background: #eff6ff;
-            border-left: 4px solid #2E86AB;
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            border-radius: 0 6px 6px 0;
-        }
-        
-        .object-label {
-            font-size: 8pt;
-            color: #1e40af;
-            text-transform: uppercase;
-            font-weight: 600;
+            text-align: center;
+            padding: 14px 20px;
+            margin: 15px 0;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0, 102, 204, 0.3);
         }
         
         .object-text {
-            font-size: 10pt;
-            color: #1E3A5F;
-            font-weight: 500;
-            margin-top: 3px;
+            font-size: 13pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-        
-        /* Table */
+
+        /* ==================== TABLE ==================== */
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         .items-table thead th {
-            background: #1E3A5F;
+            background: linear-gradient(180deg, #0077DD 0%, #0055AA 100%);
             color: #fff;
-            font-size: 8pt;
-            font-weight: 600;
+            font-size: 8.5pt;
+            font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             padding: 10px 8px;
-            text-align: left;
+            text-align: center;
             border: none;
         }
         
         .items-table thead th:first-child {
+            text-align: left;
             border-radius: 6px 0 0 0;
-            width: 5%;
-            text-align: center;
+            padding-left: 12px;
         }
         
         .items-table thead th:last-child {
             border-radius: 0 6px 0 0;
-            text-align: right;
-        }
-        
-        .items-table thead th.text-right {
-            text-align: right;
-        }
-        
-        .items-table thead th.text-center {
-            text-align: center;
-        }
-        
-        .items-table tbody tr {
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .items-table tbody tr:nth-child(even) {
-            background: #f9fafb;
         }
         
         .items-table tbody td {
             padding: 10px 8px;
             font-size: 9pt;
-            vertical-align: top;
+            border-bottom: 1px solid #e8e8e8;
+            vertical-align: middle;
         }
         
-        .items-table tbody td:first-child {
+        .items-table tbody tr:nth-child(odd) {
+            background: #fafbfc;
+        }
+        
+        .items-table tbody tr:nth-child(even) {
+            background: #ffffff;
+        }
+        
+        .col-designation {
+            width: 22%;
+            font-weight: 600;
+            color: #1a1a1a;
+            padding-left: 12px !important;
+        }
+        
+        .col-caracteristiques {
+            width: 38%;
+            color: #444;
+        }
+        
+        .col-qte {
+            width: 8%;
             text-align: center;
-            color: #6b7280;
             font-weight: 500;
         }
         
-        .items-table tbody td:last-child {
+        .col-pu {
+            width: 16%;
+            text-align: right;
+            font-family: 'DejaVu Sans Mono', monospace;
+            font-size: 8.5pt;
+        }
+        
+        .col-pt {
+            width: 16%;
             text-align: right;
             font-weight: 600;
+            font-family: 'DejaVu Sans Mono', monospace;
+            font-size: 8.5pt;
+            color: #0055AA;
         }
         
-        .item-designation {
+        /* Subtotal rows */
+        .subtotal-row td {
+            background: #f0f4f8 !important;
             font-weight: 600;
-            color: #1E3A5F;
-        }
-        
-        .item-description {
-            font-size: 8pt;
-            color: #6b7280;
-            margin-top: 3px;
-            font-style: italic;
-        }
-        
-        .text-right {
-            text-align: right;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-        
-        /* Totals */
-        .totals-section {
-            display: table;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        
-        .totals-spacer {
-            display: table-cell;
-            width: 55%;
-        }
-        
-        .totals-box {
-            display: table-cell;
-            width: 45%;
-        }
-        
-        .totals-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .totals-table tr td {
-            padding: 8px 12px;
             font-size: 9pt;
+            border-bottom: 1px solid #ddd;
         }
         
-        .totals-table tr td:first-child {
-            text-align: left;
-            color: #6b7280;
+        /* Total Row */
+        .total-row td {
+            background: linear-gradient(135deg, #0077DD 0%, #0055AA 100%) !important;
+            color: #fff !important;
+            font-weight: bold;
+            font-size: 11pt;
+            padding: 12px 8px;
+            border: none;
         }
         
-        .totals-table tr td:last-child {
-            text-align: right;
-            font-weight: 600;
+        .total-row td:first-child {
+            border-radius: 0 0 0 6px;
         }
         
-        .totals-table tr.total-row {
-            background: linear-gradient(135deg, #1E3A5F 0%, #2E86AB 100%);
-            color: #fff;
+        .total-row td:last-child {
+            border-radius: 0 0 6px 0;
+            font-size: 12pt;
         }
         
-        .totals-table tr.total-row td {
-            padding: 12px;
+        /* Paid row */
+        .paid-row td {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+            color: #155724 !important;
+            font-weight: bold;
+        }
+        
+        /* Due row */
+        .due-row td {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
+            color: #721c24 !important;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+
+        /* ==================== AMOUNT IN WORDS ==================== */
+        .amount-section {
+            margin: 18px 0;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #fffbf0 0%, #fff8e6 100%);
+            border-left: 4px solid #FF9900;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .amount-label {
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .amount-value {
             font-size: 11pt;
             font-weight: bold;
-            color: #fff;
-        }
-        
-        .totals-table tr.total-row td:first-child {
-            border-radius: 6px 0 0 6px;
-            color: #fff;
-        }
-        
-        .totals-table tr.total-row td:last-child {
-            border-radius: 0 6px 6px 0;
-        }
-        
-        .totals-table tr.paid-row {
-            background: #d1fae5;
-        }
-        
-        .totals-table tr.paid-row td {
-            color: #065f46;
-        }
-        
-        .totals-table tr.due-row {
-            background: #fee2e2;
-        }
-        
-        .totals-table tr.due-row td {
-            color: #991b1b;
-            font-weight: bold;
-        }
-        
-        /* Amount in words */
-        .amount-words {
-            background: #fef3c7;
-            border: 1px solid #fcd34d;
-            border-left: 4px solid #f59e0b;
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 0 6px 6px 0;
-        }
-        
-        .amount-words-label {
-            font-size: 8pt;
-            color: #92400e;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        
-        .amount-words-text {
-            font-size: 10pt;
-            color: #78350f;
-            font-weight: 600;
             font-style: italic;
-            margin-top: 3px;
+            color: #CC6600;
+            text-decoration: underline;
+            text-decoration-color: #FFaa00;
         }
-        
-        /* Bank info */
+
+        /* ==================== BANK INFO ==================== */
         .bank-section {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            border-left: 4px solid #22c55e;
-            padding: 12px 15px;
-            margin-bottom: 20px;
+            margin: 15px 0;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 4px solid #28a745;
             border-radius: 0 6px 6px 0;
         }
         
         .bank-title {
-            font-size: 8pt;
-            color: #166534;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #1b5e20;
+            margin-bottom: 6px;
         }
         
-        .bank-info {
-            display: table;
-            width: 100%;
-        }
-        
-        .bank-row {
-            display: table-row;
-        }
-        
-        .bank-label {
-            display: table-cell;
-            font-size: 8pt;
-            color: #6b7280;
-            padding: 2px 10px 2px 0;
-            width: 30%;
-        }
-        
-        .bank-value {
-            display: table-cell;
+        .bank-details {
             font-size: 8.5pt;
-            color: #1E3A5F;
-            font-weight: 500;
+            color: #2e7d32;
         }
         
-        /* Notes */
+        .bank-details strong {
+            color: #1b5e20;
+        }
+
+        /* ==================== NOTES ==================== */
         .notes-section {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-left: 4px solid #3b82f6;
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 0 6px 6px 0;
+            margin: 15px 0;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
         }
         
         .notes-title {
-            font-size: 8pt;
-            color: #1e40af;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 5px;
+            font-size: 9pt;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
         }
         
-        .notes-text {
+        .notes-content {
             font-size: 8.5pt;
-            color: #1e3a8a;
-            line-height: 1.5;
+            color: #555;
         }
-        
-        /* Footer */
+
+        /* ==================== FOOTER ==================== */
         .footer {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 10px 15mm;
-            background: #f9fafb;
-            border-top: 2px solid #1E3A5F;
-            font-size: 7pt;
-            color: #6b7280;
             text-align: center;
+            padding: 8px 10mm;
+            background: linear-gradient(180deg, #0066CC 0%, #004499 100%);
+            color: #fff;
         }
         
         .footer-company {
-            font-weight: 600;
-            color: #1E3A5F;
+            font-size: 8pt;
+            font-weight: bold;
+            letter-spacing: 0.5px;
         }
+        
+        .footer-legal {
+            font-size: 7pt;
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+
+        /* ==================== WATERMARK ==================== */
+        {% if invoice.status == 'CANCELLED' %}
+        body:before {
+            content: "ANNULÉE";
+            position: fixed;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80pt;
+            color: rgba(220, 53, 69, 0.15);
+            font-weight: bold;
+            z-index: -1;
+        }
+        {% endif %}
+        
+        {% if invoice.status == 'PAID' %}
+        body:after {
+            content: "PAYÉE";
+            position: fixed;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80pt;
+            color: rgba(40, 167, 69, 0.08);
+            font-weight: bold;
+            z-index: -1;
+        }
+        {% endif %}
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- ==================== HEADER ==================== -->
     <div class="header">
-        <div class="header-top">
-            <div class="logo-section">
+        <div class="header-left">
+            <div class="logo-container">
                 {% if logo_base64 %}
-                    <img src="{{ logo_base64 }}" alt="Logo">
+                    <img src="{{ logo_base64 }}" alt="Logo" class="logo">
+                {% else %}
+                    <div class="company-text-logo">KTC<span>-Center</span></div>
                 {% endif %}
+                <div class="slogan">Nouvelle Vision de l'Informatique</div>
             </div>
-            <div class="title-section">
-                <div class="doc-title">Facture</div>
-                <div class="doc-ref">N° {{ invoice.reference }}</div>
+        </div>
+        <div class="header-right">
+            <div class="doc-type">Facture</div>
+            <div class="doc-meta">
+                <div class="doc-meta-row">
+                    <span class="doc-meta-label">N° :</span>
+                    <span class="doc-meta-value">{{ invoice.reference }}</span>
+                </div>
+                <div class="doc-meta-row">
+                    <span class="doc-meta-label">Date :</span>
+                    <span class="doc-meta-value">{{ invoice.issueDate|date('d/m/Y') }}</span>
+                </div>
+                <div class="doc-meta-row">
+                    <span class="doc-meta-label">Échéance :</span>
+                    <span class="doc-meta-value">{{ invoice.dueDate|date('d/m/Y') }}</span>
+                </div>
+            </div>
+            <span class="status-badge status-{{ invoice.status|lower }}">{{ invoice.statusLabel }}</span>
+        </div>
+    </div>
+
+    <!-- ==================== PARTIES ==================== -->
+    <div class="parties">
+        <div class="party-emetteur">
+            <div class="party-label">Émetteur :</div>
+            <div class="emetteur-box">
+                <div class="emetteur-name">{{ settings.companyName ?? 'KTC-Center Sarl' }}</div>
+                <div class="emetteur-details">
+                    {% if settings.address %}{{ settings.address }}<br>{% endif %}
+                    {% if settings.postalCode or settings.city %}
+                        {% if settings.postalCode %}BP : {{ settings.postalCode }} {% endif %}{{ settings.city ?? 'Yaoundé' }}<br>
+                    {% endif %}
+                    {% if settings.phone %}
+                        <strong>Tél.:</strong> {{ settings.phone }}
+                        {% if settings.phone2 %} / {{ settings.phone2 }}{% endif %}<br>
+                    {% endif %}
+                    {% if settings.email %}<strong>Email:</strong> {{ settings.email }}<br>{% endif %}
+                    {% if settings.website %}<strong>Web:</strong> {{ settings.website }}{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="party-spacer"></div>
+        <div class="party-client">
+            <div class="party-label">Adressé à :</div>
+            <div class="client-box">
+                <div class="client-name">{{ invoice.client.name }}</div>
+                <div class="client-details">
+                    {% if invoice.client.address %}{{ invoice.client.address }}<br>{% endif %}
+                    {% if invoice.client.city %}{{ invoice.client.city }}{% if invoice.client.country %}, {{ invoice.client.country }}{% endif %}<br>{% endif %}
+                    {% if invoice.client.phone %}Tel : {{ invoice.client.phone }}<br>{% endif %}
+                    {% if invoice.client.email %}{{ invoice.client.email }}{% endif %}
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- Info boxes -->
-    <div class="info-row">
-        <div class="info-box left">
-            <div class="info-title">Émetteur</div>
-            <div class="company-name">{{ settings.companyName ?? 'KTC-Center' }}</div>
-            <div class="info-text">
-                {% if settings.address %}{{ settings.address }}<br>{% endif %}
-                {% if settings.city %}{{ settings.city }}{% if settings.country %}, {{ settings.country }}{% endif %}<br>{% endif %}
-                {% if settings.phone %}Tél: {{ settings.phone }}<br>{% endif %}
-                {% if settings.email %}Email: {{ settings.email }}<br>{% endif %}
-                {% if settings.website %}Web: {{ settings.website }}{% endif %}
-            </div>
-        </div>
-        <div class="info-spacer"></div>
-        <div class="info-box right">
-            <div class="info-title">Client</div>
-            <div class="company-name">{{ invoice.client.name }}</div>
-            <div class="info-text">
-                {% if invoice.client.address %}{{ invoice.client.address }}<br>{% endif %}
-                {% if invoice.client.city %}{{ invoice.client.city }}{% if invoice.client.country %}, {{ invoice.client.country }}{% endif %}<br>{% endif %}
-                {% if invoice.client.phone %}Tél: {{ invoice.client.phone }}<br>{% endif %}
-                {% if invoice.client.email %}Email: {{ invoice.client.email }}{% endif %}
-            </div>
-        </div>
-    </div>
-    
-    <!-- Meta info bar -->
-    <div class="meta-row">
-        <div class="meta-item">
-            <div class="meta-label">Date d'émission</div>
-            <div class="meta-value">{{ invoice.issueDate|date('d/m/Y') }}</div>
-        </div>
-        <div class="meta-item">
-            <div class="meta-label">Date d'échéance</div>
-            <div class="meta-value">{{ invoice.dueDate|date('d/m/Y') }}</div>
-        </div>
-        <div class="meta-item">
-            <div class="meta-label">Statut</div>
-            <div class="meta-value">
-                <span class="status-badge status-{{ invoice.status|lower }}">
-                    {{ invoice.statusLabel }}
-                </span>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Object -->
+
+    <!-- ==================== OBJECT BANNER ==================== -->
     {% if invoice.object %}
-    <div class="object-section">
-        <div class="object-label">Objet</div>
+    <div class="object-banner">
         <div class="object-text">{{ invoice.object }}</div>
     </div>
     {% endif %}
-    
-    <!-- Items table -->
+
+    <!-- ==================== ITEMS TABLE ==================== -->
     <table class="items-table">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Désignation</th>
-                <th class="text-center" style="width: 8%;">Qté</th>
-                <th class="text-right" style="width: 15%;">Prix Unit.</th>
-                <th class="text-center" style="width: 8%;">Rem.</th>
-                <th class="text-right" style="width: 15%;">Total HT</th>
+                <th class="col-designation">Désignation</th>
+                <th class="col-caracteristiques">Caractéristiques</th>
+                <th class="col-qte">Qtés</th>
+                <th class="col-pu">P.U</th>
+                <th class="col-pt">P.T</th>
             </tr>
         </thead>
         <tbody>
             {% for item in invoice.items %}
             <tr>
-                <td>{{ loop.index }}</td>
-                <td>
-                    <div class="item-designation">{{ item.designation }}</div>
-                    {% if item.description %}
-                    <div class="item-description">{{ item.description }}</div>
-                    {% endif %}
-                </td>
-                <td class="text-center">{{ item.quantityFloat|number_format(0, ',', ' ') }}</td>
-                <td class="text-right">{{ item.unitPriceFloat|number_format(0, ',', ' ') }}</td>
-                <td class="text-center">{% if item.discountFloat > 0 %}{{ item.discountFloat }}%{% else %}-{% endif %}</td>
-                <td class="text-right">{{ item.totalFloat|number_format(0, ',', ' ') }} {{ settings.currency ?? 'FCFA' }}</td>
+                <td class="col-designation">{{ item.designation }}</td>
+                <td class="col-caracteristiques">{{ item.description ?? '' }}</td>
+                <td class="col-qte">{{ item.quantityFloat|number_format(0, ',', ' ') }}</td>
+                <td class="col-pu">{{ item.unitPriceFloat|number_format(0, ' ', ' ') }} FCFA</td>
+                <td class="col-pt">{{ item.totalFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             {% endfor %}
+            
+            <!-- Subtotals -->
+            <tr class="subtotal-row">
+                <td colspan="4" style="text-align: right; padding-right: 15px;">Total HT</td>
+                <td class="col-pt">{{ invoice.totalHTFloat|number_format(0, ' ', ' ') }} FCFA</td>
+            </tr>
+            <tr class="subtotal-row">
+                <td colspan="4" style="text-align: right; padding-right: 15px;">TVA ({{ invoice.taxRateFloat }}%)</td>
+                <td class="col-pt">{{ invoice.totalTaxFloat|number_format(0, ' ', ' ') }} FCFA</td>
+            </tr>
+            
+            <!-- Total TTC -->
+            <tr class="total-row">
+                <td colspan="4" style="text-align: center; letter-spacing: 2px;">TOTAL TTC</td>
+                <td class="col-pt">{{ invoice.totalTTCFloat|number_format(0, ' ', ' ') }} FCFA</td>
+            </tr>
+            
+            <!-- Paid -->
+            {% if invoice.amountPaidFloat > 0 %}
+            <tr class="paid-row">
+                <td colspan="4" style="text-align: right; padding-right: 15px;">✓ Montant payé</td>
+                <td class="col-pt">{{ invoice.amountPaidFloat|number_format(0, ' ', ' ') }} FCFA</td>
+            </tr>
+            {% endif %}
+            
+            <!-- Remaining -->
+            {% if invoice.remainingAmountFloat > 0 %}
+            <tr class="due-row">
+                <td colspan="4" style="text-align: right; padding-right: 15px; font-weight: bold;">⚠ RESTE À PAYER</td>
+                <td class="col-pt" style="font-size: 11pt;">{{ invoice.remainingAmountFloat|number_format(0, ' ', ' ') }} FCFA</td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
-    
-    <!-- Totals -->
-    <div class="totals-section">
-        <div class="totals-spacer"></div>
-        <div class="totals-box">
-            <table class="totals-table">
-                <tr>
-                    <td>Total HT</td>
-                    <td>{{ invoice.totalHTFloat|number_format(0, ',', ' ') }} {{ settings.currency ?? 'FCFA' }}</td>
-                </tr>
-                <tr>
-                    <td>TVA ({{ invoice.taxRateFloat }}%)</td>
-                    <td>{{ invoice.totalTaxFloat|number_format(0, ',', ' ') }} {{ settings.currency ?? 'FCFA' }}</td>
-                </tr>
-                <tr class="total-row">
-                    <td>TOTAL TTC</td>
-                    <td>{{ invoice.totalTTCFloat|number_format(0, ',', ' ') }} {{ settings.currency ?? 'FCFA' }}</td>
-                </tr>
-                {% if invoice.amountPaidFloat > 0 %}
-                <tr class="paid-row">
-                    <td>Montant payé</td>
-                    <td>{{ invoice.amountPaidFloat|number_format(0, ',', ' ') }} {{ settings.currency ?? 'FCFA' }}</td>
-                </tr>
-                {% endif %}
-                {% if invoice.remainingAmountFloat > 0 %}
-                <tr class="due-row">
-                    <td>Reste à payer</td>
-                    <td>{{ invoice.remainingAmountFloat|number_format(0, ',', ' ') }} {{ settings.currency ?? 'FCFA' }}</td>
-                </tr>
-                {% endif %}
-            </table>
-        </div>
+
+    <!-- ==================== AMOUNT IN WORDS ==================== -->
+    <div class="amount-section">
+        <span class="amount-label">Arrêté la présente facture à la somme de : </span>
+        <span class="amount-value">{{ invoice.amountInWords ?? (invoice.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
     </div>
-    
-    <!-- Amount in words -->
-    <div class="amount-words">
-        <div class="amount-words-label">Arrêté la présente facture à la somme de</div>
-        <div class="amount-words-text">{{ invoice.amountInWords ?? (invoice.totalTTCFloat|number_format(0, ',', ' ') ~ ' ' ~ (settings.currency ?? 'FCFA')) }}</div>
-    </div>
-    
-    <!-- Bank information -->
+
+    <!-- ==================== BANK INFO ==================== -->
     {% if settings.bankName or settings.bankAccountNumber %}
     <div class="bank-section">
-        <div class="bank-title">Coordonnées bancaires</div>
-        <div class="bank-info">
-            {% if settings.bankName %}
-            <div class="bank-row">
-                <span class="bank-label">Banque :</span>
-                <span class="bank-value">{{ settings.bankName }}</span>
-            </div>
-            {% endif %}
-            {% if settings.bankAccountNumber %}
-            <div class="bank-row">
-                <span class="bank-label">N° Compte :</span>
-                <span class="bank-value">{{ settings.bankAccountNumber }}</span>
-            </div>
-            {% endif %}
-            {% if settings.bankIban %}
-            <div class="bank-row">
-                <span class="bank-label">IBAN :</span>
-                <span class="bank-value">{{ settings.bankIban }}</span>
-            </div>
-            {% endif %}
+        <div class="bank-title">💳 Coordonnées bancaires :</div>
+        <div class="bank-details">
+            {% if settings.bankName %}<strong>Banque :</strong> {{ settings.bankName }}<br>{% endif %}
+            {% if settings.bankAccountNumber %}<strong>N° Compte :</strong> {{ settings.bankAccountNumber }}<br>{% endif %}
+            {% if settings.bankIban %}<strong>IBAN :</strong> {{ settings.bankIban }}{% endif %}
         </div>
     </div>
     {% endif %}
-    
-    <!-- Notes -->
+
+    <!-- ==================== NOTES ==================== -->
     {% if invoice.notes %}
     <div class="notes-section">
-        <div class="notes-title">Notes</div>
-        <div class="notes-text">{{ invoice.notes|nl2br }}</div>
+        <div class="notes-title">📝 Remarques :</div>
+        <div class="notes-content">{{ invoice.notes|nl2br }}</div>
     </div>
     {% endif %}
-    
-    <!-- Footer -->
+
+    <!-- ==================== FOOTER ==================== -->
     <div class="footer">
-        <span class="footer-company">{{ settings.companyName ?? 'KTC-Center' }}</span>
-        {% if settings.legalInfo %} | {{ settings.legalInfo }}{% endif %}
-        {% if settings.phone %} | Tél: {{ settings.phone }}{% endif %}
-        {% if settings.email %} | {{ settings.email }}{% endif %}
+        <div class="footer-company">{{ settings.companyName ?? 'Kamer Training and Consulting Center Sarl' }}</div>
+        <div class="footer-legal">
+            {% if settings.rccm %}N° RCCM: {{ settings.rccm }}{% endif %}
+            {% if settings.legalInfo %} &nbsp;•&nbsp; {{ settings.legalInfo }}{% endif %}
+        </div>
     </div>
 </body>
 </html>
