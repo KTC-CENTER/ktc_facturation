@@ -379,4 +379,31 @@ class InvoiceController extends AbstractController
             'invoice' => $invoice,
         ]);
     }
+
+    #[Route('/{id}/send-whatsapp', name: 'app_invoice_send_whatsapp', methods: ['GET'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function sendWhatsApp(Invoice $invoice, \App\Service\DocumentShareService $shareService): Response
+    {
+        $client = $invoice->getClient();
+        
+        if (!$client->getPhone()) {
+            $this->addFlash('error', 'Ce client n\'a pas de numéro de téléphone.');
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+        }
+
+        // Créer un partage avec lien
+        $share = $shareService->createInvoiceShare(
+            $invoice,
+            $this->getUser(),
+            'whatsapp',
+            null,
+            $client->getPhone(),
+            168 // 7 jours
+        );
+
+        // Générer le lien WhatsApp
+        $whatsappUrl = $shareService->getWhatsAppLink($share);
+
+        return $this->redirect($whatsappUrl);
+    }
 }

@@ -121,11 +121,14 @@ class DocumentShareService
         $document = $share->getProforma() ?? $share->getInvoice();
         $docType = $share->getProforma() ? 'proforma' : 'facture';
         
+        // Générer l'URL absolue
+        $shareUrl = $this->urlGenerator->generate('app_share_view', ['token' => $share->getToken()], UrlGeneratorInterface::ABSOLUTE_URL);
+        
         $message = sprintf(
             "Bonjour,\n\nVoici le lien pour consulter votre %s n° %s :\n%s\n\nCe lien expire le %s.",
             $docType,
             $document->getReference(),
-            $share->getShareUrl(),
+            $shareUrl,
             $share->getExpiresAt()->format('d/m/Y à H:i')
         );
 
@@ -186,9 +189,12 @@ class DocumentShareService
             mkdir($qrDir, 0755, true);
         }
 
+        // Générer l'URL absolue pour le QR code
+        $shareUrl = $this->urlGenerator->generate('app_share_view', ['token' => $share->getToken()], UrlGeneratorInterface::ABSOLUTE_URL);
+
         $result = Builder::create()
             ->writer(new PngWriter())
-            ->data($share->getShareUrl())
+            ->data($shareUrl)
             ->encoding(new Encoding('UTF-8'))
             ->errorCorrectionLevel(ErrorCorrectionLevel::High)
             ->size(300)
