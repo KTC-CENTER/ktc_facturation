@@ -3,47 +3,214 @@
 {% block title %}Nouveau modèle de proforma{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto space-y-6">
+<div class="space-y-6">
     <div>
         <nav class="text-sm text-gray-500 mb-2">
-            <a href="{{ path('app_proforma_template_index') }}" class="hover:text-blue-600">Modèles</a>
+            <a href="{{ path('app_proforma_template_index') }}" class="hover:text-primary-600">Modèles</a>
             <span class="mx-2">/</span>
-            <span class="text-gray-900">Nouveau</span>
+            <span class="text-gray-700">Nouveau</span>
         </nav>
         <h1 class="text-2xl font-bold text-gray-900">Nouveau modèle de proforma</h1>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <form method="post" class="space-y-6">
-                <div>
-                    <label for="name" class="form-label">Nom du modèle <span class="text-red-500">*</span></label>
-                    <input type="text" name="name" id="name" required class="form-input" placeholder="Ex: Maintenance annuelle">
-                </div>
-                <div>
-                    <label for="description" class="form-label">Description</label>
-                    <textarea name="description" id="description" rows="2" class="form-textarea" placeholder="Description du modèle"></textarea>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="validityDays" class="form-label">Validité (jours)</label>
-                        <input type="number" name="validityDays" id="validityDays" value="30" min="1" class="form-input">
+    <form method="POST" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Informations générales -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="font-semibold text-gray-900">Informations générales</h3>
                     </div>
-                    <div>
-                        <label for="taxRate" class="form-label">Taux TVA (%)</label>
-                        <input type="number" name="taxRate" id="taxRate" value="19.25" step="0.01" class="form-input">
+                    <div class="card-body space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du modèle *</label>
+                            <input type="text" name="name" required class="form-input" placeholder="Ex: Pack Comptabilité PME">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Objet par défaut</label>
+                            <input type="text" name="defaultObject" class="form-input" placeholder="Ex: FOURNITURE DE LOGICIEL">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea name="description" rows="2" class="form-textarea" placeholder="Description du modèle"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Validité (jours)</label>
+                                <input type="number" name="validityDays" value="30" min="1" class="form-input">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Conditions par défaut</label>
+                            <textarea name="conditions" rows="3" class="form-textarea" placeholder="Conditions générales..."></textarea>
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <label for="conditions" class="form-label">Conditions</label>
-                    <textarea name="conditions" id="conditions" rows="4" class="form-textarea" placeholder="Conditions générales..."></textarea>
+
+                <!-- Produits du modèle -->
+                <div class="card">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="font-semibold text-gray-900">
+                            Produits du modèle
+                            <span class="text-sm font-normal text-gray-500" id="item-count">(0 produits)</span>
+                        </h3>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="addItem()">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Ajouter un produit
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="overflow-x-auto">
+                            <table class="table w-full">
+                                <thead>
+                                    <tr class="bg-gray-50 text-xs uppercase text-gray-500">
+                                        <th class="px-3 py-3">Produit (catalogue)</th>
+                                        <th class="px-3 py-3">Désignation *</th>
+                                        <th class="w-24 px-3 py-3">Qté</th>
+                                        <th class="w-32 px-3 py-3">Prix unit.</th>
+                                        <th class="w-20 px-3 py-3">Remise %</th>
+                                        <th class="w-32 px-3 py-3 text-right">Total HT</th>
+                                        <th class="w-16 px-3 py-3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="items-container">
+                                    <!-- Items will be added here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex justify-end gap-3 pt-4 border-t">
-                    <a href="{{ path('app_proforma_template_index') }}" class="btn btn-secondary">Annuler</a>
-                    <button type="submit" class="btn btn-primary">Créer le modèle</button>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <div class="card sticky top-4">
+                    <div class="card-header">
+                        <h3 class="font-semibold text-gray-900">Récapitulatif</h3>
+                    </div>
+                    <div class="card-body space-y-3">
+                        <div class="flex justify-between text-lg">
+                            <span class="font-bold">Total HT</span>
+                            <span class="font-bold text-primary-600" id="total-ht">0 FCFA</span>
+                        </div>
+                    </div>
                 </div>
-            </form>
+                <div class="card">
+                    <div class="card-body space-y-3">
+                        <button type="submit" class="btn btn-primary w-full">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Créer le modèle
+                        </button>
+                        <a href="{{ path('app_proforma_template_index') }}" class="btn btn-secondary w-full">Annuler</a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
+
+<template id="item-template">
+    <tr class="template-item border-b border-gray-100" data-index="__INDEX__">
+        <td class="px-3 py-3">
+            <select name="items[__INDEX__][product]" class="form-select text-sm product-select" onchange="loadProduct(this)">
+                <option value="">-- Sélectionner --</option>
+                {% for product in products %}
+                <option value="{{ product.id }}" 
+                        data-name="{{ product.name }}"
+                        data-description="{{ product.description }}"
+                        data-price="{{ product.unitPriceFloat }}">
+                    {{ product.code }} - {{ product.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </td>
+        <td class="px-3 py-3">
+            <input type="text" name="items[__INDEX__][designation]" class="form-input text-sm designation-input" placeholder="Désignation" required>
+            <input type="text" name="items[__INDEX__][description]" class="form-input text-xs mt-1 description-input text-gray-500" placeholder="Description (optionnel)">
+        </td>
+        <td class="px-3 py-3">
+            <input type="number" name="items[__INDEX__][quantity]" value="1" min="0.01" step="0.01" class="form-input text-sm text-center qty-input" oninput="calcLine(this)">
+        </td>
+        <td class="px-3 py-3">
+            <input type="number" name="items[__INDEX__][unitPrice]" value="0" min="0" class="form-input text-sm text-right price-input" oninput="calcLine(this)">
+        </td>
+        <td class="px-3 py-3">
+            <input type="number" name="items[__INDEX__][discount]" value="0" min="0" max="100" class="form-input text-sm text-center discount-input" oninput="calcLine(this)">
+        </td>
+        <td class="px-3 py-3 text-right font-semibold">
+            <span class="line-total">0 FCFA</span>
+        </td>
+        <td class="px-3 py-3">
+            <button type="button" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" onclick="removeItem(this)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </button>
+        </td>
+    </tr>
+</template>
+
+<script>
+var itemIndex = 0;
+function fmt(n) { return new Intl.NumberFormat('fr-FR', {maximumFractionDigits: 0}).format(n) + ' FCFA'; }
+
+function loadProduct(sel) {
+    var opt = sel.selectedOptions[0]; if (!opt || !opt.value) return;
+    var row = sel.closest('.template-item'); if (!row) return;
+    var des = row.querySelector('.designation-input');
+    var desc = row.querySelector('.description-input');
+    var price = row.querySelector('.price-input');
+    if (des && opt.dataset.name) des.value = opt.dataset.name;
+    if (desc && opt.dataset.description) desc.value = opt.dataset.description;
+    if (price && opt.dataset.price) price.value = opt.dataset.price;
+    calcLine(sel);
+}
+
+function calcLine(el) {
+    var row = el.closest('.template-item'); if (!row) return;
+    var qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
+    var price = parseFloat(row.querySelector('.price-input')?.value) || 0;
+    var disc = parseFloat(row.querySelector('.discount-input')?.value) || 0;
+    row.querySelector('.line-total').textContent = fmt(qty * price * (1 - disc / 100));
+    calcTotals();
+}
+
+function calcTotals() {
+    var total = 0;
+    document.querySelectorAll('#items-container .template-item').forEach(function(row) {
+        var qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
+        var price = parseFloat(row.querySelector('.price-input')?.value) || 0;
+        var disc = parseFloat(row.querySelector('.discount-input')?.value) || 0;
+        total += qty * price * (1 - disc / 100);
+    });
+    document.getElementById('total-ht').textContent = fmt(total);
+    updateItemCount();
+}
+
+function addItem() {
+    var html = document.getElementById('item-template').innerHTML.replace(/__INDEX__/g, itemIndex);
+    document.getElementById('items-container').insertAdjacentHTML('beforeend', html);
+    itemIndex++;
+    updateItemCount();
+}
+
+function removeItem(btn) {
+    var row = btn.closest('.template-item');
+    row.remove();
+    calcTotals();
+}
+
+function updateItemCount() {
+    var c = document.querySelectorAll('#items-container .template-item').length;
+    document.getElementById('item-count').textContent = '(' + c + ' produit' + (c > 1 ? 's' : '') + ')';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    addItem(); // Start with one empty row
+});
+</script>
 {% endblock %}

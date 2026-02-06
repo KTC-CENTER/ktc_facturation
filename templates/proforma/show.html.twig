@@ -12,7 +12,10 @@
                 <span class="mx-2">/</span>
                 <span class="text-gray-700">{{ proforma.reference }}</span>
             </nav>
-            <h1 class="text-2xl font-bold text-gray-900">{{ proforma.reference }}</h1>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-bold text-gray-900">{{ proforma.reference }}</h1>
+                <span class="badge badge-{{ proforma.statusColor }}">{{ proforma.statusLabel }}</span>
+            </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <a href="{{ path('app_proforma_preview', {id: proforma.id}) }}" target="_blank" class="btn btn-secondary">
@@ -28,7 +31,7 @@
                 </svg>
                 PDF
             </a>
-            <!-- Bouton Envoyer (Email/WhatsApp) -->
+            <!-- Bouton Envoyer -->
             <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" class="btn btn-success">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,13 +48,6 @@
                         </svg>
                         Envoyer par Email
                     </a>
-                    {% else %}
-                    <span class="flex items-center px-4 py-2 text-sm text-gray-400">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                        Email (pas d'adresse)
-                    </span>
                     {% endif %}
                     {% if proforma.client.phone %}
                     <a href="{{ path('app_proforma_send_whatsapp', {id: proforma.id}) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -60,13 +56,6 @@
                         </svg>
                         Envoyer par WhatsApp
                     </a>
-                    {% else %}
-                    <span class="flex items-center px-4 py-2 text-sm text-gray-400">
-                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                        </svg>
-                        WhatsApp (pas de tél)
-                    </span>
                     {% endif %}
                 </div>
             </div>
@@ -94,9 +83,6 @@
                             {% if proforma.client.address %}
                                 <p class="text-sm text-gray-600">{{ proforma.client.address }}</p>
                             {% endif %}
-                            {% if proforma.client.city %}
-                                <p class="text-sm text-gray-600">{{ proforma.client.city }}{% if proforma.client.country %}, {{ proforma.client.country }}{% endif %}</p>
-                            {% endif %}
                             {% if proforma.client.phone %}
                                 <p class="text-sm text-gray-600">{{ proforma.client.phone }}</p>
                             {% endif %}
@@ -104,54 +90,45 @@
                                 <p class="text-sm text-gray-600">{{ proforma.client.email }}</p>
                             {% endif %}
                         </div>
-                        <div class="text-right">
-                            <span class="badge badge-{{ proforma.statusColor }} badge-lg">
-                                {{ proforma.statusLabel }}
-                            </span>
-                            {% if proforma.isExpired %}
-                                <p class="text-sm text-danger-600 mt-2">Expirée depuis {{ proforma.daysExpired }} jours</p>
+                        <div>
+                            {% if proforma.object %}
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">Objet</h3>
+                            <p class="text-gray-900">{{ proforma.object }}</p>
                             {% endif %}
                         </div>
                     </div>
-                    
-                    {% if proforma.object %}
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <h3 class="text-sm font-medium text-gray-500 mb-1">Objet</h3>
-                        <p class="text-gray-900">{{ proforma.object }}</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
 
-            <!-- Lignes -->
+            <!-- Lignes du document -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="font-semibold text-gray-900">Détail des lignes</h3>
+                    <h3 class="font-semibold text-gray-900">Détails ({{ proforma.items|length }} lignes)</h3>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="table">
+                <div class="card-body p-0 overflow-x-auto">
+                    <table class="table w-full">
                         <thead>
-                            <tr>
-                                <th>Désignation</th>
-                                <th class="text-right">Qté</th>
-                                <th class="text-right">Prix unit.</th>
-                                <th class="text-right">Remise</th>
-                                <th class="text-right">Total HT</th>
+                            <tr class="bg-gray-50 text-xs uppercase text-gray-500">
+                                <th class="px-4 py-3">Désignation</th>
+                                <th class="px-4 py-3 text-center w-20">Qté</th>
+                                <th class="px-4 py-3 text-right w-32">P.U.</th>
+                                <th class="px-4 py-3 text-center w-20">Remise</th>
+                                <th class="px-4 py-3 text-right w-32">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in proforma.items %}
-                            <tr>
-                                <td>
-                                    <div class="font-medium text-gray-900">{{ item.designation }}</div>
+                            <tr class="border-b border-gray-100">
+                                <td class="px-4 py-3">
+                                    <span class="font-medium text-gray-900">{{ item.designation }}</span>
                                     {% if item.description %}
-                                        <div class="text-sm text-gray-500">{{ item.description }}</div>
+                                    <p class="text-sm text-gray-500 mt-1">{{ item.description }}</p>
                                     {% endif %}
                                 </td>
-                                <td class="text-right">{{ item.quantityFloat|number_format(0, ',', ' ') }}</td>
-                                <td class="text-right">{{ item.unitPriceFloat|number_format(0, ',', ' ') }}</td>
-                                <td class="text-right">{% if item.discountFloat > 0 %}{{ item.discountFloat }}%{% else %}-{% endif %}</td>
-                                <td class="text-right font-medium">{{ item.totalFloat|number_format(0, ',', ' ') }}</td>
+                                <td class="px-4 py-3 text-center">{{ item.quantityFloat|number_format(0, ',', ' ') }}</td>
+                                <td class="px-4 py-3 text-right">{{ item.unitPriceFloat|number_format(0, ',', ' ') }} {{ default_currency }}</td>
+                                <td class="px-4 py-3 text-center">{% if item.discountFloat > 0 %}{{ item.discountFloat }}%{% else %}-{% endif %}</td>
+                                <td class="px-4 py-3 text-right font-medium">{{ item.totalFloat|number_format(0, ',', ' ') }} {{ default_currency }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -159,14 +136,25 @@
                 </div>
             </div>
 
-            <!-- Conditions -->
-            {% if proforma.conditions %}
+            <!-- Notes et conditions -->
+            {% if proforma.notes or proforma.conditions %}
             <div class="card">
                 <div class="card-header">
-                    <h3 class="font-semibold text-gray-900">Conditions</h3>
+                    <h3 class="font-semibold text-gray-900">Notes et conditions</h3>
                 </div>
-                <div class="card-body">
-                    <p class="text-gray-700 whitespace-pre-line">{{ proforma.conditions }}</p>
+                <div class="card-body space-y-4">
+                    {% if proforma.notes %}
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500 mb-1">Notes</h4>
+                        <p class="text-gray-700">{{ proforma.notes|nl2br }}</p>
+                    </div>
+                    {% endif %}
+                    {% if proforma.conditions %}
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-500 mb-1">Conditions</h4>
+                        <p class="text-gray-700">{{ proforma.conditions|nl2br }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
@@ -174,6 +162,44 @@
 
         <!-- Sidebar -->
         <div class="space-y-6">
+            <!-- Statut -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="font-semibold text-gray-900">Statut</h3>
+                </div>
+                <div class="card-body space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500">Statut actuel</span>
+                        <span class="badge badge-{{ proforma.statusColor }}">{{ proforma.statusLabel }}</span>
+                    </div>
+                    
+                    {% if proforma.status != 'INVOICED' %}
+                    <div class="border-t pt-3 space-y-2">
+                        <p class="text-xs text-gray-500 mb-2">Changer le statut :</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% if proforma.status == 'DRAFT' %}
+                            <form method="post" action="{{ path('app_proforma_status', {id: proforma.id, status: 'SENT'}) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('status' ~ proforma.id) }}">
+                                <button type="submit" class="btn btn-sm btn-secondary">Marquer envoyée</button>
+                            </form>
+                            {% endif %}
+                            
+                            {% if proforma.status in ['DRAFT', 'SENT'] %}
+                            <form method="post" action="{{ path('app_proforma_status', {id: proforma.id, status: 'ACCEPTED'}) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('status' ~ proforma.id) }}">
+                                <button type="submit" class="btn btn-sm btn-success">Acceptée</button>
+                            </form>
+                            <form method="post" action="{{ path('app_proforma_status', {id: proforma.id, status: 'REFUSED'}) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('status' ~ proforma.id) }}">
+                                <button type="submit" class="btn btn-sm btn-danger">Refusée</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- Informations -->
             <div class="card">
                 <div class="card-header">
@@ -188,10 +214,6 @@
                         <span class="text-gray-500">Valide jusqu'au</span>
                         <span class="font-medium {{ proforma.isExpired ? 'text-red-600' : 'text-green-600' }}">{{ proforma.validUntil|date('d/m/Y') }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-500">Validité</span>
-                        <span class="font-medium">{{ proforma.validityDays }} jours</span>
-                    </div>
                 </div>
             </div>
 
@@ -205,10 +227,12 @@
                         <span class="text-gray-500">Total HT</span>
                         <span>{{ proforma.totalHTFloat|number_format(0, ',', ' ') }} {{ default_currency }}</span>
                     </div>
+                    {% if proforma.taxRateFloat > 0 %}
                     <div class="flex justify-between">
                         <span class="text-gray-500">TVA ({{ proforma.taxRateFloat }}%)</span>
                         <span>{{ proforma.totalTaxFloat|number_format(0, ',', ' ') }} {{ default_currency }}</span>
                     </div>
+                    {% endif %}
                     <div class="flex justify-between pt-3 border-t border-gray-200">
                         <span class="font-semibold text-gray-900">Total TTC</span>
                         <span class="font-bold text-lg text-primary-600">{{ proforma.totalTTCFloat|number_format(0, ',', ' ') }} {{ default_currency }}</span>
@@ -216,23 +240,32 @@
                 </div>
             </div>
 
-            <!-- Actions rapides -->
+            <!-- Actions -->
             <div class="card">
                 <div class="card-header">
                     <h3 class="font-semibold text-gray-900">Actions</h3>
                 </div>
                 <div class="card-body space-y-2">
-                    {% if proforma.canBeConverted %}
+                    {% if proforma.invoice %}
+                    <!-- Facture déjà générée -->
+                    <a href="{{ path('app_invoice_show', {id: proforma.invoice.id}) }}" class="btn btn-primary w-full">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Voir la facture {{ proforma.invoice.reference }}
+                    </a>
+                    {% elseif proforma.canBeConverted %}
                     <form method="post" action="{{ path('app_proforma_convert', {id: proforma.id}) }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('convert' ~ proforma.id) }}">
                         <button type="submit" class="btn btn-success w-full">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
-                            Convertir en facture
+                            Générer la facture
                         </button>
                     </form>
                     {% endif %}
+                    
                     <form method="post" action="{{ path('app_proforma_duplicate', {id: proforma.id}) }}">
                         <input type="hidden" name="_token" value="{{ csrf_token('duplicate' ~ proforma.id) }}">
                         <button type="submit" class="btn btn-secondary w-full">
@@ -242,6 +275,7 @@
                             Dupliquer
                         </button>
                     </form>
+                    
                     {% if proforma.status == 'DRAFT' %}
                     <form method="post" action="{{ path('app_proforma_delete', {id: proforma.id}) }}" onsubmit="return confirm('Supprimer cette proforma ?')">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ proforma.id) }}">

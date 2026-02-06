@@ -65,7 +65,7 @@ class Proforma
     private string $totalTTC = '0';
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    private string $taxRate = '19.25';
+    private string $taxRate = '0.00';
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
@@ -256,9 +256,9 @@ class Proforma
         return (float) $this->taxRate;
     }
 
-    public function setTaxRate(string $taxRate): static
+    public function setTaxRate(?string $taxRate): static
     {
-        $this->taxRate = $taxRate;
+        $this->taxRate = $taxRate ?? '0.00';
 
         return $this;
     }
@@ -461,7 +461,7 @@ class Proforma
         $totalHT = 0;
 
         foreach ($this->items as $item) {
-            $totalHT += $item->getTotalPriceFloat();
+            $totalHT += $item->getTotalFloat();
         }
 
         $totalTVA = $totalHT * ($this->getTaxRateFloat() / 100);
@@ -481,7 +481,9 @@ class Proforma
 
     public function canBeConverted(): bool
     {
-        return $this->status === self::STATUS_ACCEPTED && !$this->hasInvoice();
+        // Permet la conversion depuis DRAFT, SENT ou ACCEPTED (tant qu'il n'y a pas déjà de facture)
+        $allowedStatuses = [self::STATUS_DRAFT, self::STATUS_SENT, self::STATUS_ACCEPTED];
+        return in_array($this->status, $allowedStatuses) && !$this->hasInvoice();
     }
 
     public function canBeSent(): bool

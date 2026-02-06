@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\ProformaTemplate;
 use App\Entity\TemplateItem;
 use App\Repository\ProformaTemplateRepository;
+use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,7 +20,8 @@ class ProformaTemplateController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private ProformaTemplateRepository $templateRepository
+        private ProformaTemplateRepository $templateRepository,
+        private ProductRepository $productRepository
     ) {}
 
     #[Route('', name: 'app_proforma_template_index', methods: ['GET'])]
@@ -56,19 +58,52 @@ class ProformaTemplateController extends AbstractController
             $template = new ProformaTemplate();
             $template->setName($request->request->get('name'));
             $template->setDescription($request->request->get('description'));
-            $template->setConditions($request->request->get('conditions'));
+            $template->setDefaultConditions($request->request->get('conditions'));
+            $template->setDefaultObject($request->request->get('defaultObject'));
             $template->setValidityDays((int)$request->request->get('validityDays', 30));
-            $template->setTaxRate($request->request->get('taxRate', '19.25'));
+            $template->setCreatedBy($this->getUser());
             $template->setIsActive(true);
+
+            // Handle items
+            $items = $request->request->all('items');
+            if (is_array($items)) {
+                $sortOrder = 0;
+                foreach ($items as $itemData) {
+                    if (empty($itemData['designation'])) continue;
+                    
+                    $item = new TemplateItem();
+                    $item->setDesignation($itemData['designation']);
+                    $item->setDescription($itemData['description'] ?? null);
+                    $item->setQuantity($itemData['quantity'] ?? '1');
+                    $item->setUnitPrice($itemData['unitPrice'] ?? '0');
+                    $item->setDiscount($itemData['discount'] ?? '0');
+                    $item->setSortOrder($sortOrder++);
+                    
+                    // Link product if selected
+                    if (!empty($itemData['product'])) {
+                        $product = $this->productRepository->find($itemData['product']);
+                        if ($product) {
+                            $item->setProduct($product);
+                        }
+                    }
+                    
+                    $template->addItem($item);
+                }
+            }
+
+            // Calculate base price
+            $template->setBasePrice((string) $template->calculateTotalHT());
 
             $this->entityManager->persist($template);
             $this->entityManager->flush();
 
             $this->addFlash('success', 'Modèle créé avec succès.');
-            return $this->redirectToRoute('app_proforma_template_index');
+            return $this->redirectToRoute('app_proforma_template_show', ['id' => $template->getId()]);
         }
 
-        return $this->render('proforma_template/new.html.twig');
+        return $this->render('proforma_template/new.html.twig', [
+            'products' => $this->productRepository->findActive(),
+        ]);
     }
 
     #[Route('/{id}', name: 'app_proforma_template_show', methods: ['GET'])]
@@ -86,9 +121,45 @@ class ProformaTemplateController extends AbstractController
         if ($request->isMethod('POST')) {
             $template->setName($request->request->get('name'));
             $template->setDescription($request->request->get('description'));
-            $template->setConditions($request->request->get('conditions'));
+            $template->setDefaultConditions($request->request->get('conditions'));
+            $template->setDefaultObject($request->request->get('defaultObject'));
             $template->setValidityDays((int)$request->request->get('validityDays', 30));
-            $template->setTaxRate($request->request->get('taxRate', '19.25'));
+
+            // Clear existing items
+            foreach ($template->getItems() as $item) {
+                $template->removeItem($item);
+                $this->entityManager->remove($item);
+            }
+
+            // Handle new items
+            $items = $request->request->all('items');
+            if (is_array($items)) {
+                $sortOrder = 0;
+                foreach ($items as $itemData) {
+                    if (empty($itemData['designation'])) continue;
+                    
+                    $item = new TemplateItem();
+                    $item->setDesignation($itemData['designation']);
+                    $item->setDescription($itemData['description'] ?? null);
+                    $item->setQuantity($itemData['quantity'] ?? '1');
+                    $item->setUnitPrice($itemData['unitPrice'] ?? '0');
+                    $item->setDiscount($itemData['discount'] ?? '0');
+                    $item->setSortOrder($sortOrder++);
+                    
+                    // Link product if selected
+                    if (!empty($itemData['product'])) {
+                        $product = $this->productRepository->find($itemData['product']);
+                        if ($product) {
+                            $item->setProduct($product);
+                        }
+                    }
+                    
+                    $template->addItem($item);
+                }
+            }
+
+            // Recalculate base price
+            $template->setBasePrice((string) $template->calculateTotalHT());
 
             $this->entityManager->flush();
 
@@ -98,6 +169,7 @@ class ProformaTemplateController extends AbstractController
 
         return $this->render('proforma_template/edit.html.twig', [
             'template' => $template,
+            'products' => $this->productRepository->findActive(),
         ]);
     }
 
@@ -118,6 +190,9 @@ class ProformaTemplateController extends AbstractController
     #[Route('/{id}/use', name: 'app_proforma_template_use', methods: ['GET'])]
     public function useTemplate(ProformaTemplate $template): Response
     {
+        $template->incrementUsageCount();
+        $this->entityManager->flush();
+        
         return $this->redirectToRoute('app_proforma_new', ['template' => $template->getId()]);
     }
 }

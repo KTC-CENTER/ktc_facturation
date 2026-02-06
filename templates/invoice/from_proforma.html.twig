@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle facture depuis une proforma{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <nav class="text-sm text-gray-500 mb-2">
+            <a href="{{ path('app_invoice_index') }}" class="hover:text-primary-600">Factures</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-700">Depuis une proforma</span>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900">Créer une facture depuis une proforma</h1>
+        <p class="text-sm text-gray-500 mt-1">Sélectionnez une proforma acceptée à convertir en facture</p>
+    </div>
+
+    {% if proformas is empty %}
+    <div class="card">
+        <div class="card-body text-center py-12">
+            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune proforma convertible</h3>
+            <p class="text-gray-500 mb-4">Il n'y a pas de proforma en attente ou acceptée pouvant être convertie en facture.</p>
+            <div class="flex justify-center gap-3">
+                <a href="{{ path('app_proforma_new') }}" class="btn btn-primary">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Créer une proforma
+                </a>
+                <a href="{{ path('app_invoice_new') }}" class="btn btn-secondary">
+                    Créer facture de zéro
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Liste des proformas convertibles -->
+    <div class="card">
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Référence</th>
+                        <th>Client</th>
+                        <th>Objet</th>
+                        <th class="text-right">Montant TTC</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proforma in proformas %}
+                    <tr>
+                        <td>
+                            <a href="{{ path('app_proforma_show', {id: proforma.id}) }}" class="font-medium text-primary-600 hover:text-primary-700">
+                                {{ proforma.reference }}
+                            </a>
+                        </td>
+                        <td>{{ proforma.client.name }}</td>
+                        <td class="max-w-xs truncate">{{ proforma.object ?: '-' }}</td>
+                        <td class="text-right font-medium">{{ proforma.totalTTCFloat|number_format(0, ',', ' ') }} FCFA</td>
+                        <td>{{ proforma.issueDate|date('d/m/Y') }}</td>
+                        <td>
+                            <span class="badge badge-{{ proforma.statusColor }}">{{ proforma.statusLabel }}</span>
+                        </td>
+                        <td class="text-right">
+                            <form action="{{ path('app_proforma_convert', {id: proforma.id}) }}" method="POST" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('convert' ~ proforma.id) }}">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Convertir
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

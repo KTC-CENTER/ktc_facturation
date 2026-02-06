@@ -5,558 +5,277 @@
     <title>Facture {{ invoice.reference }}</title>
     <style>
         @page {
-            margin: 8mm 10mm 15mm 10mm;
+            margin: 15mm 15mm 18mm 15mm;
             size: A4;
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'DejaVu Sans', Helvetica, Arial, sans-serif;
             font-size: 9pt;
-            color: #1a1a1a;
-            line-height: 1.35;
-            background: #fff;
+            color: #333;
+            line-height: 1.25;
+            margin: 25px;
         }
 
-        /* ==================== HEADER ==================== */
+        /* HEADER */
         .header {
             display: table;
             width: 100%;
-            margin-bottom: 12px;
-            border-bottom: 3px solid #0066CC;
-            padding-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .header-left {
             display: table-cell;
             width: 50%;
-            vertical-align: middle;
+            vertical-align: top;
         }
         
         .header-right {
             display: table-cell;
             width: 50%;
-            vertical-align: middle;
+            vertical-align: top;
             text-align: right;
         }
         
-        .logo-container {
-            display: inline-block;
-        }
+        .logo { max-height: 45px; max-width: 130px; }
         
-        .logo {
-            max-height: 55px;
-            max-width: 160px;
-        }
+        .company-text { font-size: 14pt; font-weight: bold; color: #5B8BA0; }
         
-        .company-text-logo {
-            font-size: 22pt;
-            font-weight: bold;
-            color: #0066CC;
-            letter-spacing: -0.5px;
-        }
+        .slogan { font-size: 7pt; color: #5B8BA0; font-style: italic; margin-top: 2px; }
         
-        .company-text-logo span {
-            color: #FF6600;
-        }
+        .doc-type { font-size: 12pt; font-weight: bold; color: #8B6914; }
         
-        .slogan {
-            font-size: 7.5pt;
-            color: #0066CC;
-            font-style: italic;
-            margin-top: 2px;
-        }
-        
-        .doc-type {
-            font-size: 24pt;
-            font-weight: bold;
-            color: #CC0000;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        .doc-meta {
-            margin-top: 6px;
-            font-size: 8.5pt;
-            color: #444;
-        }
-        
-        .doc-meta-row {
-            margin: 2px 0;
-        }
-        
-        .doc-meta-label {
-            color: #666;
-        }
-        
-        .doc-meta-value {
-            font-weight: 600;
-            color: #1a1a1a;
-        }
+        .doc-meta { font-size: 8pt; color: #444; margin-top: 4px; line-height: 1.4; }
         
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 8pt;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 7pt;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 6px;
+            margin-top: 3px;
         }
-        
-        .status-paid {
-            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-            color: #fff;
-        }
-        
-        .status-pending {
-            background: linear-gradient(135deg, #ffc107 0%, #d39e00 100%);
-            color: #333;
-        }
-        
-        .status-overdue {
-            background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-            color: #fff;
-        }
-        
-        .status-partial {
-            background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
-            color: #fff;
-        }
-        
-        .status-cancelled {
-            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
-            color: #fff;
-        }
+        .status-paid { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-overdue { background: #f8d7da; color: #721c24; }
+        .status-partial { background: #d1ecf1; color: #0c5460; }
+        .status-cancelled { background: #e2e3e5; color: #383d41; }
 
-        /* ==================== PARTIES ==================== */
+        /* PARTIES */
         .parties {
             display: table;
             width: 100%;
-            margin-bottom: 15px;
+            margin: 8px 0;
         }
         
-        .party-emetteur {
+        .party-left, .party-right {
             display: table-cell;
             width: 48%;
             vertical-align: top;
         }
         
-        .party-spacer {
-            display: table-cell;
-            width: 4%;
-        }
+        .party-spacer { display: table-cell; width: 4%; }
         
-        .party-client {
-            display: table-cell;
-            width: 48%;
-            vertical-align: top;
-        }
-        
-        .party-label {
-            font-size: 8pt;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
+        .party-label { font-size: 7pt; color: #666; margin-bottom: 2px; }
         
         .emetteur-box {
-            border: 2px solid #0066CC;
-            border-radius: 8px;
-            padding: 12px 14px;
-            background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
+            border: 1px solid #5B8BA0;
+            border-radius: 3px;
+            padding: 6px 8px;
         }
         
-        .emetteur-name {
-            font-size: 11pt;
-            font-weight: bold;
-            color: #0066CC;
-            margin-bottom: 6px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 4px;
-        }
+        .emetteur-name { font-size: 9pt; font-weight: bold; color: #333; margin-bottom: 3px; }
         
-        .emetteur-details {
-            font-size: 8pt;
-            color: #333;
-            line-height: 1.5;
-        }
+        .emetteur-details { font-size: 7.5pt; color: #444; line-height: 1.35; }
         
-        .emetteur-details strong {
-            color: #0066CC;
-        }
+        .client-name { font-size: 10pt; font-weight: bold; color: #5B8BA0; margin-top: 3px; }
         
-        .client-box {
-            padding: 10px 0;
-        }
-        
-        .client-name {
-            font-size: 15pt;
-            font-weight: bold;
-            color: #0066CC;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-        
-        .client-details {
-            font-size: 9pt;
-            color: #444;
-            line-height: 1.5;
-        }
+        .client-details { font-size: 8pt; color: #444; margin-top: 3px; line-height: 1.35; }
 
-        /* ==================== OBJECT BANNER ==================== */
+        /* OBJECT */
         .object-banner {
-            background: linear-gradient(135deg, #0088FF 0%, #0055CC 50%, #003399 100%);
+            background: #5B8BA0;
             color: #fff;
             text-align: center;
-            padding: 14px 20px;
-            margin: 15px 0;
-            border-radius: 6px;
-            box-shadow: 0 3px 10px rgba(0, 102, 204, 0.3);
+            padding: 6px 10px;
+            margin: 8px 0;
         }
         
-        .object-text {
-            font-size: 13pt;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
+        .object-text { font-size: 9pt; font-weight: bold; }
 
-        /* ==================== TABLE ==================== */
+        /* TABLE */
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 5px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 6px;
         }
         
-        .items-table thead th {
-            background: linear-gradient(180deg, #0077DD 0%, #0055AA 100%);
+        .items-table th {
+            background: #5B8BA0;
             color: #fff;
-            font-size: 8.5pt;
+            font-size: 7.5pt;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 10px 8px;
+            padding: 5px 4px;
             text-align: center;
-            border: none;
+            border: 1px solid #4A7A90;
         }
         
-        .items-table thead th:first-child {
-            text-align: left;
-            border-radius: 6px 0 0 0;
-            padding-left: 12px;
+        .items-table th:first-child { text-align: left; padding-left: 6px; }
+        
+        .items-table td {
+            padding: 5px 4px;
+            font-size: 8pt;
+            border: 1px solid #ccc;
+            vertical-align: top;
         }
         
-        .items-table thead th:last-child {
-            border-radius: 0 6px 0 0;
-        }
+        .items-table tbody tr:nth-child(even) { background: #f9f9f9; }
         
-        .items-table tbody td {
-            padding: 10px 8px;
-            font-size: 9pt;
-            border-bottom: 1px solid #e8e8e8;
-            vertical-align: middle;
-        }
+        .col-designation { width: 24%; font-weight: bold; padding-left: 6px !important; }
+        .col-caracteristiques { width: 36%; font-size: 7pt; }
+        .col-qte { width: 8%; text-align: center; }
+        .col-pu { width: 16%; text-align: right; font-size: 7.5pt; }
+        .col-pt { width: 16%; text-align: right; font-size: 7.5pt; }
         
-        .items-table tbody tr:nth-child(odd) {
-            background: #fafbfc;
-        }
-        
-        .items-table tbody tr:nth-child(even) {
-            background: #ffffff;
-        }
-        
-        .col-designation {
-            width: 22%;
-            font-weight: 600;
-            color: #1a1a1a;
-            padding-left: 12px !important;
-        }
-        
-        .col-caracteristiques {
-            width: 38%;
-            color: #444;
-        }
-        
-        .col-qte {
-            width: 8%;
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        .col-pu {
-            width: 16%;
-            text-align: right;
-            font-family: 'DejaVu Sans Mono', monospace;
-            font-size: 8.5pt;
-        }
-        
-        .col-pt {
-            width: 16%;
-            text-align: right;
-            font-weight: 600;
-            font-family: 'DejaVu Sans Mono', monospace;
-            font-size: 8.5pt;
-            color: #0055AA;
-        }
-        
-        /* Subtotal rows */
         .subtotal-row td {
-            background: #f0f4f8 !important;
-            font-weight: 600;
-            font-size: 9pt;
-            border-bottom: 1px solid #ddd;
+            background: #f0f0f0 !important;
+            font-weight: bold;
+            font-size: 7.5pt;
+            padding: 4px;
         }
         
-        /* Total Row */
         .total-row td {
-            background: linear-gradient(135deg, #0077DD 0%, #0055AA 100%) !important;
+            background: #5B8BA0 !important;
             color: #fff !important;
             font-weight: bold;
-            font-size: 11pt;
-            padding: 12px 8px;
-            border: none;
+            font-size: 8pt;
+            padding: 6px 4px;
         }
         
-        .total-row td:first-child {
-            border-radius: 0 0 0 6px;
-        }
-        
-        .total-row td:last-child {
-            border-radius: 0 0 6px 0;
-            font-size: 12pt;
-        }
-        
-        /* Paid row */
         .paid-row td {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+            background: #d4edda !important;
             color: #155724 !important;
             font-weight: bold;
+            font-size: 7.5pt;
+            padding: 4px;
         }
         
-        /* Due row */
         .due-row td {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
+            background: #f8d7da !important;
             color: #721c24 !important;
             font-weight: bold;
-            font-size: 10pt;
+            font-size: 7.5pt;
+            padding: 4px;
         }
 
-        /* ==================== AMOUNT IN WORDS ==================== */
+        /* AMOUNT */
         .amount-section {
-            margin: 18px 0;
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #fffbf0 0%, #fff8e6 100%);
-            border-left: 4px solid #FF9900;
-            border-radius: 0 6px 6px 0;
-        }
-        
-        .amount-label {
-            font-size: 9pt;
-            color: #666;
-        }
-        
-        .amount-value {
-            font-size: 11pt;
-            font-weight: bold;
+            margin: 8px 0;
+            font-size: 8pt;
             font-style: italic;
-            color: #CC6600;
-            text-decoration: underline;
-            text-decoration-color: #FFaa00;
         }
+        
+        .amount-value { font-weight: bold; text-decoration: underline; }
 
-        /* ==================== BANK INFO ==================== */
+        /* BANK */
         .bank-section {
-            margin: 15px 0;
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            border-left: 4px solid #28a745;
-            border-radius: 0 6px 6px 0;
-        }
-        
-        .bank-title {
-            font-size: 9pt;
-            font-weight: bold;
-            color: #1b5e20;
-            margin-bottom: 6px;
-        }
-        
-        .bank-details {
-            font-size: 8.5pt;
-            color: #2e7d32;
-        }
-        
-        .bank-details strong {
-            color: #1b5e20;
-        }
-
-        /* ==================== NOTES ==================== */
-        .notes-section {
-            margin: 15px 0;
-            padding: 12px 16px;
+            margin: 8px 0;
+            padding: 6px 8px;
             background: #f8f9fa;
-            border-radius: 6px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #ddd;
+            border-radius: 2px;
         }
         
-        .notes-title {
-            font-size: 9pt;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 6px;
-        }
-        
-        .notes-content {
-            font-size: 8.5pt;
-            color: #555;
-        }
+        .bank-title { font-weight: bold; margin-bottom: 3px; font-size: 7.5pt; }
+        .bank-details { font-size: 7.5pt; line-height: 1.35; }
 
-        /* ==================== FOOTER ==================== */
+        /* NOTES */
+        .notes-section {
+            margin: 8px 0;
+        }
+        
+        .notes-title { font-weight: bold; margin-bottom: 3px; font-size: 7.5pt; }
+        .notes-content { font-size: 7.5pt; line-height: 1.35; }
+
+        /* FOOTER */
         .footer {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             text-align: center;
-            padding: 8px 10mm;
-            background: linear-gradient(180deg, #0066CC 0%, #004499 100%);
-            color: #fff;
-        }
-        
-        .footer-company {
-            font-size: 8pt;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-        
-        .footer-legal {
+            padding: 5px 15mm;
+            border-top: 1px solid #5B8BA0;
             font-size: 7pt;
-            opacity: 0.85;
-            margin-top: 2px;
         }
-
-        /* ==================== WATERMARK ==================== */
-        {% if invoice.status == 'CANCELLED' %}
-        body:before {
-            content: "ANNULÉE";
-            position: fixed;
-            top: 45%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 80pt;
-            color: rgba(220, 53, 69, 0.15);
-            font-weight: bold;
-            z-index: -1;
-        }
-        {% endif %}
         
-        {% if invoice.status == 'PAID' %}
-        body:after {
-            content: "PAYÉE";
-            position: fixed;
-            top: 45%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 80pt;
-            color: rgba(40, 167, 69, 0.08);
-            font-weight: bold;
-            z-index: -1;
-        }
-        {% endif %}
+        .footer-company { font-weight: bold; color: #5B8BA0; }
+        .footer-legal { font-size: 6pt; color: #666; margin-top: 1px; }
     </style>
 </head>
 <body>
-    <!-- ==================== HEADER ==================== -->
+    <!-- HEADER -->
     <div class="header">
         <div class="header-left">
-            <div class="logo-container">
-                {% if logo_base64 %}
-                    <img src="{{ logo_base64 }}" alt="Logo" class="logo">
-                {% else %}
-                    <div class="company-text-logo">KTC<span>-Center</span></div>
-                {% endif %}
-                <div class="slogan">Nouvelle Vision de l'Informatique</div>
-            </div>
+            {% if logo_base64 %}
+                <img src="{{ logo_base64 }}" alt="Logo" class="logo">
+            {% else %}
+                <div class="company-text">KTC-Center</div>
+            {% endif %}
+            <div class="slogan">Nouvelle Vision de l'Informatique</div>
         </div>
         <div class="header-right">
-            <div class="doc-type">Facture</div>
+            <div class="doc-type">FACTURE</div>
             <div class="doc-meta">
-                <div class="doc-meta-row">
-                    <span class="doc-meta-label">N° :</span>
-                    <span class="doc-meta-value">{{ invoice.reference }}</span>
-                </div>
-                <div class="doc-meta-row">
-                    <span class="doc-meta-label">Date :</span>
-                    <span class="doc-meta-value">{{ invoice.issueDate|date('d/m/Y') }}</span>
-                </div>
-                <div class="doc-meta-row">
-                    <span class="doc-meta-label">Échéance :</span>
-                    <span class="doc-meta-value">{{ invoice.dueDate|date('d/m/Y') }}</span>
-                </div>
+                N° : {{ invoice.reference }}<br>
+                Date : {{ invoice.issueDate|date('d/m/Y') }}<br>
+                Échéance : {{ invoice.dueDate|date('d/m/Y') }}
             </div>
             <span class="status-badge status-{{ invoice.status|lower }}">{{ invoice.statusLabel }}</span>
         </div>
     </div>
 
-    <!-- ==================== PARTIES ==================== -->
+    <!-- PARTIES -->
     <div class="parties">
-        <div class="party-emetteur">
-            <div class="party-label">Émetteur :</div>
+        <div class="party-left">
+            <div class="party-label">Émetteur:</div>
             <div class="emetteur-box">
                 <div class="emetteur-name">{{ settings.companyName ?? 'KTC-Center Sarl' }}</div>
                 <div class="emetteur-details">
                     {% if settings.address %}{{ settings.address }}<br>{% endif %}
-                    {% if settings.postalCode or settings.city %}
-                        {% if settings.postalCode %}BP : {{ settings.postalCode }} {% endif %}{{ settings.city ?? 'Yaoundé' }}<br>
-                    {% endif %}
-                    {% if settings.phone %}
-                        <strong>Tél.:</strong> {{ settings.phone }}
-                        {% if settings.phone2 %} / {{ settings.phone2 }}{% endif %}<br>
-                    {% endif %}
-                    {% if settings.email %}<strong>Email:</strong> {{ settings.email }}<br>{% endif %}
-                    {% if settings.website %}<strong>Web:</strong> {{ settings.website }}{% endif %}
+                    {% if settings.postalCode %}BP : {{ settings.postalCode }} {% endif %}{{ settings.city ?? 'Yaoundé' }}<br>
+                    {% if settings.phone %}Tél.: {{ settings.phone }}{% if settings.phone2 %} / {{ settings.phone2 }}{% endif %}<br>{% endif %}
+                    {% if settings.email %}{{ settings.email }}{% endif %}
                 </div>
             </div>
         </div>
         <div class="party-spacer"></div>
-        <div class="party-client">
+        <div class="party-right">
             <div class="party-label">Adressé à :</div>
-            <div class="client-box">
-                <div class="client-name">{{ invoice.client.name }}</div>
-                <div class="client-details">
-                    {% if invoice.client.address %}{{ invoice.client.address }}<br>{% endif %}
-                    {% if invoice.client.city %}{{ invoice.client.city }}{% if invoice.client.country %}, {{ invoice.client.country }}{% endif %}<br>{% endif %}
-                    {% if invoice.client.phone %}Tel : {{ invoice.client.phone }}<br>{% endif %}
-                    {% if invoice.client.email %}{{ invoice.client.email }}{% endif %}
-                </div>
+            <div class="client-name">{{ invoice.client.name }}</div>
+            <div class="client-details">
+                {% if invoice.client.address %}{{ invoice.client.address }}<br>{% endif %}
+                {% if invoice.client.phone %}Tel : {{ invoice.client.phone }}{% endif %}
             </div>
         </div>
     </div>
 
-    <!-- ==================== OBJECT BANNER ==================== -->
+    <!-- OBJECT -->
     {% if invoice.object %}
     <div class="object-banner">
-        <div class="object-text">{{ invoice.object }}</div>
+        <div class="object-text">{{ invoice.object|upper }}</div>
     </div>
     {% endif %}
 
-    <!-- ==================== ITEMS TABLE ==================== -->
+    <!-- TABLE -->
     <table class="items-table">
         <thead>
             <tr>
                 <th class="col-designation">Désignation</th>
                 <th class="col-caracteristiques">Caractéristiques</th>
-                <th class="col-qte">Qtés</th>
+                <th class="col-qte">Qté</th>
                 <th class="col-pu">P.U</th>
                 <th class="col-pt">P.T</th>
             </tr>
@@ -567,77 +286,73 @@
                 <td class="col-designation">{{ item.designation }}</td>
                 <td class="col-caracteristiques">{{ item.description ?? '' }}</td>
                 <td class="col-qte">{{ item.quantityFloat|number_format(0, ',', ' ') }}</td>
-                <td class="col-pu">{{ item.unitPriceFloat|number_format(0, ' ', ' ') }} FCFA</td>
-                <td class="col-pt">{{ item.totalFloat|number_format(0, ' ', ' ') }} FCFA</td>
+                <td class="col-pu">{{ item.unitPriceFloat|number_format(0, ' ', ' ') }}</td>
+                <td class="col-pt">{{ item.totalFloat|number_format(0, ' ', ' ') }}</td>
             </tr>
             {% endfor %}
             
-            <!-- Subtotals -->
+            {% if invoice.taxRateFloat > 0 %}
             <tr class="subtotal-row">
-                <td colspan="4" style="text-align: right; padding-right: 15px;">Total HT</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">Total HT</td>
                 <td class="col-pt">{{ invoice.totalHTFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             <tr class="subtotal-row">
-                <td colspan="4" style="text-align: right; padding-right: 15px;">TVA ({{ invoice.taxRateFloat }}%)</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">TVA ({{ invoice.taxRateFloat }}%)</td>
                 <td class="col-pt">{{ invoice.totalTaxFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
+            {% endif %}
             
-            <!-- Total TTC -->
             <tr class="total-row">
-                <td colspan="4" style="text-align: center; letter-spacing: 2px;">TOTAL TTC</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">Total{% if invoice.taxRateFloat > 0 %} TTC{% endif %}</td>
                 <td class="col-pt">{{ invoice.totalTTCFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             
-            <!-- Paid -->
             {% if invoice.amountPaidFloat > 0 %}
             <tr class="paid-row">
-                <td colspan="4" style="text-align: right; padding-right: 15px;">✓ Montant payé</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">Payé</td>
                 <td class="col-pt">{{ invoice.amountPaidFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             {% endif %}
             
-            <!-- Remaining -->
             {% if invoice.remainingAmountFloat > 0 %}
             <tr class="due-row">
-                <td colspan="4" style="text-align: right; padding-right: 15px; font-weight: bold;">⚠ RESTE À PAYER</td>
-                <td class="col-pt" style="font-size: 11pt;">{{ invoice.remainingAmountFloat|number_format(0, ' ', ' ') }} FCFA</td>
+                <td colspan="4" style="text-align: right; padding-right: 8px;">Reste</td>
+                <td class="col-pt">{{ invoice.remainingAmountFloat|number_format(0, ' ', ' ') }} FCFA</td>
             </tr>
             {% endif %}
         </tbody>
     </table>
 
-    <!-- ==================== AMOUNT IN WORDS ==================== -->
+    <!-- AMOUNT -->
     <div class="amount-section">
-        <span class="amount-label">Arrêté la présente facture à la somme de : </span>
-        <span class="amount-value">{{ invoice.amountInWords ?? (invoice.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
+        Arrêté à : <span class="amount-value">{{ invoice.amountInWords ?? (invoice.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
     </div>
 
-    <!-- ==================== BANK INFO ==================== -->
+    <!-- BANK INFO -->
     {% if settings.bankName or settings.bankAccountNumber %}
     <div class="bank-section">
-        <div class="bank-title">💳 Coordonnées bancaires :</div>
+        <div class="bank-title">Coordonnées bancaires :</div>
         <div class="bank-details">
-            {% if settings.bankName %}<strong>Banque :</strong> {{ settings.bankName }}<br>{% endif %}
-            {% if settings.bankAccountNumber %}<strong>N° Compte :</strong> {{ settings.bankAccountNumber }}<br>{% endif %}
-            {% if settings.bankIban %}<strong>IBAN :</strong> {{ settings.bankIban }}{% endif %}
+            {% if settings.bankName %}Banque : {{ settings.bankName }}<br>{% endif %}
+            {% if settings.bankAccountNumber %}N° Compte : {{ settings.bankAccountNumber }}{% endif %}
         </div>
     </div>
     {% endif %}
 
-    <!-- ==================== NOTES ==================== -->
+    <!-- NOTES -->
     {% if invoice.notes %}
     <div class="notes-section">
-        <div class="notes-title">📝 Remarques :</div>
+        <div class="notes-title">Remarques :</div>
         <div class="notes-content">{{ invoice.notes|nl2br }}</div>
     </div>
     {% endif %}
 
-    <!-- ==================== FOOTER ==================== -->
+    <!-- FOOTER -->
     <div class="footer">
         <div class="footer-company">{{ settings.companyName ?? 'Kamer Training and Consulting Center Sarl' }}</div>
         <div class="footer-legal">
             {% if settings.rccm %}N° RCCM: {{ settings.rccm }}{% endif %}
-            {% if settings.legalInfo %} &nbsp;•&nbsp; {{ settings.legalInfo }}{% endif %}
+            {% if settings.legalInfo %} {{ settings.legalInfo }}{% endif %}
         </div>
     </div>
 </body>

@@ -70,7 +70,7 @@ class Invoice
     private string $amountPaid = '0.00';
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    private string $taxRate = '19.25';
+    private string $taxRate = '0.00';
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
@@ -83,6 +83,12 @@ class Invoice
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $paymentTerms = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $paymentMethod = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $paymentReference = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
@@ -255,9 +261,9 @@ class Invoice
         return $this->taxRate;
     }
 
-    public function setTaxRate(string $taxRate): static
+    public function setTaxRate(?string $taxRate): static
     {
-        $this->taxRate = $taxRate;
+        $this->taxRate = $taxRate ?? '0.00';
         return $this;
     }
 
@@ -307,6 +313,28 @@ class Invoice
     public function setPaymentTerms(?string $paymentTerms): static
     {
         $this->paymentTerms = $paymentTerms;
+        return $this;
+    }
+
+    public function getPaymentMethod(): ?string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(?string $paymentMethod): static
+    {
+        $this->paymentMethod = $paymentMethod;
+        return $this;
+    }
+
+    public function getPaymentReference(): ?string
+    {
+        return $this->paymentReference;
+    }
+
+    public function setPaymentReference(?string $paymentReference): static
+    {
+        $this->paymentReference = $paymentReference;
         return $this;
     }
 
