@@ -86,6 +86,7 @@ class DocumentItemType extends AbstractType
                 'label' => 'Remise (%)',
                 'required' => false,
                 'scale' => 2,
+                'empty_data' => '0',
                 'attr' => [
                     'placeholder' => '0',
                     'class' => 'form-input discount-input',
@@ -99,6 +100,7 @@ class DocumentItemType extends AbstractType
                 'attr' => [
                     'class' => 'sort-order-input',
                 ],
+                'empty_data' => '0',
             ])
         ;
     }

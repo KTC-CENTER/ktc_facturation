@@ -324,4 +324,59 @@ class InvoiceController extends AbstractController
         $this->addFlash('success', 'Facture supprimée.');
         return $this->redirectToRoute('app_invoice_index');
     }
+
+    #[Route('/{id}/send-email', name: 'app_invoice_send_email', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function sendEmail(Request $request, Invoice $invoice, \App\Service\BrevoMailerService $mailer, \App\Service\PdfGeneratorService $pdfService, \App\Repository\CompanySettingsRepository $settingsRepo): Response
+    {
+        $client = $invoice->getClient();
+        
+        if (!$client->getEmail()) {
+            $this->addFlash('error', 'Ce client n\'a pas d\'adresse email.');
+            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+        }
+
+        if ($request->isMethod('POST')) {
+            $subject = $request->request->get('subject', 'Facture ' . $invoice->getReference());
+            $message = $request->request->get('message', '');
+            $attachPdf = $request->request->getBoolean('attach_pdf', true);
+
+            $settings = $settingsRepo->getOrCreateSettings();
+            $companyName = $settings->getCompanyName() ?? 'KTC-Center';
+
+            // Generate PDF if needed
+            $pdfContent = null;
+            $pdfFilename = null;
+            if ($attachPdf) {
+                $pdfContent = $pdfService->generateInvoicePdf($invoice, false);
+                $pdfFilename = 'Facture_' . $invoice->getReference() . '.pdf';
+            }
+
+            // Send email
+            $success = $mailer->sendDocumentEmail(
+                $client->getEmail(),
+                $subject,
+                $companyName,
+                $client->getName(),
+                'facture',
+                $invoice->getReference(),
+                $invoice->getTotalTTCFloat(),
+                $settings->getCurrency() ?? 'FCFA',
+                $message,
+                $pdfContent,
+                $pdfFilename
+            );
+
+            if ($success) {
+                $this->addFlash('success', 'Facture envoyée par email à ' . $client->getEmail());
+                return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+            } else {
+                $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email.');
+            }
+        }
+
+        return $this->render('invoice/send_email.html.twig', [
+            'invoice' => $invoice,
+        ]);
+    }
 }

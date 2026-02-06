@@ -1,43 +1,40 @@
 {# Template pour le modal de partage (chargé en AJAX) #}
 <div class="space-y-6">
-    <form action="{{ path(is_proforma ? 'app_proforma_share' : 'app_invoice_share', {id: document.id}) }}" method="post" class="space-y-6">
+    <form action="{{ path(type == 'proforma' ? 'app_proforma_share' : 'app_invoice_share', {id: document.id}) }}" method="post" class="space-y-6">
         <input type="hidden" name="_token" value="{{ csrf_token('share' ~ document.id) }}">
 
         <!-- Type de partage -->
         <div>
             <label class="form-label">Mode de partage</label>
             <div class="grid grid-cols-3 gap-3 mt-2">
-                <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none hover:border-primary-500 transition-colors">
-                    <input type="radio" name="shareType" value="link" class="sr-only" checked>
+                <label class="share-option relative flex cursor-pointer rounded-lg border-2 bg-white p-4 shadow-sm hover:border-blue-400 transition-colors" data-type="link">
+                    <input type="radio" name="share_type" value="link" class="sr-only" checked>
                     <span class="flex flex-1 flex-col items-center">
-                        <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                         </svg>
                         <span class="mt-2 text-sm font-medium text-gray-900">Lien</span>
                     </span>
-                    <span class="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent peer-checked:border-primary-500" aria-hidden="true"></span>
                 </label>
 
-                <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none hover:border-primary-500 transition-colors">
-                    <input type="radio" name="shareType" value="email" class="sr-only">
+                <label class="share-option relative flex cursor-pointer rounded-lg border-2 bg-white p-4 shadow-sm hover:border-blue-400 transition-colors" data-type="email">
+                    <input type="radio" name="share_type" value="email" class="sr-only">
                     <span class="flex flex-1 flex-col items-center">
-                        <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
                         <span class="mt-2 text-sm font-medium text-gray-900">Email</span>
                     </span>
-                    <span class="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent peer-checked:border-primary-500" aria-hidden="true"></span>
                 </label>
 
-                <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none hover:border-green-500 transition-colors">
-                    <input type="radio" name="shareType" value="whatsapp" class="sr-only">
+                <label class="share-option relative flex cursor-pointer rounded-lg border-2 bg-white p-4 shadow-sm hover:border-green-400 transition-colors" data-type="whatsapp">
+                    <input type="radio" name="share_type" value="whatsapp" class="sr-only">
                     <span class="flex flex-1 flex-col items-center">
                         <svg class="h-8 w-8 text-green-500" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                         </svg>
                         <span class="mt-2 text-sm font-medium text-gray-900">WhatsApp</span>
                     </span>
-                    <span class="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent peer-checked:border-green-500" aria-hidden="true"></span>
                 </label>
             </div>
         </div>
@@ -46,11 +43,11 @@
         <div id="emailOptions" class="hidden space-y-4">
             <div>
                 <label class="form-label">Email du destinataire *</label>
-                <input type="email" name="recipientEmail" value="{{ document.client.email }}" class="form-input" placeholder="client@exemple.com">
+                <input type="email" name="recipient_email" value="{{ document.client.email }}" class="form-input" placeholder="client@exemple.com">
             </div>
             <div>
                 <label class="form-label">Message personnalisé</label>
-                <textarea name="emailMessage" rows="3" class="form-textarea" placeholder="Bonjour, veuillez trouver ci-joint..."></textarea>
+                <textarea name="message" rows="3" class="form-textarea" placeholder="Bonjour, veuillez trouver ci-joint..."></textarea>
             </div>
         </div>
 
@@ -58,19 +55,15 @@
         <div id="whatsappOptions" class="hidden space-y-4">
             <div>
                 <label class="form-label">Numéro WhatsApp *</label>
-                <input type="tel" name="recipientPhone" value="{{ document.client.phone }}" class="form-input" placeholder="+237 6XX XXX XXX">
-                <p class="mt-1 text-xs text-gray-500">Format international avec indicatif pays</p>
-            </div>
-            <div>
-                <label class="form-label">Message</label>
-                <textarea name="whatsappMessage" rows="3" class="form-textarea">Bonjour, voici votre {{ is_proforma ? 'proforma' : 'facture' }} n°{{ document.reference }}.</textarea>
+                <input type="tel" name="recipient_phone" value="{{ document.client.phone }}" class="form-input" placeholder="+237 6XX XXX XXX">
+                <p class="mt-1 text-xs text-gray-500">Format: 6XXXXXXXX (WhatsApp ouvrira la conversation)</p>
             </div>
         </div>
 
         <!-- Validité -->
         <div>
             <label class="form-label">Durée de validité du lien</label>
-            <select name="validityHours" class="form-select">
+            <select name="validity_hours" class="form-select">
                 <option value="24">24 heures</option>
                 <option value="72">3 jours</option>
                 <option value="168" selected>7 jours</option>
@@ -82,34 +75,61 @@
         <!-- Actions -->
         <div class="flex items-center justify-end space-x-3 pt-4 border-t">
             <button type="button" onclick="closeModal()" class="btn btn-secondary">Annuler</button>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
                 </svg>
-                Partager
+                <span id="submitText">Créer le lien</span>
             </button>
         </div>
     </form>
 </div>
 
 <script>
-document.querySelectorAll('input[name="shareType"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        document.getElementById('emailOptions').classList.toggle('hidden', this.value !== 'email');
-        document.getElementById('whatsappOptions').classList.toggle('hidden', this.value !== 'whatsapp');
+(function() {
+    const options = document.querySelectorAll('.share-option');
+    const emailOpts = document.getElementById('emailOptions');
+    const whatsappOpts = document.getElementById('whatsappOptions');
+    const submitText = document.getElementById('submitText');
+    
+    function updateUI(type) {
+        // Reset all borders
+        options.forEach(opt => {
+            opt.classList.remove('border-blue-500', 'border-green-500', 'bg-blue-50', 'bg-green-50');
+            opt.classList.add('border-gray-200');
+        });
         
-        // Mettre à jour le style des cartes
-        document.querySelectorAll('input[name="shareType"]').forEach(r => {
-            const card = r.closest('label');
-            const border = card.querySelector('.border-2');
-            if (r.checked) {
-                border.classList.remove('border-transparent');
-                border.classList.add(r.value === 'whatsapp' ? 'border-green-500' : 'border-primary-500');
-            } else {
-                border.classList.add('border-transparent');
-                border.classList.remove('border-primary-500', 'border-green-500');
-            }
+        // Highlight selected
+        const selected = document.querySelector('.share-option[data-type="' + type + '"]');
+        selected.classList.remove('border-gray-200');
+        if (type === 'whatsapp') {
+            selected.classList.add('border-green-500', 'bg-green-50');
+        } else {
+            selected.classList.add('border-blue-500', 'bg-blue-50');
+        }
+        
+        // Show/hide options
+        emailOpts.classList.toggle('hidden', type !== 'email');
+        whatsappOpts.classList.toggle('hidden', type !== 'whatsapp');
+        
+        // Update button text
+        const texts = {
+            'link': 'Créer le lien',
+            'email': 'Envoyer par email',
+            'whatsapp': 'Ouvrir WhatsApp'
+        };
+        submitText.textContent = texts[type] || 'Partager';
+    }
+    
+    options.forEach(opt => {
+        opt.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            updateUI(this.dataset.type);
         });
     });
-});
+    
+    // Init
+    updateUI('link');
+})();
 </script>
