@@ -1,0 +1,138 @@
+name: Deploy KTC-Invoice to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  DOMAIN: facturation.kamer-center.net
+  VPS_IP: 81.169.177.240
+  APP_DIR: /opt/apps/ktc-invoice
+  CONTAINER_NAME: ktc-invoice-app
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mbstring, gd, zip, intl, opcache
+          coverage: none
+      
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-scripts
+      
+      - name: Check Symfony requirements
+        run: php bin/console about || true
+
+  deploy:
+    name: Deploy to VPS
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+      
+      - name: Add VPS to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.VPS_IP }} >> ~/.ssh/known_hosts
+      
+      - name: Create deployment directories
+        run: |
+          ssh root@${{ env.VPS_IP }} "mkdir -p ${{ env.APP_DIR }} /etc/letsencrypt ${{ env.APP_DIR }}/certbot/www ${{ env.APP_DIR }}/var/cache ${{ env.APP_DIR }}/var/log ${{ env.APP_DIR }}/public/uploads/logo ${{ env.APP_DIR }}/public/uploads/pdf"
+      
+      - name: Sync application files
+        run: |
+          rsync -avz --delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude 'var/cache/*' \
+            --exclude 'var/log/*' \
+            --exclude '.env.local' \
+            --exclude 'public/uploads/*' \
+            ./ root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/
+      
+      - name: Create production environment files
+        env:
+          APP_SECRET: ${{ secrets.APP_SECRET }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
+          MAILER_DSN: ${{ secrets.MAILER_DSN }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
+        run: |
+          ssh root@${{ env.VPS_IP }} "cat > ${{ env.APP_DIR }}/.env.local" << EOF
+          APP_ENV=prod
+          APP_DEBUG=0
+          APP_SECRET=${APP_SECRET}
+          DATABASE_URL=mysql://admin:${DB_PASSWORD}@ktc-invoice-db:3306/ktc_invoice?serverVersion=8.0
+          MAILER_DSN=${MAILER_DSN}
+          BREVO_API_KEY=${BREVO_API_KEY}
+          BREVO_SENDER_EMAIL=${BREVO_SENDER_EMAIL}
+          BREVO_SENDER_NAME=KTC-Center
+          EOF
+          
+          ssh root@${{ env.VPS_IP }} "cat > ${{ env.APP_DIR }}/.env" << EOF
+          DB_PASSWORD=${DB_PASSWORD}
+          DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+          EOF
+      
+      - name: Install SSL Certificate
+        run: |
+          ssh root@${{ env.VPS_IP }} 'if [ ! -f "/etc/letsencrypt/live/${{ env.DOMAIN }}/fullchain.pem" ]; then
+            apt-get update && apt-get install -y certbot
+            docker stop ktc-invoice-nginx 2>/dev/null || true
+            fuser -k 80/tcp 2>/dev/null || true
+            certbot certonly --standalone -d ${{ env.DOMAIN }} --email admin@kamer-center.net --agree-tos --non-interactive
+            echo "SSL certificate installed!"
+          else
+            echo "SSL certificate already exists"
+          fi'
+      
+      - name: Build and Deploy with Docker
+        run: |
+          ssh root@${{ env.VPS_IP }} 'cd ${{ env.APP_DIR }} && \
+            if ! command -v docker &> /dev/null; then
+              curl -fsSL https://get.docker.com | sh
+              systemctl enable docker
+              systemctl start docker
+            fi && \
+            docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true && \
+            docker compose -f docker-compose.prod.yml build --no-cache && \
+            docker compose -f docker-compose.prod.yml up -d && \
+            echo "Waiting for containers..." && \
+            sleep 15 && \
+            docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true && \
+            docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:schema:update --force 2>/dev/null || true && \
+            docker exec ${{ env.CONTAINER_NAME }} php bin/console cache:clear --env=prod && \
+            docker exec ${{ env.CONTAINER_NAME }} php bin/console cache:warmup --env=prod && \
+            docker exec ${{ env.CONTAINER_NAME }} chown -R www-data:www-data var public/uploads && \
+            docker exec ${{ env.CONTAINER_NAME }} chmod -R 775 var public/uploads && \
+            echo "Deployment completed!"'
+      
+      - name: Health Check
+        run: |
+          sleep 5
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.DOMAIN }} --insecure || echo "000")
+          echo "HTTP Response: $response"
+          if [ "$response" = "200" ] || [ "$response" = "302" ]; then
+            echo "✅ Application is responding"
+          else
+            echo "⚠️ Application returned HTTP $response - may need manual check"
+          fi

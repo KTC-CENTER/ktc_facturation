@@ -390,4 +390,31 @@ class ProformaController extends AbstractController
             'proforma' => $proforma,
         ]);
     }
+
+    #[Route('/{id}/send-whatsapp', name: 'app_proforma_send_whatsapp', methods: ['GET'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function sendWhatsApp(Proforma $proforma, \App\Service\DocumentShareService $shareService): Response
+    {
+        $client = $proforma->getClient();
+        
+        if (!$client->getPhone()) {
+            $this->addFlash('error', 'Ce client n\'a pas de numéro de téléphone.');
+            return $this->redirectToRoute('app_proforma_show', ['id' => $proforma->getId()]);
+        }
+
+        // Créer un partage avec lien
+        $share = $shareService->createProformaShare(
+            $proforma,
+            $this->getUser(),
+            'whatsapp',
+            null,
+            $client->getPhone(),
+            168 // 7 jours
+        );
+
+        // Générer le lien WhatsApp
+        $whatsappUrl = $shareService->getWhatsAppLink($share);
+
+        return $this->redirect($whatsappUrl);
+    }
 }
