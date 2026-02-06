@@ -4,28 +4,98 @@
     <meta charset="UTF-8">
     <title>Catalogue produits</title>
     <style>
-        @page { margin: 15mm; }
+        @page { 
+            margin: 15mm 15mm 18mm 15mm;
+            size: A4;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 9px; color: #1f2937; }
-        .header { background: linear-gradient(135deg, #1E3A5F 0%, #2E86AB 100%); color: white; padding: 15px 20px; margin-bottom: 15px; border-radius: 4px; }
-        .header h1 { font-size: 18px; margin: 0; }
-        .header p { font-size: 10px; opacity: 0.8; margin-top: 3px; }
-        .company { font-size: 11px; font-weight: bold; }
-        .meta { font-size: 8px; color: #6b7280; margin-bottom: 10px; }
+        body { 
+            font-family: 'DejaVu Sans', Arial, sans-serif; 
+            font-size: 8pt; 
+            color: #333;
+        }
+        
+        /* Header with company info */
+        .header-top {
+            display: table;
+            width: 100%;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1.5px solid #5B8BA0;
+        }
+        .header-left { display: table-cell; width: 60%; vertical-align: middle; }
+        .header-right { display: table-cell; width: 40%; vertical-align: middle; text-align: right; }
+        .logo { max-height: 45px; max-width: 130px; }
+        .company-name { font-size: 14pt; font-weight: bold; color: #5B8BA0; }
+        .company-slogan { font-size: 7pt; color: #5B8BA0; font-style: italic; margin-top: 2px; }
+        .company-details { font-size: 7pt; color: #555; line-height: 1.4; }
+        
+        /* Title banner */
+        .title-banner {
+            background: #5B8BA0;
+            color: white;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+        }
+        .title-banner h1 { font-size: 12pt; margin: 0; }
+        .title-banner p { font-size: 8pt; opacity: 0.9; margin-top: 3px; }
+        
         table { width: 100%; border-collapse: collapse; }
-        th { background: #1E3A5F; color: white; padding: 7px 8px; text-align: left; font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; font-size: 8.5px; }
+        th { 
+            background: #5B8BA0; 
+            color: white; 
+            padding: 6px 5px; 
+            text-align: left; 
+            font-size: 7pt; 
+            text-transform: uppercase; 
+            letter-spacing: 0.3px; 
+        }
+        td { padding: 6px 5px; border-bottom: 1px solid #e5e7eb; font-size: 8pt; }
         tr:nth-child(even) { background: #f9fafb; }
         .right { text-align: right; }
         .center { text-align: center; }
-        .price { font-weight: 600; color: #1E3A5F; }
-        .footer { position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 7px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding: 5px 15mm; }
-        .count { text-align: right; font-size: 8px; color: #6b7280; margin-top: 10px; }
+        .price { font-weight: 600; color: #5B8BA0; }
+        
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 6.5pt;
+            color: #555;
+            border-top: 1px solid #5B8BA0;
+            padding: 5px 15mm;
+            background: #fff;
+        }
+        .footer-company { font-weight: bold; color: #5B8BA0; }
+        
+        .count { text-align: right; font-size: 8pt; color: #666; margin-top: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <p class="company">{{ settings.companyName }}</p>
+    <!-- Header with company info -->
+    <div class="header-top">
+        <div class="header-left">
+            {% if logo_base64 %}
+                <img src="{{ logo_base64 }}" alt="Logo" class="logo">
+            {% else %}
+                <div class="company-name">{{ settings.companyName ?? 'KTC-Center' }}</div>
+            {% endif %}
+            <div class="company-slogan">Nouvelle Vision de l'Informatique</div>
+        </div>
+        <div class="header-right">
+            <div class="company-details">
+                {% if settings.address %}{{ settings.address }}<br>{% endif %}
+                {% if settings.city %}{{ settings.city }}{% endif %}{% if settings.postalCode %} - BP: {{ settings.postalCode }}{% endif %}<br>
+                {% if settings.phone %}Tél: {{ settings.phone }}{% endif %}{% if settings.phone2 %} / {{ settings.phone2 }}{% endif %}<br>
+                {% if settings.email %}{{ settings.email }}{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="title-banner">
         <h1>Catalogue des produits</h1>
         <p>Généré le {{ date|date('d/m/Y à H:i') }}</p>
     </div>
@@ -33,12 +103,12 @@
     <table>
         <thead>
             <tr>
-                <th>#</th>
-                <th>Code</th>
-                <th>Désignation</th>
-                <th>Type</th>
-                <th class="right">Prix unitaire</th>
-                <th class="center">Unité</th>
+                <th style="width: 5%;">#</th>
+                <th style="width: 12%;">Code</th>
+                <th style="width: 40%;">Désignation</th>
+                <th style="width: 13%;">Type</th>
+                <th style="width: 18%;" class="right">Prix unitaire</th>
+                <th style="width: 12%;" class="center">Unité</th>
             </tr>
         </thead>
         <tbody>
@@ -48,10 +118,10 @@
                 <td>{{ product.code }}</td>
                 <td>
                     <strong>{{ product.name }}</strong>
-                    {% if product.description %}<br><span style="font-size:7.5px;color:#6b7280;">{{ product.description|slice(0,80) }}{{ product.description|length > 80 ? '...' : '' }}</span>{% endif %}
+                    {% if product.description %}<br><span style="font-size:7pt;color:#666;">{{ product.description|slice(0,80) }}{{ product.description|length > 80 ? '...' : '' }}</span>{% endif %}
                 </td>
                 <td>{{ product.type }}</td>
-                <td class="right price">{{ product.unitPriceFloat|number_format(0, ',', ' ') }} {{ settings.currency }}</td>
+                <td class="right price">{{ product.unitPriceFloat|number_format(0, ',', ' ') }} {{ settings.currency ?? 'FCFA' }}</td>
                 <td class="center">{{ product.unit|default('-') }}</td>
             </tr>
             {% endfor %}
@@ -61,7 +131,8 @@
     <p class="count">Total : {{ products|length }} produit(s)</p>
 
     <div class="footer">
-        {{ settings.companyName }} — Catalogue généré automatiquement le {{ date|date('d/m/Y') }}
+        <span class="footer-company">{{ settings.companyName ?? 'Kamer Training and Consulting Center Sarl' }}</span>
+        {% if settings.rccm %} — N° RCCM: {{ settings.rccm }}{% endif %}
     </div>
 </body>
 </html>

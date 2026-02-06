@@ -8,6 +8,7 @@ use App\Form\InvoiceType;
 use App\Form\PaymentType;
 use App\Repository\InvoiceRepository;
 use App\Repository\ClientRepository;
+use App\Repository\ProformaRepository;
 use App\Service\ReferenceGeneratorService;
 use App\Service\PdfGeneratorService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,6 +27,7 @@ class InvoiceController extends AbstractController
         private EntityManagerInterface $entityManager,
         private InvoiceRepository $invoiceRepository,
         private ClientRepository $clientRepository,
+        private ProformaRepository $proformaRepository,
         private ReferenceGeneratorService $referenceGenerator,
         private PdfGeneratorService $pdfGenerator
     ) {}
@@ -85,6 +87,25 @@ class InvoiceController extends AbstractController
             'dateTo' => $dateTo,
             'statuses' => Invoice::STATUSES,
             'clients' => $this->clientRepository->findBy(['isArchived' => false], ['name' => 'ASC']),
+        ]);
+    }
+
+    #[Route('/from-proforma', name: 'app_invoice_from_proforma', methods: ['GET'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function fromProforma(): Response
+    {
+        // Get proformas that can be converted (not already converted, accepted or pending)
+        $proformas = $this->proformaRepository->createQueryBuilder('p')
+            ->leftJoin('p.invoice', 'i')
+            ->where('i.id IS NULL')
+            ->andWhere('p.status IN (:statuses)')
+            ->setParameter('statuses', ['pending', 'sent', 'accepted'])
+            ->orderBy('p.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('invoice/from_proforma.html.twig', [
+            'proformas' => $proformas,
         ]);
     }
 
@@ -185,10 +206,17 @@ class InvoiceController extends AbstractController
         return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
     }
 
-    #[Route('/{id}/payment', name: 'app_invoice_payment', methods: ['POST'])]
+    #[Route('/{id}/payment', name: 'app_invoice_payment', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_COMMERCIAL')]
     public function recordPayment(Request $request, Invoice $invoice): Response
     {
+        // Si GET, afficher le formulaire
+        if ($request->isMethod('GET')) {
+            return $this->render('invoice/payment.html.twig', [
+                'invoice' => $invoice,
+            ]);
+        }
+
         if (!$this->isCsrfTokenValid('payment' . $invoice->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Token CSRF invalide.');
             return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
@@ -200,7 +228,7 @@ class InvoiceController extends AbstractController
 
         if ($amount <= 0) {
             $this->addFlash('error', 'Le montant doit être positif.');
-            return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
+            return $this->redirectToRoute('app_invoice_payment', ['id' => $invoice->getId()]);
         }
 
         $currentPaid = $invoice->getAmountPaidFloat();

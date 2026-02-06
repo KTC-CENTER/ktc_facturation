@@ -74,8 +74,10 @@ class ProformaType extends AbstractType
             ->add('taxRate', NumberType::class, [
                 'label' => 'Taux TVA (%)',
                 'scale' => 2,
+                'required' => false,
+                'empty_data' => '0',
                 'attr' => [
-                    'placeholder' => '19.25',
+                    'placeholder' => '0',
                     'class' => 'form-input',
                     'step' => '0.01',
                 ],
