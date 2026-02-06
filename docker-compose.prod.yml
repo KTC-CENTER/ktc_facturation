@@ -30,7 +30,7 @@ services:
       APP_ENV: prod
       APP_DEBUG: 0
       APP_SECRET: ${APP_SECRET}
-      DATABASE_URL: mysql://admin:${DB_PASSWORD}@ktc-invoice-db:3306/ktc_invoice?serverVersion=8.0
+      DATABASE_URL: mysql://admin:${DB_PASSWORD:-Ktc2026SecurePass}@ktc-invoice-db:3306/ktc_invoice?serverVersion=8.0
       MAILER_DSN: ${MAILER_DSN:-null://null}
       BREVO_API_KEY: ${BREVO_API_KEY:-}
       BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL:-}
