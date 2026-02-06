@@ -201,6 +201,27 @@ class ProductController extends AbstractController
         return $response;
     }
 
+    #[Route('/export/pdf', name: 'app_product_export_pdf', methods: ['GET'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function exportPdf(\App\Service\PdfGeneratorService $pdfService): Response
+    {
+        $products = $this->productRepository->findBy(['isActive' => true], ['name' => 'ASC']);
+
+        $pdfPath = $pdfService->generateReportPdf('pdf/products_list.html.twig', [
+            'products' => $products,
+            'date' => new \DateTime(),
+        ], 'catalogue_produits_' . date('Y-m-d') . '.pdf');
+
+        return new Response(
+            file_get_contents($pdfPath),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="catalogue_produits_' . date('Y-m-d') . '.pdf"',
+            ]
+        );
+    }
+
     #[Route('/import/csv', name: 'app_product_import', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function import(Request $request): Response

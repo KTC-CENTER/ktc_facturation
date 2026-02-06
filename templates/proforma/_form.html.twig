@@ -1,47 +1,30 @@
-{{ form_start(form, {'attr': {'class': 'space-y-6', 'data-controller': 'document-items', 'data-document-items-tax-rate-value': form.taxRate.vars.value|default(19.25), 'data-document-items-currency-value': default_currency}}) }}
+{{ form_start(form, {'attr': {'class': 'space-y-6', 'id': 'document-form'}}) }}
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Contenu principal -->
     <div class="lg:col-span-2 space-y-6">
-        <!-- Informations générales -->
         <div class="card">
-            <div class="card-header">
-                <h3 class="font-semibold text-gray-900">Informations générales</h3>
-            </div>
+            <div class="card-header"><h3 class="font-semibold text-gray-900">Informations générales</h3></div>
             <div class="card-body space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        {{ form_row(form.client) }}
-                    </div>
-                    <div>
-                        {{ form_row(form.template) }}
-                    </div>
+                    <div>{{ form_row(form.client) }}</div>
+                    <div>{{ form_row(form.template) }}</div>
                 </div>
-                <div>
-                    {{ form_row(form.object) }}
-                </div>
+                <div>{{ form_row(form.object) }}</div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        {{ form_row(form.issueDate) }}
-                    </div>
-                    <div>
-                        {{ form_row(form.validUntil) }}
-                    </div>
-                    <div>
-                        {{ form_row(form.taxRate) }}
-                    </div>
+                    <div>{{ form_row(form.issueDate) }}</div>
+                    <div>{{ form_row(form.validUntil) }}</div>
+                    <div>{{ form_row(form.taxRate) }}</div>
                 </div>
             </div>
         </div>
 
-        <!-- Lignes du document -->
         <div class="card">
             <div class="card-header flex items-center justify-between">
                 <h3 class="font-semibold text-gray-900">
                     Lignes du document
-                    <span class="text-sm font-normal text-gray-500" data-document-items-target="itemCount">(0 lignes)</span>
+                    <span class="text-sm font-normal text-gray-500" id="item-count">(0 lignes)</span>
                 </h3>
-                <button type="button" class="btn btn-primary btn-sm" data-action="document-items#addItem">
+                <button type="button" class="btn btn-primary btn-sm" onclick="addItem()">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -50,74 +33,59 @@
             </div>
             <div class="card-body p-0">
                 <div class="overflow-x-auto">
-                    <table class="table">
+                    <table class="table w-full">
                         <thead>
-                            <tr>
-                                <th class="w-8"></th>
-                                <th>Produit</th>
-                                <th>Désignation</th>
-                                <th class="w-24">Qté</th>
-                                <th class="w-32">Prix unit.</th>
-                                <th class="w-20">Remise %</th>
-                                <th class="w-32 text-right">Total HT</th>
-                                <th class="w-16"></th>
+                            <tr class="bg-gray-50 text-xs uppercase text-gray-500">
+                                <th class="w-8 px-2"></th>
+                                <th class="px-2 py-3">Produit</th>
+                                <th class="px-2 py-3">Désignation</th>
+                                <th class="w-24 px-2 py-3">Qté</th>
+                                <th class="w-32 px-2 py-3">Prix unit.</th>
+                                <th class="w-20 px-2 py-3">Remise %</th>
+                                <th class="w-32 px-2 py-3 text-right">Total HT</th>
+                                <th class="w-16 px-2 py-3"></th>
                             </tr>
                         </thead>
-                        <tbody data-document-items-target="items">
+                        <tbody id="items-container">
                             {% for item in form.items %}
                                 {{ include('proforma/_item_row.html.twig', {item: item, index: loop.index0}) }}
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                
-                <!-- Template pour nouvelles lignes -->
-                <template data-document-items-target="template">
+                <template id="item-template">
                     {{ include('proforma/_item_row.html.twig', {item: form.items.vars.prototype, index: '__name__'}) }}
                 </template>
             </div>
         </div>
 
-        <!-- Notes et conditions -->
         <div class="card">
-            <div class="card-header">
-                <h3 class="font-semibold text-gray-900">Notes et conditions</h3>
-            </div>
+            <div class="card-header"><h3 class="font-semibold text-gray-900">Notes et conditions</h3></div>
             <div class="card-body space-y-4">
-                <div>
-                    {{ form_row(form.notes) }}
-                </div>
-                <div>
-                    {{ form_row(form.conditions) }}
-                </div>
+                <div>{{ form_row(form.notes) }}</div>
+                <div>{{ form_row(form.conditions) }}</div>
             </div>
         </div>
     </div>
 
-    <!-- Sidebar -->
     <div class="space-y-6">
-        <!-- Totaux -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="font-semibold text-gray-900">Récapitulatif</h3>
-            </div>
+        <div class="card sticky top-4">
+            <div class="card-header"><h3 class="font-semibold text-gray-900">Récapitulatif</h3></div>
             <div class="card-body space-y-3">
                 <div class="flex justify-between">
                     <span class="text-gray-500">Total HT</span>
-                    <span class="font-medium" data-document-items-target="totalHT">0 {{ default_currency }}</span>
+                    <span class="font-medium" id="total-ht">0 {{ default_currency }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">TVA</span>
-                    <span class="font-medium" data-document-items-target="totalTVA">0 {{ default_currency }}</span>
+                    <span class="text-gray-500">TVA (<span id="tax-rate-display">{{ form.taxRate.vars.value|default(19.25) }}</span>%)</span>
+                    <span class="font-medium" id="total-tva">0 {{ default_currency }}</span>
                 </div>
                 <div class="flex justify-between text-lg border-t pt-3">
                     <span class="font-bold">Total TTC</span>
-                    <span class="font-bold text-primary-600" data-document-items-target="totalTTC">0 {{ default_currency }}</span>
+                    <span class="font-bold text-blue-600" id="total-ttc">0 {{ default_currency }}</span>
                 </div>
             </div>
         </div>
-
-        <!-- Actions -->
         <div class="card">
             <div class="card-body space-y-3">
                 <button type="submit" class="btn btn-primary w-full">
@@ -126,12 +94,76 @@
                     </svg>
                     {{ button_label|default('Enregistrer') }}
                 </button>
-                <a href="{{ path('app_proforma_index') }}" class="btn btn-secondary w-full">
-                    Annuler
-                </a>
+                <a href="{{ path('app_proforma_index') }}" class="btn btn-secondary w-full">Annuler</a>
             </div>
         </div>
     </div>
 </div>
 
 {{ form_end(form) }}
+
+<script>
+var itemIndex = document.querySelectorAll('#items-container .document-item').length;
+var currency = '{{ default_currency }}';
+function fmt(n) { return new Intl.NumberFormat('fr-FR', {maximumFractionDigits: 0}).format(n) + ' ' + currency; }
+function getTaxRate() { var el = document.querySelector('[name*="taxRate"]'); return el ? parseFloat(el.value) || 0 : 19.25; }
+function loadProduct(sel) {
+    var opt = sel.selectedOptions[0]; if (!opt || !opt.value) return;
+    var row = sel.closest('.document-item'); if (!row) return;
+    var des = row.querySelector('.designation-input'), desc = row.querySelector('.description-input'), price = row.querySelector('.price-input');
+    if (des && opt.dataset.name) des.value = opt.dataset.code + ' - ' + opt.dataset.name;
+    if (desc && opt.dataset.description) desc.value = opt.dataset.description;
+    if (price && opt.dataset.price) price.value = opt.dataset.price;
+    calcLine(sel);
+}
+function calcLine(el) {
+    var row = el.closest('.document-item'); if (!row) return;
+    var qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
+    var price = parseFloat(row.querySelector('.price-input')?.value) || 0;
+    var disc = parseFloat(row.querySelector('.discount-input')?.value) || 0;
+    row.querySelector('.line-total').textContent = fmt(qty * price * (1 - disc / 100));
+    calcTotals();
+}
+function calcTotals() {
+    var totalHT = 0;
+    document.querySelectorAll('#items-container .document-item').forEach(function(row) {
+        var qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
+        var price = parseFloat(row.querySelector('.price-input')?.value) || 0;
+        var disc = parseFloat(row.querySelector('.discount-input')?.value) || 0;
+        totalHT += qty * price * (1 - disc / 100);
+    });
+    var taxRate = getTaxRate(), totalTVA = totalHT * taxRate / 100;
+    document.getElementById('total-ht').textContent = fmt(totalHT);
+    document.getElementById('total-tva').textContent = fmt(totalTVA);
+    document.getElementById('total-ttc').textContent = fmt(totalHT + totalTVA);
+    var trd = document.getElementById('tax-rate-display'); if (trd) trd.textContent = taxRate;
+    updateItemCount();
+}
+function addItem() {
+    var html = document.getElementById('item-template').innerHTML.replace(/__name__/g, itemIndex);
+    document.getElementById('items-container').insertAdjacentHTML('beforeend', html);
+    itemIndex++; updateItemCount();
+    var rows = document.querySelectorAll('#items-container .document-item');
+    var last = rows[rows.length - 1]; if (last) { var inp = last.querySelector('select, input'); if (inp) inp.focus(); }
+}
+function removeItem(btn) {
+    var row = btn.closest('.document-item');
+    if (document.querySelectorAll('#items-container .document-item').length <= 1) { alert('Vous devez avoir au moins une ligne.'); return; }
+    row.style.opacity = '0.3'; setTimeout(function() { row.remove(); calcTotals(); }, 150);
+}
+function duplicateItem(btn) {
+    var row = btn.closest('.document-item'), clone = row.cloneNode(true);
+    clone.querySelectorAll('[name]').forEach(function(el) { el.name = el.name.replace(/\[\d+\]/, '[' + itemIndex + ']'); if (el.id) el.id = el.id.replace(/_\d+_/, '_' + itemIndex + '_'); });
+    clone.querySelectorAll('[for]').forEach(function(el) { if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/_\d+_/, '_' + itemIndex + '_'); });
+    row.parentNode.insertBefore(clone, row.nextSibling); itemIndex++; updateItemCount(); calcTotals();
+}
+function updateItemCount() {
+    var c = document.querySelectorAll('#items-container .document-item').length;
+    var el = document.getElementById('item-count'); if (el) el.textContent = '(' + c + ' ligne' + (c > 1 ? 's' : '') + ')';
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var taxInput = document.querySelector('[name*="taxRate"]'); if (taxInput) taxInput.addEventListener('input', calcTotals);
+    calcTotals();
+    if (document.querySelectorAll('#items-container .document-item').length === 0) addItem();
+});
+</script>

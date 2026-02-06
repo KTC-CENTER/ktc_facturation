@@ -1,0 +1,98 @@
+services:
+  # Nginx Reverse Proxy avec SSL
+  ktc-invoice-nginx:
+    image: nginx:alpine
+    container_name: ktc-invoice-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./public:/var/www/html/public:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - ktc-invoice-app
+    networks:
+      - ktc-invoice-prod
+
+  # Application PHP-FPM
+  ktc-invoice-app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    container_name: ktc-invoice-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ./var:/var/www/html/var
+      - ./public/uploads:/var/www/html/public/uploads
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      DATABASE_URL: mysql://admin:${DB_PASSWORD}@ktc-invoice-db:3306/ktc_invoice?serverVersion=8.0
+    depends_on:
+      ktc-invoice-db:
+        condition: service_healthy
+    networks:
+      - ktc-invoice-prod
+
+  # Base de données MySQL
+  ktc-invoice-db:
+    image: mysql:8.0
+    container_name: ktc-invoice-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ktc_invoice
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ktc-invoice-mysql-data:/var/lib/mysql
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - ktc-invoice-prod
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # phpMyAdmin (optionnel, accès restreint)
+  ktc-invoice-pma:
+    image: phpmyadmin:latest
+    container_name: ktc-invoice-pma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8091:80"
+    environment:
+      PMA_HOST: ktc-invoice-db
+      PMA_PASSWORD: ${DB_PASSWORD}
+      UPLOAD_LIMIT: 100M
+    networks:
+      - ktc-invoice-prod
+    depends_on:
+      - ktc-invoice-db
+
+  # Certbot pour renouvellement SSL
+  ktc-invoice-certbot:
+    image: certbot/certbot
+    container_name: ktc-invoice-certbot
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - ktc-invoice-prod
+
+networks:
+  ktc-invoice-prod:
+    driver: bridge
+
+volumes:
+  ktc-invoice-mysql-data:
+    driver: local

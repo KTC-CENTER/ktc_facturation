@@ -105,8 +105,8 @@ class ProformaController extends AbstractController
             if ($template) {
                 $proforma->setTemplate($template);
                 $proforma->setObject($template->getName());
-                $proforma->setConditions($template->getConditions());
-                $proforma->setTaxRate($template->getTaxRate());
+                $proforma->setConditions($template->getDefaultConditions());
+                // Note: taxRate is set at proforma level, not from template
 
                 // Copier les lignes du template
                 foreach ($template->getItems() as $templateItem) {
@@ -334,5 +334,60 @@ class ProformaController extends AbstractController
 
         $this->addFlash('success', 'Proforma supprimée.');
         return $this->redirectToRoute('app_proforma_index');
+    }
+
+    #[Route('/{id}/send-email', name: 'app_proforma_send_email', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function sendEmail(Request $request, Proforma $proforma, \App\Service\BrevoMailerService $mailer, \App\Repository\CompanySettingsRepository $settingsRepo): Response
+    {
+        $client = $proforma->getClient();
+        
+        if (!$client->getEmail()) {
+            $this->addFlash('error', 'Ce client n\'a pas d\'adresse email.');
+            return $this->redirectToRoute('app_proforma_show', ['id' => $proforma->getId()]);
+        }
+
+        if ($request->isMethod('POST')) {
+            $subject = $request->request->get('subject', 'Proforma ' . $proforma->getReference());
+            $message = $request->request->get('message', '');
+            $attachPdf = $request->request->getBoolean('attach_pdf', true);
+
+            $settings = $settingsRepo->getOrCreateSettings();
+            $companyName = $settings->getCompanyName() ?? 'KTC-Center';
+
+            // Generate PDF if needed
+            $pdfContent = null;
+            $pdfFilename = null;
+            if ($attachPdf) {
+                $pdfContent = $this->pdfGenerator->generateProformaPdf($proforma, false);
+                $pdfFilename = 'Proforma_' . $proforma->getReference() . '.pdf';
+            }
+
+            // Send email
+            $success = $mailer->sendDocumentEmail(
+                $client->getEmail(),
+                $subject,
+                $companyName,
+                $client->getName(),
+                'proforma',
+                $proforma->getReference(),
+                $proforma->getTotalTTCFloat(),
+                $settings->getCurrency() ?? 'FCFA',
+                $message,
+                $pdfContent,
+                $pdfFilename
+            );
+
+            if ($success) {
+                $this->addFlash('success', 'Proforma envoyée par email à ' . $client->getEmail());
+                return $this->redirectToRoute('app_proforma_show', ['id' => $proforma->getId()]);
+            } else {
+                $this->addFlash('error', 'Erreur lors de l\'envoi de l\'email.');
+            }
+        }
+
+        return $this->render('proforma/send_email.html.twig', [
+            'proforma' => $proforma,
+        ]);
     }
 }

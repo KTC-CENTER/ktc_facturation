@@ -377,4 +377,110 @@ class BrevoMailerService
             . '</td></tr>'
             . '</table></td></tr></table></body></html>';
     }
+
+    /**
+     * Envoyer un document (facture/proforma) directement par email avec pièce jointe PDF optionnelle
+     */
+    public function sendDocumentEmail(
+        string $toEmail,
+        string $subject,
+        string $companyName,
+        string $clientName,
+        string $docType,
+        string $reference,
+        float $totalAmount,
+        string $currency,
+        ?string $personalMessage = null,
+        ?string $pdfContent = null,
+        ?string $pdfFilename = null
+    ): bool {
+        $htmlBody = $this->buildDirectDocumentEmailHtml($companyName, $clientName, $docType, $reference, $totalAmount, $currency, $personalMessage);
+        $textBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $htmlBody));
+
+        $sendSmtpEmail = new SendSmtpEmail([
+            'sender' => ['name' => $companyName, 'email' => $this->senderEmail],
+            'to' => [['email' => $toEmail]],
+            'subject' => $subject,
+            'htmlContent' => $htmlBody,
+            'textContent' => $textBody,
+        ]);
+
+        // Ajouter la pièce jointe PDF si fournie
+        if ($pdfContent && $pdfFilename) {
+            $sendSmtpEmail->setAttachment([
+                [
+                    'content' => base64_encode($pdfContent),
+                    'name' => $pdfFilename,
+                    'type' => 'application/pdf'
+                ]
+            ]);
+        }
+
+        try {
+            $this->emailsApi->sendTransacEmail($sendSmtpEmail);
+            return true;
+        } catch (ApiException $e) {
+            return false;
+        }
+    }
+
+    private function buildDirectDocumentEmailHtml(
+        string $companyName,
+        string $clientName,
+        string $docType,
+        string $reference,
+        float $totalAmount,
+        string $currency,
+        ?string $personalMessage = null
+    ): string {
+        $safeCompany = htmlspecialchars($companyName);
+        $safeClient = htmlspecialchars($clientName);
+        $safeRef = htmlspecialchars($reference);
+        $docTypeLabel = $docType === 'proforma' ? 'Proforma' : 'Facture';
+        $emoji = $docType === 'proforma' ? '&#x1F4CB;' : '&#x1F9FE;';
+        $year = date('Y');
+        $formattedAmount = number_format($totalAmount, 0, ',', ' ') . ' ' . $currency;
+
+        $personalHtml = '';
+        if ($personalMessage) {
+            $safeMsg = nl2br(htmlspecialchars($personalMessage));
+            $personalHtml = '<div style="background-color:#eff6ff;border-left:4px solid #2E86AB;border-radius:0 8px 8px 0;padding:16px 20px;margin:0 0 25px;">'
+                . '<p style="color:#1e40af;font-size:13px;font-weight:600;margin:0 0 6px;">Message :</p>'
+                . '<p style="color:#374151;font-size:14px;margin:0;line-height:1.6;">' . $safeMsg . '</p>'
+                . '</div>';
+        }
+
+        return '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>'
+            . '<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:\'Segoe UI\',Roboto,Arial,sans-serif;">'
+            . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f6f9;"><tr><td style="padding:30px 20px;">'
+            . '<table role="presentation" width="600" cellspacing="0" cellpadding="0" style="margin:0 auto;max-width:600px;">'
+            // Header
+            . '<tr><td style="background:linear-gradient(135deg,#1E3A5F 0%,#2E86AB 100%);padding:30px 40px;border-radius:12px 12px 0 0;text-align:center;">'
+            . '<div style="width:60px;height:60px;margin:0 auto 15px;background:rgba(255,255,255,0.15);border-radius:50%;line-height:60px;font-size:28px;">' . $emoji . '</div>'
+            . '<h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:700;">' . $docTypeLabel . ' ' . $safeRef . '</h1>'
+            . '<p style="color:#A3C4DC;margin:8px 0 0;font-size:13px;">' . $safeCompany . '</p>'
+            . '</td></tr>'
+            // Body
+            . '<tr><td style="background-color:#ffffff;padding:35px 40px;border-left:1px solid #e5e7eb;border-right:1px solid #e5e7eb;">'
+            . '<p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 20px;">Bonjour <strong>' . $safeClient . '</strong>,</p>'
+            . '<p style="color:#374151;font-size:15px;line-height:1.6;margin:0 0 25px;">Veuillez trouver ci-joint votre ' . strtolower($docTypeLabel) . '.</p>'
+            . $personalHtml
+            // Document info card
+            . '<div style="background-color:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:18px 22px;margin:0 0 25px;">'
+            . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0">'
+            . '<tr><td style="color:#6b7280;font-size:13px;padding:4px 0;">Type :</td><td style="color:#111827;font-size:13px;font-weight:600;text-align:right;padding:4px 0;">' . $docTypeLabel . '</td></tr>'
+            . '<tr><td style="color:#6b7280;font-size:13px;padding:4px 0;">Référence :</td><td style="color:#111827;font-size:13px;font-weight:600;text-align:right;padding:4px 0;">' . $safeRef . '</td></tr>'
+            . '<tr><td style="color:#6b7280;font-size:13px;padding:4px 0;">Montant TTC :</td><td style="color:#1E3A5F;font-size:15px;font-weight:700;text-align:right;padding:4px 0;">' . $formattedAmount . '</td></tr>'
+            . '</table></div>'
+            // Info about attachment
+            . '<div style="background-color:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:14px 18px;text-align:center;">'
+            . '<p style="color:#065f46;font-size:13px;margin:0;">&#x1F4CE; Le document PDF est joint à cet email</p>'
+            . '</div>'
+            . '</td></tr>'
+            // Footer
+            . '<tr><td style="background-color:#f9fafb;padding:25px 40px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb;border-top:none;text-align:center;">'
+            . '<p style="color:#6b7280;font-size:12px;margin:0;">Cet email a été envoyé par <strong>' . $safeCompany . '</strong></p>'
+            . '<p style="color:#9ca3af;font-size:11px;margin:8px 0 0;">&copy; ' . $year . ' ' . $safeCompany . '</p>'
+            . '</td></tr></table></td></tr></table></body></html>';
+    }
 }
