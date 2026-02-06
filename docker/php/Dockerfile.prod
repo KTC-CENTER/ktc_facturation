@@ -1,9 +1,6 @@
 FROM php:8.3-fpm
 
-ARG user=ktc
-ARG uid=1000
-
-# Installer dépendances système et extensions PHP
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip \
     libpng-dev libonig-dev libxml2-dev libzip-dev \
@@ -14,32 +11,31 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Installer Composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Config PHP
+# PHP production configuration
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY docker/php/prod.ini /usr/local/etc/php/conf.d/prod.ini
 
-# Créer un utilisateur custom
-RUN useradd -G www-data,root -u $uid -d /home/$user $user \
-    && mkdir -p /home/$user/.composer \
-    && chown -R $user:$user /home/$user
+# PHP-FPM configuration
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /var/www/html
 
-# Copier le code et fixer la propriété
-COPY --chown=$user:www-data . /var/www/html
+# Copy application files
+COPY --chown=www-data:www-data . /var/www/html
 
-# Installer les dépendances PHP correctement (Symfony Runtime inclus)
-RUN composer install --no-dev --optimize-autoloader
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Créer les dossiers nécessaires et définir les permissions
+# Set permissions
 RUN mkdir -p var/cache var/log public/uploads \
-    && chown -R $user:www-data var public/uploads \
+    && chown -R www-data:www-data var public/uploads \
     && chmod -R 775 var public/uploads
 
-USER $user
+# Switch to www-data user
+USER www-data
 
 EXPOSE 9000
 
