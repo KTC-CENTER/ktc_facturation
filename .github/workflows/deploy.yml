@@ -34,36 +34,36 @@ jobs:
       - name: Check Symfony requirements
         run: php bin/console about || true
 
-  build-assets:
-    name: Build Assets
-    runs-on: ubuntu-latest
+  # build-assets:
+  #   name: Build Assets
+  #   runs-on: ubuntu-latest
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
+  #         cache: 'npm'
       
-      - name: Install dependencies
-        run: npm ci
+  #     - name: Install dependencies
+  #       run: npm ci
       
-      - name: Build for production
-        run: npm run build
+  #     - name: Build for production
+  #       run: npm run build
       
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-assets
-          path: public/build/
-          retention-days: 1
+  #     - name: Upload build artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: build-assets
+  #         path: public/build/
+  #         retention-days: 1
 
   deploy:
     name: Deploy to VPS
-    needs: [test, build-assets]
+    needs: [test]
     runs-on: ubuntu-latest
     
     steps:
