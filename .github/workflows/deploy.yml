@@ -34,42 +34,15 @@ jobs:
       - name: Check Symfony requirements
         run: php bin/console about || true
 
-  # build-assets:
-  #   name: Build Assets
-  #   runs-on: ubuntu-latest
-    
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-      
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '20'
-  #         cache: 'npm'
-      
-  #     - name: Install dependencies
-  #       run: npm ci
-      
-  #     - name: Build for production
-  #       run: npm run build
-      
-  #     - name: Upload build artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: build-assets
-  #         path: public/build/
-  #         retention-days: 1
-
   deploy:
     name: Deploy to VPS
-    needs: [test]
+    needs: test
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-          
+      
       - name: Setup SSH Key
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -108,24 +81,22 @@ jobs:
             echo "SSL certificate already exists"
           fi'
       
-      - name: Create environment file and deploy
+      - name: Create environment file
         run: |
-          ssh root@${{ env.VPS_IP }} "cd ${{ env.APP_DIR }} && \
-            cat > .env << EOF
-              DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-              DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
-              APP_SECRET=${{ secrets.APP_SECRET }}
-              APP_LOCALE=${{ secrets.APP_LOCALE }}
-              APP_TIMEZONE=${{ secrets.APP_TIMEZONE }}
-              APP_NAME=${{ secrets.APP_NAME }}
-              DEFAULT_CURRENCY=${{ secrets.DEFAULT_CURRENCY }}
-              DEFAULT_TAX_RATE=${{ secrets.DEFAULT_TAX_RATE }}
-              MAILER_DSN=${{ secrets.MAILER_DSN }}
-              BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
-              BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
-              BREVO_SENDER_NAME=${{ secrets.BREVO_SENDER_NAME }}
-              EOF
-              "
+          ssh root@${{ env.VPS_IP }} "cat > ${{ env.APP_DIR }}/.env << 'EOF'
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+            APP_SECRET=${{ secrets.APP_SECRET }}
+            APP_LOCALE=${{ secrets.APP_LOCALE }}
+            APP_TIMEZONE=${{ secrets.APP_TIMEZONE }}
+            APP_NAME=${{ secrets.APP_NAME }}
+            DEFAULT_CURRENCY=${{ secrets.DEFAULT_CURRENCY }}
+            DEFAULT_TAX_RATE=${{ secrets.DEFAULT_TAX_RATE }}
+            MAILER_DSN=${{ secrets.MAILER_DSN }}
+            BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+            BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+            BREVO_SENDER_NAME=${{ secrets.BREVO_SENDER_NAME }}
+            EOF"
       
       - name: Deploy with Docker
         run: |
