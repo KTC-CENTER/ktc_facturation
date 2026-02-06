@@ -111,7 +111,7 @@ jobs:
       - name: Create environment file and deploy
         run: |
           ssh root@${{ env.VPS_IP }} "cd ${{ env.APP_DIR }} && \
-            cat > .env << "EOF"
+            cat > .env << EOF
               DB_PASSWORD=${{ secrets.DB_PASSWORD }}
               DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
               APP_SECRET=${{ secrets.APP_SECRET }}
@@ -124,7 +124,8 @@ jobs:
               BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
               BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
               BREVO_SENDER_NAME=${{ secrets.BREVO_SENDER_NAME }}
-            EOF
+              EOF
+              "
       
       - name: Deploy with Docker
         run: |
