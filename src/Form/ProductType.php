@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Product;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
@@ -66,6 +67,13 @@ class ProductType extends AbstractType
                 'attr' => [
                     'placeholder' => 'ex: licence, pièce, heure, jour',
                     'class' => 'form-input',
+                ],
+            ])
+            ->add('isActive', CheckboxType::class, [
+                'label' => 'Produit actif',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-checkbox',
                 ],
             ])
         ;
