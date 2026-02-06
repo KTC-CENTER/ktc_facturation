@@ -417,7 +417,7 @@ class BrevoMailerService
         }
 
         try {
-            $this->emailsApi->sendTransacEmail($sendSmtpEmail);
+            $this->getApiInstance()->sendTransacEmail($sendSmtpEmail);
             return true;
         } catch (ApiException $e) {
             return false;

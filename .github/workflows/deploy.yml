@@ -59,6 +59,8 @@ jobs:
             mkdir -p ${{ env.APP_DIR }}
             mkdir -p /etc/letsencrypt
             mkdir -p ${{ env.APP_DIR }}/certbot/www
+            mkdir -p ${{ env.APP_DIR }}/var/{cache,log}
+            mkdir -p ${{ env.APP_DIR }}/public/uploads/{logo,pdf}
           ENDSSH
       
       - name: Sync application files
@@ -72,34 +74,31 @@ jobs:
             --exclude 'public/uploads/*' \
             ./ root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/
       
-      - name: Create production .env file
+      - name: Create production environment files
         run: |
-          ssh root@${{ env.VPS_IP }} << 'ENDSSH'
+          ssh root@${{ env.VPS_IP }} << ENDSSH
+            # Create Symfony .env.local
             cat > ${{ env.APP_DIR }}/.env.local << 'ENVFILE'
-          APP_ENV=prod
-          APP_DEBUG=0
-          APP_SECRET=${{ secrets.APP_SECRET }}
-          DATABASE_URL=mysql://admin:${{ secrets.DB_PASSWORD }}@ktc-invoice-db:3306/ktc_invoice?serverVersion=8.0
-          MAILER_DSN=${{ secrets.MAILER_DSN }}
-          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
-          BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
-          ENVFILE
-          ENDSSH
-      
-      - name: Create Docker environment file
-        run: |
-          ssh root@${{ env.VPS_IP }} << 'ENDSSH'
-            cat > ${{ env.APP_DIR }}/.env << 'ENVFILE'
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
-          ENVFILE
-          ENDSSH
-      
-      - name: Install SSL Certificate (first time only)
-        run: |
-          ssh root@${{ env.VPS_IP }} << 'ENDSSH'
-            cd ${{ env.APP_DIR }}
+APP_ENV=prod
+APP_DEBUG=0
+APP_SECRET=${{ secrets.APP_SECRET }}
+DATABASE_URL=mysql://admin:${{ secrets.DB_PASSWORD }}@ktc-invoice-db:3306/ktc_invoice?serverVersion=8.0
+MAILER_DSN=${{ secrets.MAILER_DSN }}
+BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+BREVO_SENDER_NAME=KTC-Center
+ENVFILE
             
+            # Create Docker .env
+            cat > ${{ env.APP_DIR }}/.env << 'ENVFILE'
+DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+ENVFILE
+          ENDSSH
+      
+      - name: Install SSL Certificate (if needed)
+        run: |
+          ssh root@${{ env.VPS_IP }} << 'ENDSSH'
             # Check if certificate exists
             if [ ! -f "/etc/letsencrypt/live/${{ env.DOMAIN }}/fullchain.pem" ]; then
               echo "Installing SSL certificate for ${{ env.DOMAIN }}..."
@@ -109,6 +108,7 @@ jobs:
               
               # Stop any service using port 80
               docker stop ktc-invoice-nginx 2>/dev/null || true
+              fuser -k 80/tcp 2>/dev/null || true
               
               # Get certificate
               certbot certonly --standalone \
@@ -117,9 +117,9 @@ jobs:
                 --agree-tos \
                 --non-interactive
               
-              echo "SSL certificate installed successfully!"
+              echo "SSL certificate installed!"
             else
-              echo "SSL certificate already exists, skipping..."
+              echo "SSL certificate already exists"
             fi
           ENDSSH
       
@@ -128,20 +128,27 @@ jobs:
           ssh root@${{ env.VPS_IP }} << 'ENDSSH'
             cd ${{ env.APP_DIR }}
             
+            # Install Docker if not present
+            if ! command -v docker &> /dev/null; then
+              curl -fsSL https://get.docker.com | sh
+              systemctl enable docker
+              systemctl start docker
+            fi
+            
             # Stop existing containers
-            docker compose -f docker-compose.prod.yml down --remove-orphans || true
+            docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
             
             # Build and start containers
             docker compose -f docker-compose.prod.yml build --no-cache
             docker compose -f docker-compose.prod.yml up -d
             
-            # Wait for app container to be ready
-            echo "Waiting for containers to start..."
-            sleep 10
+            # Wait for containers
+            echo "Waiting for containers..."
+            sleep 15
             
             # Run database migrations
-            docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:migrations:migrate --no-interaction || true
-            docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:schema:update --force || true
+            docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true
+            docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:schema:update --force 2>/dev/null || true
             
             # Clear and warm cache
             docker exec ${{ env.CONTAINER_NAME }} php bin/console cache:clear --env=prod
@@ -151,27 +158,16 @@ jobs:
             docker exec ${{ env.CONTAINER_NAME }} chown -R www-data:www-data var public/uploads
             docker exec ${{ env.CONTAINER_NAME }} chmod -R 775 var public/uploads
             
-            echo "Deployment completed successfully!"
+            echo "Deployment completed!"
           ENDSSH
       
       - name: Health Check
         run: |
           sleep 5
           response=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.DOMAIN }} --insecure || echo "000")
+          echo "HTTP Response: $response"
           if [ "$response" = "200" ] || [ "$response" = "302" ]; then
-            echo "✅ Application is responding (HTTP $response)"
+            echo "✅ Application is responding"
           else
-            echo "⚠️ Application returned HTTP $response"
+            echo "⚠️ Application returned HTTP $response - may need manual check"
           fi
-      
-      - name: Notify Success
-        if: success()
-        run: |
-          echo "🎉 Deployment successful!"
-          echo "Application is live at: https://${{ env.DOMAIN }}"
-      
-      - name: Notify Failure
-        if: failure()
-        run: |
-          echo "❌ Deployment failed!"
-          # Here you could add Slack/Discord/Email notification
