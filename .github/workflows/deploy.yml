@@ -65,27 +65,9 @@ jobs:
             --exclude 'var/cache/*' \
             --exclude 'var/log/*' \
             --exclude '.env.local' \
+            --exclude '.env' \
             --exclude 'public/uploads/*' \
             ./ root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/
-      
-      - name: Create production environment files
-        env:
-          APP_SECRET: ${{ secrets.APP_SECRET }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_ROOT_PASSWORD: ${{ secrets.DB_ROOT_PASSWORD }}
-          MAILER_DSN: ${{ secrets.MAILER_DSN }}
-          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
-          BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
-        run: |
-          ssh root@${{ env.VPS_IP }} "cat > ${{ env.APP_DIR }}/.env" << 'EOF'
-          APP_SECRET=${{ secrets.APP_SECRET }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
-          MAILER_DSN=${{ secrets.MAILER_DSN }}
-          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
-          BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
-          BREVO_SENDER_NAME=KTC-Center
-          EOF
       
       - name: Install SSL Certificate
         run: |
@@ -102,23 +84,51 @@ jobs:
       - name: Build and Deploy with Docker
         run: |
           ssh root@${{ env.VPS_IP }} 'cd ${{ env.APP_DIR }} && \
+            
+            # Créer le fichier .env pour docker-compose
+            cat > .env << EOF
+              DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+              DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+              APP_SECRET=${{ secrets.APP_SECRET }}
+              MAILER_DSN=${{ secrets.MAILER_DSN }}
+              BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+              BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+              EOF
+            
+            # Installer Docker si nécessaire
             if ! command -v docker &> /dev/null; then
               curl -fsSL https://get.docker.com | sh
               systemctl enable docker
               systemctl start docker
             fi && \
+            
+            # Arrêter les conteneurs existants
             docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true && \
+            
+            # Reconstruire sans cache
             docker compose -f docker-compose.prod.yml build --no-cache && \
+            
+            # Démarrer
             docker compose -f docker-compose.prod.yml up -d && \
-            echo "Waiting for containers..." && \
-            sleep 15 && \
-            docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true && \
-            docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:schema:update --force 2>/dev/null || true && \
-            docker exec ${{ env.CONTAINER_NAME }} php bin/console cache:clear --env=prod && \
-            docker exec ${{ env.CONTAINER_NAME }} php bin/console cache:warmup --env=prod && \
-            docker exec ${{ env.CONTAINER_NAME }} chown -R www-data:www-data var public/uploads && \
-            docker exec ${{ env.CONTAINER_NAME }} chmod -R 775 var public/uploads && \
-            echo "Deployment completed!"'
+            
+            echo "Waiting for containers to be ready..." && \
+            sleep 20 && \
+            
+            # Vérifier que le conteneur est running
+            if docker ps | grep -q ktc-invoice-app; then
+              echo "Container is running, executing commands..."
+              docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true
+              docker exec ${{ env.CONTAINER_NAME }} php bin/console doctrine:schema:update --force 2>/dev/null || true
+              docker exec ${{ env.CONTAINER_NAME }} php bin/console cache:clear --env=prod || echo "Cache clear failed but continuing..."
+              docker exec ${{ env.CONTAINER_NAME }} php bin/console cache:warmup --env=prod || echo "Cache warmup failed but continuing..."
+              docker exec ${{ env.CONTAINER_NAME }} chown -R www-data:www-data var public/uploads
+              docker exec ${{ env.CONTAINER_NAME }} chmod -R 775 var public/uploads
+              echo "Deployment completed!"
+            else
+              echo "Container failed to start, checking logs..."
+              docker logs ${{ env.CONTAINER_NAME }} --tail 50
+              exit 1
+            fi'
       
       - name: Health Check
         run: |
