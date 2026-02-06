@@ -69,13 +69,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-assets
-          path: public/build/
-      
+          
       - name: Setup SSH Key
         uses: webfactory/ssh-agent@v0.8.0
         with:
