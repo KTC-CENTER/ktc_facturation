@@ -8,6 +8,7 @@ use App\Form\InvoiceType;
 use App\Form\PaymentType;
 use App\Repository\InvoiceRepository;
 use App\Repository\ClientRepository;
+use App\Repository\ProformaRepository;
 use App\Service\ReferenceGeneratorService;
 use App\Service\PdfGeneratorService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,6 +27,7 @@ class InvoiceController extends AbstractController
         private EntityManagerInterface $entityManager,
         private InvoiceRepository $invoiceRepository,
         private ClientRepository $clientRepository,
+        private ProformaRepository $proformaRepository,
         private ReferenceGeneratorService $referenceGenerator,
         private PdfGeneratorService $pdfGenerator
     ) {}
@@ -85,6 +87,25 @@ class InvoiceController extends AbstractController
             'dateTo' => $dateTo,
             'statuses' => Invoice::STATUSES,
             'clients' => $this->clientRepository->findBy(['isArchived' => false], ['name' => 'ASC']),
+        ]);
+    }
+
+    #[Route('/from-proforma', name: 'app_invoice_from_proforma', methods: ['GET'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function fromProforma(): Response
+    {
+        // Get proformas that can be converted (not already converted, accepted or pending)
+        $proformas = $this->proformaRepository->createQueryBuilder('p')
+            ->leftJoin('p.invoice', 'i')
+            ->where('i.id IS NULL')
+            ->andWhere('p.status IN (:statuses)')
+            ->setParameter('statuses', ['pending', 'sent', 'accepted'])
+            ->orderBy('p.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('invoice/from_proforma.html.twig', [
+            'proformas' => $proformas,
         ]);
     }
 

@@ -77,7 +77,7 @@
                     <span class="font-medium" id="total-ht">0 {{ default_currency }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-gray-500">TVA (<span id="tax-rate-display">{{ form.taxRate.vars.value|default(19.25) }}</span>%)</span>
+                    <span class="text-gray-500">TVA (<span id="tax-rate-display">{{ form.taxRate.vars.value|default(0) }}</span>%)</span>
                     <span class="font-medium" id="total-tva">0 {{ default_currency }}</span>
                 </div>
                 <div class="flex justify-between text-lg border-t pt-3">
@@ -106,16 +106,18 @@
 var itemIndex = document.querySelectorAll('#items-container .document-item').length;
 var currency = '{{ default_currency }}';
 function fmt(n) { return new Intl.NumberFormat('fr-FR', {maximumFractionDigits: 0}).format(n) + ' ' + currency; }
-function getTaxRate() { var el = document.querySelector('[name*="taxRate"]'); return el ? parseFloat(el.value) || 0 : 19.25; }
+function getTaxRate() { var el = document.querySelector('[name*="taxRate"]'); return el ? parseFloat(el.value) || 0 : 0; }
+
 function loadProduct(sel) {
     var opt = sel.selectedOptions[0]; if (!opt || !opt.value) return;
     var row = sel.closest('.document-item'); if (!row) return;
     var des = row.querySelector('.designation-input'), desc = row.querySelector('.description-input'), price = row.querySelector('.price-input');
-    if (des && opt.dataset.name) des.value = opt.dataset.code + ' - ' + opt.dataset.name;
+    if (des && opt.dataset.name) des.value = opt.dataset.code ? (opt.dataset.code + ' - ' + opt.dataset.name) : opt.dataset.name;
     if (desc && opt.dataset.description) desc.value = opt.dataset.description;
     if (price && opt.dataset.price) price.value = opt.dataset.price;
     calcLine(sel);
 }
+
 function calcLine(el) {
     var row = el.closest('.document-item'); if (!row) return;
     var qty = parseFloat(row.querySelector('.qty-input')?.value) || 0;
@@ -124,6 +126,7 @@ function calcLine(el) {
     row.querySelector('.line-total').textContent = fmt(qty * price * (1 - disc / 100));
     calcTotals();
 }
+
 function calcTotals() {
     var totalHT = 0;
     document.querySelectorAll('#items-container .document-item').forEach(function(row) {
@@ -139,6 +142,7 @@ function calcTotals() {
     var trd = document.getElementById('tax-rate-display'); if (trd) trd.textContent = taxRate;
     updateItemCount();
 }
+
 function addItem() {
     var html = document.getElementById('item-template').innerHTML.replace(/__name__/g, itemIndex);
     document.getElementById('items-container').insertAdjacentHTML('beforeend', html);
@@ -146,23 +150,158 @@ function addItem() {
     var rows = document.querySelectorAll('#items-container .document-item');
     var last = rows[rows.length - 1]; if (last) { var inp = last.querySelector('select, input'); if (inp) inp.focus(); }
 }
+
+function addItemWithData(data) {
+    var html = document.getElementById('item-template').innerHTML.replace(/__name__/g, itemIndex);
+    document.getElementById('items-container').insertAdjacentHTML('beforeend', html);
+    
+    var rows = document.querySelectorAll('#items-container .document-item');
+    var row = rows[rows.length - 1];
+    if (row) {
+        // Set product if available
+        if (data.productId) {
+            var productSelect = row.querySelector('.product-select');
+            if (productSelect) productSelect.value = data.productId;
+        }
+        // Set designation
+        var desInput = row.querySelector('.designation-input');
+        if (desInput && data.designation) desInput.value = data.designation;
+        // Set description
+        var descInput = row.querySelector('.description-input');
+        if (descInput && data.description) descInput.value = data.description;
+        // Set quantity
+        var qtyInput = row.querySelector('.qty-input');
+        if (qtyInput && data.quantity) qtyInput.value = data.quantity;
+        // Set unit price
+        var priceInput = row.querySelector('.price-input');
+        if (priceInput && data.unitPrice) priceInput.value = data.unitPrice;
+        // Set discount
+        var discInput = row.querySelector('.discount-input');
+        if (discInput && data.discount !== undefined) discInput.value = data.discount;
+        
+        // Calculate line total
+        calcLine(row);
+    }
+    itemIndex++;
+}
+
 function removeItem(btn) {
     var row = btn.closest('.document-item');
-    if (document.querySelectorAll('#items-container .document-item').length <= 1) { alert('Vous devez avoir au moins une ligne.'); return; }
     row.style.opacity = '0.3'; setTimeout(function() { row.remove(); calcTotals(); }, 150);
 }
+
 function duplicateItem(btn) {
     var row = btn.closest('.document-item'), clone = row.cloneNode(true);
     clone.querySelectorAll('[name]').forEach(function(el) { el.name = el.name.replace(/\[\d+\]/, '[' + itemIndex + ']'); if (el.id) el.id = el.id.replace(/_\d+_/, '_' + itemIndex + '_'); });
     clone.querySelectorAll('[for]').forEach(function(el) { if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/_\d+_/, '_' + itemIndex + '_'); });
     row.parentNode.insertBefore(clone, row.nextSibling); itemIndex++; updateItemCount(); calcTotals();
 }
+
 function updateItemCount() {
     var c = document.querySelectorAll('#items-container .document-item').length;
     var el = document.getElementById('item-count'); if (el) el.textContent = '(' + c + ' ligne' + (c > 1 ? 's' : '') + ')';
 }
+
+function clearAllItems() {
+    document.getElementById('items-container').innerHTML = '';
+    itemIndex = 0;
+}
+
+// Load template items when template is selected
+function loadTemplateItems(templateId) {
+    if (!templateId) {
+        // "Aucun modèle" selected - reset to empty state
+        clearAllItems();
+        addItem(); // Add one empty line
+        
+        // Clear object, conditions, notes
+        var objectField = document.querySelector('[name*="object"]');
+        if (objectField) objectField.value = '';
+        var conditionsField = document.querySelector('[name*="conditions"]');
+        if (conditionsField) conditionsField.value = '';
+        var notesField = document.querySelector('[name*="notes"]');
+        if (notesField) notesField.value = '';
+        
+        return;
+    }
+    
+    // Show loading state
+    var container = document.getElementById('items-container');
+    container.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500"><svg class="animate-spin h-5 w-5 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Chargement des produits...</td></tr>';
+    
+    // Fetch template items from API
+    fetch('/proformas/api/template/' + templateId + '/items')
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+            // Clear existing items
+            clearAllItems();
+            
+            // Add items from template
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(function(item) {
+                    addItemWithData(item);
+                });
+            } else {
+                // No items, add one empty line
+                addItem();
+            }
+            
+            // Set object field
+            var objectField = document.querySelector('[name*="object"]');
+            if (objectField && data.object) {
+                objectField.value = data.object;
+            }
+            
+            // Set conditions field
+            var conditionsField = document.querySelector('[name*="conditions"]');
+            if (conditionsField && data.conditions) {
+                conditionsField.value = data.conditions;
+            }
+            
+            // Set notes field
+            var notesField = document.querySelector('[name*="notes"]');
+            if (notesField && data.notes) {
+                notesField.value = data.notes;
+            }
+            
+            calcTotals();
+        })
+        .catch(function(error) {
+            console.error('Error loading template:', error);
+            clearAllItems();
+            addItem();
+        });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    var taxInput = document.querySelector('[name*="taxRate"]'); if (taxInput) taxInput.addEventListener('input', calcTotals);
+    var taxInput = document.querySelector('[name*="taxRate"]'); 
+    if (taxInput) taxInput.addEventListener('input', calcTotals);
+    
+    // Listen for template select change
+    var templateSelect = document.querySelector('[name*="template"]');
+    if (templateSelect) {
+        templateSelect.addEventListener('change', function() {
+            var templateId = this.value;
+            
+            // Check if items already have data
+            var hasData = false;
+            document.querySelectorAll('#items-container .document-item').forEach(function(row) {
+                var designation = row.querySelector('.designation-input')?.value;
+                var price = parseFloat(row.querySelector('.price-input')?.value) || 0;
+                if (designation || price > 0) hasData = true;
+            });
+            
+            if (hasData && templateId) {
+                if (!confirm('Les produits actuels seront remplacés par ceux du modèle. Continuer ?')) {
+                    // Find previous value and restore
+                    return;
+                }
+            }
+            
+            loadTemplateItems(templateId);
+        });
+    }
+    
     calcTotals();
     if (document.querySelectorAll('#items-container .document-item').length === 0) addItem();
 });

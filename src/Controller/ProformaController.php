@@ -90,6 +90,47 @@ class ProformaController extends AbstractController
         ]);
     }
 
+    #[Route('/api/template/{id}/items', name: 'app_proforma_template_items', methods: ['GET'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function getTemplateItems(int $id): Response
+    {
+        $template = $this->templateRepository->find($id);
+        
+        if (!$template) {
+            return $this->json(['error' => 'Template not found'], 404);
+        }
+        
+        $items = [];
+        foreach ($template->getItems() as $item) {
+            $items[] = [
+                'productId' => $item->getProduct()?->getId(),
+                'designation' => $item->getDesignation(),
+                'description' => $item->getDescription(),
+                'quantity' => $item->getQuantityFloat(),
+                'unitPrice' => $item->getUnitPriceFloat(),
+                'discount' => $item->getDiscountFloat(),
+                'unit' => $item->getUnit(),
+            ];
+        }
+        
+        return $this->json([
+            'items' => $items,
+            'object' => $template->getDefaultObject() ?? $template->getName(),
+            'conditions' => $template->getDefaultConditions(),
+            'notes' => $template->getDefaultNotes(),
+        ]);
+    }
+
+    #[Route('/from-template', name: 'app_proforma_from_template', methods: ['GET'])]
+    #[IsGranted('ROLE_COMMERCIAL')]
+    public function fromTemplate(): Response
+    {
+        return $this->render('proforma/from_template.html.twig', [
+            'templates' => $this->templateRepository->findBy(['isActive' => true], ['name' => 'ASC']),
+            'clients' => $this->clientRepository->findBy(['isArchived' => false], ['name' => 'ASC']),
+        ]);
+    }
+
     #[Route('/new', name: 'app_proforma_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_COMMERCIAL')]
     public function new(Request $request): Response

@@ -5,7 +5,7 @@
     <title>Proforma {{ proforma.reference }}</title>
     <style>
         @page {
-            margin: 10mm 12mm 15mm 12mm;
+            margin: 15mm 15mm 20mm 15mm;
             size: A4;
         }
         
@@ -22,7 +22,7 @@
         .header {
             display: table;
             width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
         
         .header-left {
@@ -85,7 +85,7 @@
             color: #fff;
             text-align: center;
             padding: 10px 15px;
-            margin: 12px 0;
+            margin: 15px 0;
         }
         
         .object-text { font-size: 12pt; font-weight: bold; }
@@ -94,7 +94,7 @@
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         
         .items-table th {
@@ -134,7 +134,7 @@
 
         /* AMOUNT */
         .amount-section {
-            margin: 12px 0;
+            margin: 15px 0;
             font-size: 10pt;
             font-style: italic;
         }
@@ -143,7 +143,7 @@
 
         /* CONDITIONS */
         .conditions-section {
-            margin: 12px 0;
+            margin: 15px 0;
         }
         
         .conditions-title { font-weight: bold; text-decoration: underline; margin-bottom: 5px; font-size: 9pt; }
@@ -171,7 +171,7 @@
             left: 0;
             right: 0;
             text-align: center;
-            padding: 8px 12mm;
+            padding: 8px 15mm;
             border-top: 2px solid #0066CC;
             font-size: 8pt;
         }
@@ -210,7 +210,7 @@
                 <div class="emetteur-details">
                     {% if settings.address %}{{ settings.address }}<br>{% endif %}
                     {% if settings.postalCode %}BP : {{ settings.postalCode }} {% endif %}{{ settings.city ?? 'Yaoundé' }}<br>
-                    {% if settings.phone %}Tél.: {{ settings.phone }}{% if settings.phone2 %} /{{ settings.phone2 }}{% endif %}<br>{% endif %}
+                    {% if settings.phone %}Tél.: {{ settings.phone }}{% if settings.phone2 %} / {{ settings.phone2 }}{% endif %}<br>{% endif %}
                     {% if settings.email %}Email: {{ settings.email }}<br>{% endif %}
                     {% if settings.website %}Web: {{ settings.website }}{% endif %}
                 </div>
