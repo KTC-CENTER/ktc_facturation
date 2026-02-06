@@ -47,48 +47,66 @@
                 <!-- Logiciel -->
                 <div x-show="type === 'LOGICIEL'" x-cloak class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% if form.version is defined %}
                         <div>
                             {{ form_row(form.version) }}
                         </div>
+                        {% endif %}
+                        {% if form.licenseType is defined %}
                         <div>
                             {{ form_row(form.licenseType) }}
                         </div>
+                        {% endif %}
+                        {% if form.licenseDuration is defined %}
                         <div>
                             {{ form_row(form.licenseDuration) }}
                         </div>
+                        {% endif %}
+                        {% if form.maxUsers is defined %}
                         <div>
                             {{ form_row(form.maxUsers) }}
                         </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Matériel -->
                 <div x-show="type === 'MATERIEL'" x-cloak class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% if form.brand is defined %}
                         <div>
                             {{ form_row(form.brand) }}
                         </div>
+                        {% endif %}
+                        {% if form.model is defined %}
                         <div>
                             {{ form_row(form.model) }}
                         </div>
+                        {% endif %}
+                        {% if form.warrantyMonths is defined %}
                         <div>
                             {{ form_row(form.warrantyMonths) }}
                         </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Service -->
                 <div x-show="type === 'SERVICE'" x-cloak class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% if form.durationHours is defined %}
                         <div>
                             {{ form_row(form.durationHours) }}
                         </div>
+                        {% endif %}
                     </div>
                 </div>
 
+                {% if form.characteristics is defined %}
                 <div class="mt-4">
                     {{ form_row(form.characteristics) }}
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>

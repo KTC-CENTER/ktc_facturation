@@ -13,6 +13,7 @@
             font-family: 'DejaVu Sans', Arial, sans-serif; 
             font-size: 8pt; 
             color: #333;
+            margin: 25px;
         }
         
         /* Header with company info */
@@ -25,7 +26,7 @@
         }
         .header-left { display: table-cell; width: 60%; vertical-align: middle; }
         .header-right { display: table-cell; width: 40%; vertical-align: middle; text-align: right; }
-        .logo { max-height: 45px; max-width: 130px; }
+        .logo { max-height: 50px; max-width: 140px; }
         .company-name { font-size: 14pt; font-weight: bold; color: #5B8BA0; }
         .company-slogan { font-size: 7pt; color: #5B8BA0; font-style: italic; margin-top: 2px; }
         .company-details { font-size: 7pt; color: #555; line-height: 1.4; }
@@ -83,7 +84,7 @@
             {% else %}
                 <div class="company-name">{{ settings.companyName ?? 'KTC-Center' }}</div>
             {% endif %}
-            <div class="company-slogan">Nouvelle Vision de l'Informatique</div>
+            <div class="company-slogan">{{ settings.slogan ?? 'Nouvelle Vision de l\'Informatique' }}</div>
         </div>
         <div class="header-right">
             <div class="company-details">
