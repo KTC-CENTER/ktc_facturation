@@ -37,10 +37,12 @@ class PdfGeneratorService
     public function generateProformaPdf(Proforma $proforma, bool $saveToFile = true): string
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
+        $logoBase64 = $this->getLogoBase64($settings);
         
         $html = $this->twig->render('pdf/proforma.html.twig', [
             'proforma' => $proforma,
             'settings' => $settings,
+            'logo_base64' => $logoBase64,
         ]);
 
         return $this->generatePdf($html, "proforma_{$proforma->getReference()}.pdf", $saveToFile);
@@ -53,10 +55,12 @@ class PdfGeneratorService
     public function generateInvoicePdf(Invoice $invoice, bool $saveToFile = true): string
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
+        $logoBase64 = $this->getLogoBase64($settings);
         
         $html = $this->twig->render('pdf/invoice.html.twig', [
             'invoice' => $invoice,
             'settings' => $settings,
+            'logo_base64' => $logoBase64,
         ]);
 
         return $this->generatePdf($html, "facture_{$invoice->getReference()}.pdf", $saveToFile);
@@ -68,29 +72,46 @@ class PdfGeneratorService
     public function generateProformaPreview(Proforma $proforma): string
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
+        $logoBase64 = $this->getLogoBase64($settings);
         
         return $this->twig->render('pdf/proforma.html.twig', [
             'proforma' => $proforma,
             'settings' => $settings,
+            'logo_base64' => $logoBase64,
         ]);
     }
 
-    /**
-     * Génère un aperçu HTML d'une facture (pour affichage navigateur)
-     */
     public function generateInvoicePreview(Invoice $invoice): string
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
+        $logoBase64 = $this->getLogoBase64($settings);
         
         return $this->twig->render('pdf/invoice.html.twig', [
             'invoice' => $invoice,
             'settings' => $settings,
+            'logo_base64' => $logoBase64,
         ]);
     }
 
     /**
-     * Génère un PDF à partir de HTML
+     * Convertit le logo de l'entreprise en base64 pour l'intégrer dans les PDFs
      */
+    private function getLogoBase64($settings): ?string
+    {
+        if (!$settings->getLogoPath()) {
+            return null;
+        }
+
+        $logoPath = $this->uploadsDir . '/logo/' . $settings->getLogoPath();
+        if (!file_exists($logoPath)) {
+            return null;
+        }
+
+        $mimeType = mime_content_type($logoPath) ?: 'image/png';
+        $data = file_get_contents($logoPath);
+        return 'data:' . $mimeType . ';base64,' . base64_encode($data);
+    }
+
     private function generatePdf(string $html, string $filename, bool $saveToFile = true): string
     {
         $options = new Options();

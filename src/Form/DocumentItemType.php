@@ -24,12 +24,20 @@ class DocumentItemType extends AbstractType
                 'choice_label' => function (Product $product) {
                     return sprintf('%s - %s', $product->getCode(), $product->getName());
                 },
+                'choice_attr' => function (Product $product) {
+                    return [
+                        'data-name' => $product->getName(),
+                        'data-code' => $product->getCode(),
+                        'data-price' => $product->getUnitPriceFloat(),
+                        'data-description' => $product->getDescription() ?? '',
+                        'data-unit' => $product->getUnit() ?? '',
+                    ];
+                },
                 'label' => 'Produit',
                 'placeholder' => 'Sélectionner ou saisir manuellement',
                 'required' => false,
                 'attr' => [
                     'class' => 'form-select product-select',
-                    'data-action' => 'change->document-items#loadProduct',
                 ],
                 'query_builder' => function ($repository) {
                     return $repository->createQueryBuilder('p')
@@ -78,6 +86,7 @@ class DocumentItemType extends AbstractType
                 'label' => 'Remise (%)',
                 'required' => false,
                 'scale' => 2,
+                'empty_data' => '0',
                 'attr' => [
                     'placeholder' => '0',
                     'class' => 'form-input discount-input',
@@ -91,6 +100,7 @@ class DocumentItemType extends AbstractType
                 'attr' => [
                     'class' => 'sort-order-input',
                 ],
+                'empty_data' => '0',
             ])
         ;
     }

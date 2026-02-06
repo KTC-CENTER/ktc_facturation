@@ -141,9 +141,9 @@ class DocumentItem
         return $this->discount;
     }
 
-    public function setDiscount(string $discount): static
+    public function setDiscount(?string $discount): static
     {
-        $this->discount = $discount;
+        $this->discount = $discount ?? '0.00';
         $this->calculateTotal();
         return $this;
     }
@@ -174,9 +174,9 @@ class DocumentItem
         return $this->sortOrder;
     }
 
-    public function setSortOrder(int $sortOrder): static
+    public function setSortOrder(?int $sortOrder): static
     {
-        $this->sortOrder = $sortOrder;
+        $this->sortOrder = $sortOrder ?? 0;
         return $this;
     }
 

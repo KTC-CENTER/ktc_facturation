@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notifications - Emails groupés{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
+        <p class="text-gray-600 mt-1">Envoyez des emails à un ou plusieurs clients</p>
+    </div>
+
+    <form method="post" action="{{ path('app_notification_send') }}" class="space-y-6">
+        <!-- Message -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">Rédiger le message</h3>
+            </div>
+            <div class="card-body space-y-4">
+                <div>
+                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Sujet <span class="text-red-500">*</span></label>
+                    <input type="text" name="subject" id="subject" required
+                           class="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                           placeholder="Objet de l'email">
+                </div>
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message <span class="text-red-500">*</span></label>
+                    <textarea name="message" id="message" rows="8" required
+                              class="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                              placeholder="Votre message..."></textarea>
+                    <p class="mt-1 text-xs text-gray-500">Le nom du client sera automatiquement ajouté en début de message (Bonjour [Nom du client]).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Client Selection -->
+        <div class="card">
+            <div class="card-header flex items-center justify-between">
+                <h3 class="font-semibold text-gray-900">
+                    Sélectionner les destinataires
+                    <span class="text-sm font-normal text-gray-500" id="selected-count">(0 sélectionné(s))</span>
+                </h3>
+                <div class="flex items-center gap-3">
+                    <input type="text" id="client-search" placeholder="Rechercher..."
+                           class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" id="select-all" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        Tout sélectionner
+                    </label>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="max-h-96 overflow-y-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr class="text-xs uppercase text-gray-500">
+                                <th class="w-10 px-4 py-3"></th>
+                                <th class="px-4 py-3 text-left">Client</th>
+                                <th class="px-4 py-3 text-left">Email</th>
+                                <th class="px-4 py-3 text-left">Téléphone</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clients-list">
+                            {% for client in clients %}
+                            <tr class="client-row border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer" data-name="{{ client.name|lower }}">
+                                <td class="px-4 py-3">
+                                    <input type="checkbox" name="clients[]" value="{{ client.id }}"
+                                           class="client-checkbox h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="font-medium text-gray-900">{{ client.name }}</div>
+                                    {% if client.contactName %}<div class="text-xs text-gray-500">{{ client.contactName }}</div>{% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ client.email }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">{{ client.phone|default('-') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-gray-500">Aucun client avec une adresse email</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-500">
+                <span id="send-count">0</span> destinataire(s) sélectionné(s)
+            </p>
+            <div class="flex items-center gap-3">
+                <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary" id="send-btn" disabled>
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                    </svg>
+                    Envoyer les emails
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var checkboxes = document.querySelectorAll('.client-checkbox');
+    var selectAll = document.getElementById('select-all');
+    var search = document.getElementById('client-search');
+    var sendBtn = document.getElementById('send-btn');
+
+    function updateCount() {
+        var count = document.querySelectorAll('.client-checkbox:checked').length;
+        document.getElementById('selected-count').textContent = '(' + count + ' sélectionné' + (count > 1 ? 's' : '') + ')';
+        document.getElementById('send-count').textContent = count;
+        sendBtn.disabled = count === 0;
+    }
+
+    checkboxes.forEach(function(cb) { cb.addEventListener('change', updateCount); });
+
+    // Click row to toggle checkbox
+    document.querySelectorAll('.client-row').forEach(function(row) {
+        row.addEventListener('click', function(e) {
+            if (e.target.type === 'checkbox') return;
+            var cb = row.querySelector('.client-checkbox');
+            cb.checked = !cb.checked;
+            updateCount();
+        });
+    });
+
+    selectAll.addEventListener('change', function() {
+        var visible = document.querySelectorAll('.client-row:not([style*="display: none"]) .client-checkbox');
+        visible.forEach(function(cb) { cb.checked = selectAll.checked; });
+        updateCount();
+    });
+
+    search.addEventListener('input', function() {
+        var term = this.value.toLowerCase();
+        document.querySelectorAll('.client-row').forEach(function(row) {
+            row.style.display = row.dataset.name.includes(term) ? '' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

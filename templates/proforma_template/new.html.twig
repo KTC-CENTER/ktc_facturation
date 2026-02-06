@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau modèle de proforma{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <div>
+        <nav class="text-sm text-gray-500 mb-2">
+            <a href="{{ path('app_proforma_template_index') }}" class="hover:text-blue-600">Modèles</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-900">Nouveau</span>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900">Nouveau modèle de proforma</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="space-y-6">
+                <div>
+                    <label for="name" class="form-label">Nom du modèle <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="name" required class="form-input" placeholder="Ex: Maintenance annuelle">
+                </div>
+                <div>
+                    <label for="description" class="form-label">Description</label>
+                    <textarea name="description" id="description" rows="2" class="form-textarea" placeholder="Description du modèle"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="validityDays" class="form-label">Validité (jours)</label>
+                        <input type="number" name="validityDays" id="validityDays" value="30" min="1" class="form-input">
+                    </div>
+                    <div>
+                        <label for="taxRate" class="form-label">Taux TVA (%)</label>
+                        <input type="number" name="taxRate" id="taxRate" value="19.25" step="0.01" class="form-input">
+                    </div>
+                </div>
+                <div>
+                    <label for="conditions" class="form-label">Conditions</label>
+                    <textarea name="conditions" id="conditions" rows="4" class="form-textarea" placeholder="Conditions générales..."></textarea>
+                </div>
+                <div class="flex justify-end gap-3 pt-4 border-t">
+                    <a href="{{ path('app_proforma_template_index') }}" class="btn btn-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Créer le modèle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
