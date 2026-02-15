@@ -98,6 +98,9 @@ jobs:
           BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
           BREVO_SENDER_NAME="${{ secrets.BREVO_SENDER_NAME }}"
           ENVEOF
+          sed -i 's/^[[:space:]]*//' /tmp/.env
+          scp /tmp/.env root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/.env
+          rm -f /tmp/.env
 
       - name: Deploy with Docker
         run: |

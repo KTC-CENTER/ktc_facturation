@@ -67,7 +67,7 @@ services:
     env_file:
       - .env
     ports:
-      - "127.0.0.1:8091:80"
+      - "8091:80"
     environment:
       PMA_HOST: ktc-invoice-db
       PMA_PASSWORD: "${DB_PASSWORD}"
