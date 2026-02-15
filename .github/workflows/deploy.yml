@@ -123,6 +123,7 @@ jobs:
               docker exec ktc-invoice-app php bin/console cache:warmup --env=prod || true
               docker exec ktc-invoice-app chown -R www-data:www-data var public/uploads public/build
               docker exec ktc-invoice-app chmod -R 775 var public/uploads
+              docker exec ktc-invoice-app php bin/console doctrine:fixtures:load --group=prod --append --no-interaction --env=prod || true
               echo "Deployment completed!"
             else
               docker logs ktc-invoice-app --tail 50

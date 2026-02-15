@@ -9,52 +9,79 @@ use App\Entity\ProformaTemplate;
 use App\Entity\TemplateItem;
 use App\Entity\CompanySettings;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements FixtureGroupInterface
 {
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher
-    ) {}
+    ) {
+    }
+
+    public static function getGroups(): array
+    {
+        return ['dev', 'prod'];
+    }
 
     public function load(ObjectManager $manager): void
     {
         // Paramètres entreprise
-        $settings = $this->createCompanySettings();
-        $manager->persist($settings);
+        $settings = $this->createCompanySettings($manager);
 
         // Utilisateurs
         $users = $this->createUsers($manager);
 
         // Clients
-        $clients = $this->createClients($manager);
+        $this->createClients($manager);
 
         // Produits
         $products = $this->createProducts($manager);
 
         // Modèles préconfigurés
-        $this->createTemplates($manager, $products, $users['super_admin']);
+        $superAdmin = $users['super_admin'] ?? null;
+        if ($superAdmin && !empty($products)) {
+            $this->createTemplates($manager, $products, $superAdmin);
+        }
 
         $manager->flush();
     }
 
-    private function createCompanySettings(): CompanySettings
+    private function createCompanySettings(ObjectManager $manager): ?CompanySettings
     {
+        $existing = $manager->getRepository(CompanySettings::class)->findOneBy([]);
+        if ($existing) {
+            return $existing;
+        }
+
         $settings = new CompanySettings();
         $settings->setCompanyName('KTC-Center Sarl');
         $settings->setAddress('Yaoundé, Cameroun');
+        $settings->setCountry('Cameroun');
         $settings->setPhone('+237 XXX XXX XXX');
         $settings->setEmail('contact@ktc-center.com');
-        $settings->setWebsite('www.ktc-center.com');
+        $settings->setWebsite('http://www.ktc-center.com');
         $settings->setRccm('RC/YAO/2016/A/3141');
         $settings->setTaxId('M016200025487C');
         $settings->setCurrency('FCFA');
         $settings->setDefaultTaxRate('19.25');
         $settings->setProformaPrefix('PROV');
         $settings->setInvoicePrefix('FAC');
+        $settings->setProformaStartNumber(1);
+        $settings->setInvoiceStartNumber(1);
+        $settings->setProformaCurrentNumber(0);
+        $settings->setInvoiceCurrentNumber(0);
         $settings->setDefaultValidityDays(30);
         $settings->setDefaultPaymentDays(30);
+        $settings->setSenderEmail('sale@kamer-center.net');
+        $settings->setSenderName('KTC-CENTER');
+        $settings->setReplyToEmail('sale@kamer-center.net');
+        $settings->setTimezone('Africa/Douala');
+        $settings->setLocale('fr');
+        $settings->setDateFormat('d/m/Y');
+
+        $manager->persist($settings);
 
         return $settings;
     }
@@ -62,65 +89,84 @@ class AppFixtures extends Fixture
     private function createUsers(ObjectManager $manager): array
     {
         $users = [];
+        $repo = $manager->getRepository(User::class);
 
         // Super Admin
-        $superAdmin = new User();
-        $superAdmin->setEmail('admin@ktc-center.com');
-        $superAdmin->setFirstName('Admin');
-        $superAdmin->setLastName('KTC');
-        $superAdmin->setPhone('+237 600 000 001');
-        $superAdmin->setRoles([User::ROLE_SUPER_ADMIN]);
-        $superAdmin->setIsActive(true);
-        $superAdmin->setPassword($this->passwordHasher->hashPassword($superAdmin, 'admin123'));
-        $manager->persist($superAdmin);
-        $users['super_admin'] = $superAdmin;
+        $existing = $repo->findOneBy(['email' => 'admin@kamer-center.net']);
+        if (!$existing) {
+            $superAdmin = new User();
+            $superAdmin->setEmail('admin@kamer-center.net');
+            $superAdmin->setFirstName('Admin');
+            $superAdmin->setLastName('KTC');
+            $superAdmin->setPhone('+237 600 000 001');
+            $superAdmin->setRoles([User::ROLE_SUPER_ADMIN]);
+            $superAdmin->setIsActive(true);
+            $superAdmin->setPassword($this->passwordHasher->hashPassword($superAdmin, 'Super@2026!'));
+            $manager->persist($superAdmin);
+            $users['super_admin'] = $superAdmin;
+        } else {
+            $users['super_admin'] = $existing;
+        }
 
         // Admin
-        $admin = new User();
-        $admin->setEmail('gestionnaire@ktc-center.com');
-        $admin->setFirstName('Jean');
-        $admin->setLastName('Dupont');
-        $admin->setPhone('+237 600 000 002');
-        $admin->setRoles([User::ROLE_ADMIN]);
-        $admin->setIsActive(true);
-        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'admin123'));
-        $manager->persist($admin);
-        $users['admin'] = $admin;
+        $existing = $repo->findOneBy(['email' => 'gestionnaire@ktc-center.com']);
+        if (!$existing) {
+            $admin = new User();
+            $admin->setEmail('gestionnaire@ktc-center.com');
+            $admin->setFirstName('Jean');
+            $admin->setLastName('Dupont');
+            $admin->setPhone('+237 600 000 002');
+            $admin->setRoles([User::ROLE_ADMIN]);
+            $admin->setIsActive(true);
+            $admin->setPassword($this->passwordHasher->hashPassword($admin, 'admin123'));
+            $manager->persist($admin);
+            $users['admin'] = $admin;
+        }
 
-        // Commerciaux
-        $commercial1 = new User();
-        $commercial1->setEmail('commercial@ktc-center.com');
-        $commercial1->setFirstName('Marie');
-        $commercial1->setLastName('Mbarga');
-        $commercial1->setPhone('+237 600 000 003');
-        $commercial1->setRoles([User::ROLE_COMMERCIAL]);
-        $commercial1->setIsActive(true);
-        $commercial1->setPassword($this->passwordHasher->hashPassword($commercial1, 'commercial123'));
-        $manager->persist($commercial1);
-        $users['commercial1'] = $commercial1;
+        // Commercial 1
+        $existing = $repo->findOneBy(['email' => 'commercial@ktc-center.com']);
+        if (!$existing) {
+            $commercial1 = new User();
+            $commercial1->setEmail('commercial@ktc-center.com');
+            $commercial1->setFirstName('Marie');
+            $commercial1->setLastName('Mbarga');
+            $commercial1->setPhone('+237 600 000 003');
+            $commercial1->setRoles([User::ROLE_COMMERCIAL]);
+            $commercial1->setIsActive(true);
+            $commercial1->setPassword($this->passwordHasher->hashPassword($commercial1, 'commercial123'));
+            $manager->persist($commercial1);
+            $users['commercial1'] = $commercial1;
+        }
 
-        $commercial2 = new User();
-        $commercial2->setEmail('commercial2@ktc-center.com');
-        $commercial2->setFirstName('Pierre');
-        $commercial2->setLastName('Nkono');
-        $commercial2->setPhone('+237 600 000 004');
-        $commercial2->setRoles([User::ROLE_COMMERCIAL]);
-        $commercial2->setIsActive(true);
-        $commercial2->setPassword($this->passwordHasher->hashPassword($commercial2, 'commercial123'));
-        $manager->persist($commercial2);
-        $users['commercial2'] = $commercial2;
+        // Commercial 2
+        $existing = $repo->findOneBy(['email' => 'commercial2@ktc-center.com']);
+        if (!$existing) {
+            $commercial2 = new User();
+            $commercial2->setEmail('commercial2@ktc-center.com');
+            $commercial2->setFirstName('Pierre');
+            $commercial2->setLastName('Nkono');
+            $commercial2->setPhone('+237 600 000 004');
+            $commercial2->setRoles([User::ROLE_COMMERCIAL]);
+            $commercial2->setIsActive(true);
+            $commercial2->setPassword($this->passwordHasher->hashPassword($commercial2, 'commercial123'));
+            $manager->persist($commercial2);
+            $users['commercial2'] = $commercial2;
+        }
 
         // Viewer
-        $viewer = new User();
-        $viewer->setEmail('viewer@ktc-center.com');
-        $viewer->setFirstName('Paul');
-        $viewer->setLastName('Essomba');
-        $viewer->setPhone('+237 600 000 005');
-        $viewer->setRoles([User::ROLE_VIEWER]);
-        $viewer->setIsActive(true);
-        $viewer->setPassword($this->passwordHasher->hashPassword($viewer, 'viewer123'));
-        $manager->persist($viewer);
-        $users['viewer'] = $viewer;
+        $existing = $repo->findOneBy(['email' => 'viewer@ktc-center.com']);
+        if (!$existing) {
+            $viewer = new User();
+            $viewer->setEmail('viewer@ktc-center.com');
+            $viewer->setFirstName('Paul');
+            $viewer->setLastName('Essomba');
+            $viewer->setPhone('+237 600 000 005');
+            $viewer->setRoles([User::ROLE_VIEWER]);
+            $viewer->setIsActive(true);
+            $viewer->setPassword($this->passwordHasher->hashPassword($viewer, 'viewer123'));
+            $manager->persist($viewer);
+            $users['viewer'] = $viewer;
+        }
 
         return $users;
     }
@@ -128,6 +174,7 @@ class AppFixtures extends Fixture
     private function createClients(ObjectManager $manager): array
     {
         $clients = [];
+        $repo = $manager->getRepository(Client::class);
 
         $clientsData = [
             [
@@ -181,6 +228,13 @@ class AppFixtures extends Fixture
         ];
 
         foreach ($clientsData as $data) {
+            // Vérifier si le client existe déjà
+            $existing = $repo->findOneBy(['email' => $data['email']]);
+            if ($existing) {
+                $clients[] = $existing;
+                continue;
+            }
+
             $client = new Client();
             $client->setName($data['name']);
             $client->setEmail($data['email'] ?? null);
@@ -203,6 +257,7 @@ class AppFixtures extends Fixture
     private function createProducts(ObjectManager $manager): array
     {
         $products = [];
+        $repo = $manager->getRepository(Product::class);
 
         // LOGICIELS
         $logiciels = [
@@ -239,6 +294,12 @@ class AppFixtures extends Fixture
         ];
 
         foreach ($logiciels as $data) {
+            $existing = $repo->findOneBy(['code' => $data['code']]);
+            if ($existing) {
+                $products[$data['code']] = $existing;
+                continue;
+            }
+
             $product = new Product();
             $product->setName($data['name']);
             $product->setCode($data['code']);
@@ -299,6 +360,12 @@ class AppFixtures extends Fixture
         ];
 
         foreach ($materiels as $data) {
+            $existing = $repo->findOneBy(['code' => $data['code']]);
+            if ($existing) {
+                $products[$data['code']] = $existing;
+                continue;
+            }
+
             $product = new Product();
             $product->setName($data['name']);
             $product->setCode($data['code']);
@@ -354,6 +421,12 @@ class AppFixtures extends Fixture
         ];
 
         foreach ($services as $data) {
+            $existing = $repo->findOneBy(['code' => $data['code']]);
+            if ($existing) {
+                $products[$data['code']] = $existing;
+                continue;
+            }
+
             $product = new Product();
             $product->setName($data['name']);
             $product->setCode($data['code']);
@@ -371,71 +444,78 @@ class AppFixtures extends Fixture
 
     private function createTemplates(ObjectManager $manager, array $products, User $createdBy): void
     {
+        $repo = $manager->getRepository(ProformaTemplate::class);
+
         // Template CHURCH 3.0 EN LIGNE
-        $template = new ProformaTemplate();
-        $template->setName('CHURCH 3.0 EN LIGNE');
-        $template->setDescription('Pack complet logiciel CHURCH 3.0 avec matériel et services');
-        $template->setCategory('Paroisses');
-        $template->setDefaultNotes('Ce pack comprend tout le nécessaire pour démarrer avec CHURCH 3.0');
-        $template->setDefaultConditions("Validité de l'offre : 30 jours\nPaiement : 100% à la commande");
-        $template->setIsActive(true);
-        $template->setCreatedBy($createdBy);
+        $existing = $repo->findOneBy(['name' => 'CHURCH 3.0 EN LIGNE']);
+        if (!$existing) {
+            $template = new ProformaTemplate();
+            $template->setName('CHURCH 3.0 EN LIGNE');
+            $template->setDescription('Pack complet logiciel CHURCH 3.0 avec matériel et services');
+            $template->setCategory('Paroisses');
+            $template->setDefaultNotes('Ce pack comprend tout le nécessaire pour démarrer avec CHURCH 3.0');
+            $template->setDefaultConditions("Validité de l'offre : 30 jours\nPaiement : 100% à la commande");
+            $template->setIsActive(true);
+            $template->setCreatedBy($createdBy);
 
-        // Ajouter les éléments du template
-        $items = [
-            ['code' => 'LOG-CHURCH', 'quantity' => 1, 'optional' => false, 'sortOrder' => 1],
-            ['code' => 'MAT-DESKTOP', 'quantity' => 2, 'optional' => true, 'price' => 0, 'sortOrder' => 2],
-            ['code' => 'MAT-IMP-TICKET', 'quantity' => 2, 'optional' => true, 'price' => 0, 'sortOrder' => 3],
-            ['code' => 'MAT-SWITCH', 'quantity' => 1, 'optional' => true, 'price' => 0, 'sortOrder' => 4],
-            ['code' => 'SRV-WEBSITE', 'quantity' => 1, 'optional' => true, 'price' => 0, 'sortOrder' => 5],
-            ['code' => 'SRV-SUPPORT', 'quantity' => 1, 'optional' => true, 'price' => 0, 'sortOrder' => 6],
-            ['code' => 'SRV-SMS', 'quantity' => 1, 'optional' => true, 'price' => 0, 'sortOrder' => 7],
-        ];
+            $items = [
+                ['code' => 'LOG-CHURCH', 'quantity' => 1, 'optional' => false, 'sortOrder' => 1],
+                ['code' => 'MAT-DESKTOP', 'quantity' => 2, 'optional' => true, 'price' => 0, 'sortOrder' => 2],
+                ['code' => 'MAT-IMP-TICKET', 'quantity' => 2, 'optional' => true, 'price' => 0, 'sortOrder' => 3],
+                ['code' => 'MAT-SWITCH', 'quantity' => 1, 'optional' => true, 'price' => 0, 'sortOrder' => 4],
+                ['code' => 'SRV-WEBSITE', 'quantity' => 1, 'optional' => true, 'price' => 0, 'sortOrder' => 5],
+                ['code' => 'SRV-SUPPORT', 'quantity' => 1, 'optional' => true, 'price' => 0, 'sortOrder' => 6],
+                ['code' => 'SRV-SMS', 'quantity' => 1, 'optional' => true, 'price' => 0, 'sortOrder' => 7],
+            ];
 
-        foreach ($items as $itemData) {
-            if (isset($products[$itemData['code']])) {
-                $item = new TemplateItem();
-                $item->setTemplate($template);
-                $item->setProduct($products[$itemData['code']]);
-                $item->setQuantity((string) $itemData['quantity']);
-                $item->setIsOptional($itemData['optional']);
-                $item->setSortOrder($itemData['sortOrder']);
-                if (isset($itemData['price'])) {
-                    $item->setUnitPrice((string) $itemData['price']);
+            foreach ($items as $itemData) {
+                if (isset($products[$itemData['code']])) {
+                    $item = new TemplateItem();
+                    $item->setTemplate($template);
+                    $item->setProduct($products[$itemData['code']]);
+                    $item->setQuantity((string) $itemData['quantity']);
+                    $item->setIsOptional($itemData['optional']);
+                    $item->setSortOrder($itemData['sortOrder']);
+                    if (isset($itemData['price'])) {
+                        $item->setUnitPrice((string) $itemData['price']);
+                    }
+                    $manager->persist($item);
                 }
-                $manager->persist($item);
             }
-        }
 
-        $manager->persist($template);
+            $manager->persist($template);
+        }
 
         // Template Pack Comptabilité
-        $template2 = new ProformaTemplate();
-        $template2->setName('Pack Comptabilité PME');
-        $template2->setDescription('Solution comptable complète pour PME');
-        $template2->setCategory('Entreprises');
-        $template2->setIsActive(true);
-        $template2->setCreatedBy($createdBy);
+        $existing = $repo->findOneBy(['name' => 'Pack Comptabilité PME']);
+        if (!$existing) {
+            $template2 = new ProformaTemplate();
+            $template2->setName('Pack Comptabilité PME');
+            $template2->setDescription('Solution comptable complète pour PME');
+            $template2->setCategory('Entreprises');
+            $template2->setIsActive(true);
+            $template2->setCreatedBy($createdBy);
 
-        $items2 = [
-            ['code' => 'LOG-COMPTA', 'quantity' => 1, 'optional' => false, 'sortOrder' => 1],
-            ['code' => 'MAT-DESKTOP', 'quantity' => 1, 'optional' => true, 'sortOrder' => 2],
-            ['code' => 'MAT-ONDULEUR', 'quantity' => 1, 'optional' => true, 'sortOrder' => 3],
-            ['code' => 'SRV-FORMATION', 'quantity' => 1, 'optional' => false, 'sortOrder' => 4],
-        ];
+            $items2 = [
+                ['code' => 'LOG-COMPTA', 'quantity' => 1, 'optional' => false, 'sortOrder' => 1],
+                ['code' => 'MAT-DESKTOP', 'quantity' => 1, 'optional' => true, 'sortOrder' => 2],
+                ['code' => 'MAT-ONDULEUR', 'quantity' => 1, 'optional' => true, 'sortOrder' => 3],
+                ['code' => 'SRV-FORMATION', 'quantity' => 1, 'optional' => false, 'sortOrder' => 4],
+            ];
 
-        foreach ($items2 as $itemData) {
-            if (isset($products[$itemData['code']])) {
-                $item = new TemplateItem();
-                $item->setTemplate($template2);
-                $item->setProduct($products[$itemData['code']]);
-                $item->setQuantity((string) $itemData['quantity']);
-                $item->setIsOptional($itemData['optional']);
-                $item->setSortOrder($itemData['sortOrder']);
-                $manager->persist($item);
+            foreach ($items2 as $itemData) {
+                if (isset($products[$itemData['code']])) {
+                    $item = new TemplateItem();
+                    $item->setTemplate($template2);
+                    $item->setProduct($products[$itemData['code']]);
+                    $item->setQuantity((string) $itemData['quantity']);
+                    $item->setIsOptional($itemData['optional']);
+                    $item->setSortOrder($itemData['sortOrder']);
+                    $manager->persist($item);
+                }
             }
-        }
 
-        $manager->persist($template2);
+            $manager->persist($template2);
+        }
     }
 }
