@@ -82,9 +82,9 @@ jobs:
             echo "SSL certificate already exists"
           fi'
 
-      - name: Deploy .env.prod to server
+      - name: Deploy .env to server
         run: |
-          cat > /tmp/.env.prod << ENVEOF
+          cat > /tmp/.env << ENVEOF
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
           APP_SECRET=${{ secrets.APP_SECRET }}
@@ -98,9 +98,6 @@ jobs:
           BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
           BREVO_SENDER_NAME="${{ secrets.BREVO_SENDER_NAME }}"
           ENVEOF
-          sed -i 's/^[[:space:]]*//' /tmp/.env.prod
-          scp /tmp/.env.prod root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/.env.prod
-          rm -f /tmp/.env.prod
 
       - name: Deploy with Docker
         run: |
