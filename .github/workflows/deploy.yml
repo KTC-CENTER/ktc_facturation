@@ -16,21 +16,21 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: pdo_mysql, mbstring, gd, zip, intl, opcache
           coverage: none
-      
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-scripts
-      
+
       - name: Check Symfony requirements
         run: php bin/console about || true
 
@@ -38,25 +38,25 @@ jobs:
     name: Deploy to VPS
     needs: test
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup SSH Key
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
-      
+
       - name: Add VPS to known hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ env.VPS_IP }} >> ~/.ssh/known_hosts
-      
+
       - name: Create deployment directories
         run: |
           ssh root@${{ env.VPS_IP }} "mkdir -p ${{ env.APP_DIR }} /etc/letsencrypt ${{ env.APP_DIR }}/certbot/www ${{ env.APP_DIR }}/var/cache ${{ env.APP_DIR }}/var/log ${{ env.APP_DIR }}/public/uploads/logo ${{ env.APP_DIR }}/public/uploads/pdf"
-      
+
       - name: Sync application files
         run: |
           rsync -avz --delete \
@@ -66,9 +66,10 @@ jobs:
             --exclude 'var/log/*' \
             --exclude '.env.local' \
             --exclude '.env' \
+            --exclude '.env.prod' \
             --exclude 'public/uploads/*' \
             ./ root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/
-      
+
       - name: Install SSL Certificate
         run: |
           ssh root@${{ env.VPS_IP }} 'if [ ! -f "/etc/letsencrypt/live/${{ env.DOMAIN }}/fullchain.pem" ]; then
@@ -80,24 +81,27 @@ jobs:
           else
             echo "SSL certificate already exists"
           fi'
-      
-      - name: Create environment file
+
+      - name: Deploy .env.prod to server
         run: |
-          ssh root@${{ env.VPS_IP }} "cat > ${{ env.APP_DIR }}/.env << 'EOF'
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
-            APP_SECRET=${{ secrets.APP_SECRET }}
-            APP_LOCALE=${{ secrets.APP_LOCALE }}
-            APP_TIMEZONE=${{ secrets.APP_TIMEZONE }}
-            APP_NAME=${{ secrets.APP_NAME }}
-            DEFAULT_CURRENCY=${{ secrets.DEFAULT_CURRENCY }}
-            DEFAULT_TAX_RATE=${{ secrets.DEFAULT_TAX_RATE }}
-            MAILER_DSN=${{ secrets.MAILER_DSN }}
-            BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
-            BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
-            BREVO_SENDER_NAME=${{ secrets.BREVO_SENDER_NAME }}
-            EOF"
-      
+          cat > /tmp/.env.prod << ENVEOF
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+          APP_SECRET=${{ secrets.APP_SECRET }}
+          APP_LOCALE=${{ secrets.APP_LOCALE }}
+          APP_TIMEZONE=${{ secrets.APP_TIMEZONE }}
+          APP_NAME=${{ secrets.APP_NAME }}
+          DEFAULT_CURRENCY=${{ secrets.DEFAULT_CURRENCY }}
+          DEFAULT_TAX_RATE=${{ secrets.DEFAULT_TAX_RATE }}
+          MAILER_DSN=${{ secrets.MAILER_DSN }}
+          BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
+          BREVO_SENDER_NAME=${{ secrets.BREVO_SENDER_NAME }}
+          ENVEOF
+          sed -i 's/^[[:space:]]*//' /tmp/.env.prod
+          scp /tmp/.env.prod root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/.env.prod
+          rm -f /tmp/.env.prod
+
       - name: Deploy with Docker
         run: |
           ssh root@${{ env.VPS_IP }} 'cd ${{ env.APP_DIR }} && \
@@ -124,7 +128,7 @@ jobs:
               docker logs ktc-invoice-app --tail 50
               exit 1
             fi'
-      
+
       - name: Health Check
         run: |
           sleep 5

@@ -24,22 +24,14 @@ services:
     container_name: ktc-invoice-app
     restart: unless-stopped
     working_dir: /var/www/html
+    env_file:
+      - .env.prod
     volumes:
       - uploads-data:/var/www/html/public/uploads
     environment:
       APP_ENV: prod
       APP_DEBUG: "0"
-      APP_SECRET: "${APP_SECRET}"
-      APP_LOCALE: "${APP_LOCALE:-fr}"
-      APP_TIMEZONE: "${APP_TIMEZONE:-Africa/Douala}"
-      APP_NAME: "${APP_NAME:-KTC Invoice Pro}"
-      DEFAULT_CURRENCY: "${DEFAULT_CURRENCY:-FCFA}"
-      DEFAULT_TAX_RATE: "${DEFAULT_TAX_RATE:-19.25}"
       DATABASE_URL: "mysql://admin:${DB_PASSWORD}@ktc-invoice-db:3306/ktc_invoice?serverVersion=8.0&charset=utf8mb4"
-      MAILER_DSN: "${MAILER_DSN:-null://null}"
-      BREVO_API_KEY: "${BREVO_API_KEY}"
-      BREVO_SENDER_EMAIL: "${BREVO_SENDER_EMAIL}"
-      BREVO_SENDER_NAME: "${BREVO_SENDER_NAME:-KTC Facturation}"
     depends_on:
       ktc-invoice-db:
         condition: service_healthy
@@ -50,6 +42,8 @@ services:
     image: mysql:8.0
     container_name: ktc-invoice-mysql
     restart: unless-stopped
+    env_file:
+      - .env.prod
     environment:
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
       MYSQL_DATABASE: ktc_invoice
@@ -70,6 +64,8 @@ services:
     image: phpmyadmin:latest
     container_name: ktc-invoice-pma
     restart: unless-stopped
+    env_file:
+      - .env.prod
     ports:
       - "127.0.0.1:8091:80"
     environment:
