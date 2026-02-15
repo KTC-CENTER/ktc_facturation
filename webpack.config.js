@@ -42,6 +42,9 @@ Encore
     // Active l'intégration avec Hotwired Turbo
     .splitEntryChunks()
 
+    // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
+    .enableStimulusBridge('./assets/controllers.json')
+
     // Active le hashing des noms de fichiers en production
     .cleanupOutputBeforeBuild()
 

@@ -14,6 +14,7 @@
         "ext-mbstring": "*",
         "ext-pdo": "*",
         "doctrine/doctrine-bundle": "^2.11",
+        "doctrine/doctrine-fixtures-bundle": "*",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^2.17",
         "dompdf/dompdf": "^2.0",
@@ -51,7 +52,6 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "^3.5",
         "friendsofphp/php-cs-fixer": "^3.41",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.5",

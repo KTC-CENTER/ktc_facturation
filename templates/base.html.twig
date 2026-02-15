@@ -250,6 +250,7 @@
         }
     </style>
     {% block stylesheets %}{% endblock %}
+            {{ encore_entry_link_tags('app') }}
 </head>
 <body class="h-full" x-data="{ sidebarOpen: false }">
     {% if app.user %}
@@ -367,6 +368,7 @@
         });
     </script>
     {% block javascripts %}{% endblock %}
+            {{ encore_entry_script_tags('app') }}
     <script>document.body.classList.add('ready');</script>
 </body>
 </html>
