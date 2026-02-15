@@ -9,20 +9,14 @@ use App\Entity\ProformaTemplate;
 use App\Entity\TemplateItem;
 use App\Entity\CompanySettings;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class AppFixtures extends Fixture implements FixtureGroupInterface
+class AppFixtures extends Fixture
 {
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher
     ) {
-    }
-
-    public static function getGroups(): array
-    {
-        return ['dev', 'prod'];
     }
 
     public function load(ObjectManager $manager): void
