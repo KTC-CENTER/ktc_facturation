@@ -61,3 +61,7 @@ Thumbs.db
 ###> Generated PDF ###
 /var/pdf/
 ###< Generated PDF ###
+
+# Production environment
+.env.prod
+.env.local
