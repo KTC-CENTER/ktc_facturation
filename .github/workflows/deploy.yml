@@ -90,13 +90,13 @@ jobs:
           APP_SECRET=${{ secrets.APP_SECRET }}
           APP_LOCALE=${{ secrets.APP_LOCALE }}
           APP_TIMEZONE=${{ secrets.APP_TIMEZONE }}
-          APP_NAME=${{ secrets.APP_NAME }}
+          APP_NAME="${{ secrets.APP_NAME }}"
           DEFAULT_CURRENCY=${{ secrets.DEFAULT_CURRENCY }}
           DEFAULT_TAX_RATE=${{ secrets.DEFAULT_TAX_RATE }}
           MAILER_DSN=${{ secrets.MAILER_DSN }}
           BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER_EMAIL=${{ secrets.BREVO_SENDER_EMAIL }}
-          BREVO_SENDER_NAME=${{ secrets.BREVO_SENDER_NAME }}
+          BREVO_SENDER_NAME="${{ secrets.BREVO_SENDER_NAME }}"
           ENVEOF
           sed -i 's/^[[:space:]]*//' /tmp/.env.prod
           scp /tmp/.env.prod root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/.env.prod
