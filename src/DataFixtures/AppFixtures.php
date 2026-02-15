@@ -172,15 +172,6 @@ class AppFixtures extends Fixture
 
         $clientsData = [
             [
-                'name' => 'Paroisse Saint-Pierre',
-                'email' => 'contact@paroisse-st-pierre.cm',
-                'phone' => '+237 677 123 456',
-                'address' => 'Quartier Bastos',
-                'city' => 'Yaoundé',
-                'contactPerson' => 'Abbé Jean-Marie',
-                'contactPhone' => '+237 677 123 457',
-            ],
-            [
                 'name' => 'Église Évangélique du Cameroun',
                 'email' => 'secretariat@eec.cm',
                 'phone' => '+237 699 234 567',
@@ -188,36 +179,6 @@ class AppFixtures extends Fixture
                 'city' => 'Douala',
                 'contactPerson' => 'Pasteur Thomas',
                 'contactPhone' => '+237 699 234 568',
-            ],
-            [
-                'name' => 'SABC - Brasseries du Cameroun',
-                'email' => 'achats@sabc.cm',
-                'phone' => '+237 233 421 000',
-                'address' => 'Zone Industrielle Bassa',
-                'city' => 'Douala',
-                'taxId' => 'M012300045678A',
-                'rccm' => 'RC/DLA/1950/B/1234',
-                'contactPerson' => 'M. Kamga',
-                'contactPhone' => '+237 699 345 678',
-            ],
-            [
-                'name' => 'Université de Yaoundé I',
-                'email' => 'rectorat@uy1.cm',
-                'phone' => '+237 222 221 320',
-                'address' => 'Campus Ngoa-Ekelle',
-                'city' => 'Yaoundé',
-                'contactPerson' => 'Pr. Ndjodo',
-                'contactPhone' => '+237 677 456 789',
-            ],
-            [
-                'name' => 'Clinique de l\'Espoir',
-                'email' => 'direction@clinique-espoir.cm',
-                'phone' => '+237 233 456 789',
-                'address' => 'Rue de l\'Hôpital',
-                'city' => 'Bafoussam',
-                'taxId' => 'M098700012345B',
-                'contactPerson' => 'Dr. Fotso',
-                'contactPhone' => '+237 699 567 890',
             ],
         ];
 
