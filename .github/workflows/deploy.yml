@@ -55,7 +55,7 @@ jobs:
 
       - name: Create deployment directories
         run: |
-          ssh root@${{ env.VPS_IP }} "mkdir -p ${{ env.APP_DIR }} /etc/letsencrypt ${{ env.APP_DIR }}/certbot/www ${{ env.APP_DIR }}/var/cache ${{ env.APP_DIR }}/var/log ${{ env.APP_DIR }}/public/uploads/logo ${{ env.APP_DIR }}/public/uploads/pdf"
+          ssh root@${{ env.VPS_IP }} "mkdir -p ${{ env.APP_DIR }} ${{ env.APP_DIR }}/var/cache ${{ env.APP_DIR }}/var/log ${{ env.APP_DIR }}/public/uploads/logo ${{ env.APP_DIR }}/public/uploads/pdf"
 
       - name: Sync application files
         run: |
@@ -69,18 +69,6 @@ jobs:
             --exclude '.env.prod' \
             --exclude 'public/uploads/*' \
             ./ root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/
-
-      - name: Install SSL Certificate
-        run: |
-          ssh root@${{ env.VPS_IP }} 'if [ ! -f "/etc/letsencrypt/live/${{ env.DOMAIN }}/fullchain.pem" ]; then
-            apt-get update && apt-get install -y certbot
-            docker stop ktc-invoice-nginx 2>/dev/null || true
-            fuser -k 80/tcp 2>/dev/null || true
-            certbot certonly --standalone -d ${{ env.DOMAIN }} --email admin@kamer-center.net --agree-tos --non-interactive
-            echo "SSL certificate installed!"
-          else
-            echo "SSL certificate already exists"
-          fi'
 
       - name: Deploy .env to server
         run: |
@@ -105,11 +93,7 @@ jobs:
       - name: Deploy with Docker
         run: |
           ssh root@${{ env.VPS_IP }} 'cd ${{ env.APP_DIR }} && \
-            if ! command -v docker &> /dev/null; then
-              curl -fsSL https://get.docker.com | sh
-              systemctl enable docker
-              systemctl start docker
-            fi && \
+            docker network create proxy-network 2>/dev/null || true && \
             docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true && \
             docker compose -f docker-compose.prod.yml build --no-cache && \
             docker compose -f docker-compose.prod.yml up -d && \
@@ -128,7 +112,8 @@ jobs:
             else
               docker logs ktc-invoice-app --tail 50
               exit 1
-            fi'
+            fi && \
+            docker exec nginx_proxy nginx -s reload 2>/dev/null || true'
 
       - name: Health Check
         run: |
