@@ -22,9 +22,9 @@ class Invoice
     public const STATUS_OVERDUE = 'overdue';
     public const STATUS_CANCELLED = 'cancelled';
 
-    // CHANGED: "Brouillon" -> "Initiée"
+    // CHANGED: "Brouillon" -> "Initié"
     public const STATUSES = [
-        self::STATUS_DRAFT => 'Initiée',
+        self::STATUS_DRAFT => 'Initié',
         self::STATUS_SENT => 'Envoyée',
         self::STATUS_PAID => 'Payée',
         self::STATUS_PARTIAL => 'Partiellement payée',

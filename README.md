@@ -1,249 +1,123 @@
-# KTC-Invoice Pro
+# KTC Invoice Pro - Patch v19
 
-Application web professionnelle de gestion de facturation développée avec Symfony 6.4.
+## 📋 Résumé des corrections
 
-## 🎯 Fonctionnalités
+### 1. WhatsApp - Nouvel onglet ✅
+- Les liens WhatsApp s'ouvrent maintenant dans un nouvel onglet (`target="_blank"`)
+- L'utilisateur reste sur la page de la proforma/facture
 
-- **Gestion des utilisateurs** : Authentification sécurisée avec rôles (SUPER_ADMIN, ADMIN, COMMERCIAL, VIEWER)
-- **Gestion des clients** : CRUD complet avec historique des documents
-- **Catalogue produits** : Trois types (LOGICIEL, MATÉRIEL, SERVICE) avec caractéristiques spécifiques
-- **Modèles préconfigurés** : Templates réutilisables pour générer rapidement des proformas
-- **Proformas/Devis** : Création, suivi des statuts, conversion en facture
-- **Factures** : Numérotation légale, suivi des paiements
-- **Génération PDF** : Documents professionnels avec en-tête personnalisable
-- **Partage documents** : Email (Brevo), WhatsApp, liens sécurisés avec QR Code
-- **Dashboard & Rapports** : KPIs, graphiques, filtrage par période/type/commercial
+### 2. Suivi Proforma avec Timeline ✅
+- Nouvelle entité `ProformaStatusHistory` pour l'historique
+- Colonnes de dates ajoutées: `sent_at`, `accepted_at`, `refused_at`, `expired_at`, `invoiced_at`
+- Timeline visuelle sur la page de détail de la proforma
+- Dates automatiquement enregistrées lors des changements de statut
 
-## 🛠️ Stack Technique
+### 3. NumberToWordsService ✅
+- Nouveau service pour convertir les montants en lettres français
+- Gestion des millions, milliards, centimes
+- Règles françaises respectées (quatre-vingts, soixante-dix, etc.)
+- Affiché sur la page détail facture
 
-- **Backend** : PHP 8.2+, Symfony 6.4, Doctrine ORM
-- **Base de données** : MySQL 8.0
-- **Frontend** : Twig, Tailwind CSS 3, Alpine.js, Stimulus, Turbo
-- **PDF** : Dompdf
-- **Email** : Brevo (ex-Sendinblue) API v3
-- **QR Code** : endroid/qr-code
-- **Conteneurisation** : Docker & Docker Compose
+### 4. Statut "Initié" ✅
+- Remplacement de "Brouillon" par "Initié" partout
+- Entités Proforma.php et Invoice.php mises à jour
+- Templates de liste mis à jour
 
-## 📋 Prérequis
+### 5. Stats revues ✅
+- Labels mis à jour dans les statistiques des listes
+- "Initiées" au lieu de "Brouillons"
 
-- Docker & Docker Compose
-- Git
+### 6. Création proforma depuis produit ✅
+- Bouton "Créer une proforma" sur la fiche produit
+- Le produit est automatiquement ajouté comme première ligne
 
-## 🚀 Installation
-
-### Installation rapide (recommandée)
-
-```bash
-git clone https://github.com/KTC-CENTER/ktc_facturation.git
-cd ktc_facturation
-make install
-```
-
-C'est tout ! L'application est accessible sur http://localhost:8080
-
-### Installation manuelle
-
-#### 1. Cloner le projet
-
-```bash
-git clone https://github.com/KTC-CENTER/ktc_facturation.git
-cd ktc_facturation
-```
-
-#### 2. Configurer l'environnement
-
-```bash
-cp .env.example .env
-# Éditer .env avec vos configurations (API Brevo, etc.)
-```
-
-#### 3. Lancer les conteneurs Docker
-
-```bash
-docker compose up -d --build
-```
-
-#### 4. Installer les dépendances
-
-```bash
-# PHP
-docker compose exec ktc-invoice-app composer install
-
-# Les assets sont compilés automatiquement par le conteneur node
-```
-
-#### 5. Créer la base de données
-
-```bash
-docker compose exec ktc-invoice-app php bin/console doctrine:database:create --if-not-exists
-docker compose exec ktc-invoice-app php bin/console doctrine:migrations:migrate --no-interaction
-docker compose exec ktc-invoice-app php bin/console doctrine:fixtures:load --no-interaction
-```
-
-#### 6. Accéder à l'application
-
-- **Application** : http://localhost:8080
-- **phpMyAdmin** : http://localhost:8081
-- **MailHog** : http://localhost:8025
-
-## 🔧 Commandes Make utiles
-
-```bash
-make help           # Affiche toutes les commandes disponibles
-make start          # Démarre les conteneurs
-make stop           # Arrête les conteneurs
-make restart        # Redémarre les conteneurs
-make logs           # Affiche les logs
-make shell          # Accède au shell PHP
-make db-migrate     # Exécute les migrations
-make db-fixtures    # Charge les fixtures
-make db-reset       # Reset complet de la base
-make cache-clear    # Vide le cache
-make test           # Lance les tests
-```
-
-## 🔄 Hot-Reload (Développement)
-
-Les modifications sont automatiquement prises en compte :
-- **PHP/Twig** : Rechargez simplement la page
-- **CSS/JS** : Le conteneur `node` compile automatiquement en mode watch
-
-Pour voir les logs de compilation :
-```bash
-make logs-node
-```
-
-## 👤 Comptes par défaut (fixtures)
-
-| Email | Mot de passe | Rôle |
-|-------|--------------|------|
-| admin@ktc-center.com | admin123 | SUPER_ADMIN |
-| commercial@ktc-center.com | commercial123 | COMMERCIAL |
-| viewer@ktc-center.com | viewer123 | VIEWER |
-
-## 📁 Structure du projet
+## 📦 Fichiers du patch
 
 ```
-ktc-invoice-pro/
-├── assets/              # CSS, JavaScript, Stimulus controllers
-├── config/              # Configuration Symfony
-├── docker/              # Dockerfiles et configurations
-├── migrations/          # Migrations Doctrine
-├── public/              # Point d'entrée, assets compilés
+patch/
 ├── src/
-│   ├── Controller/      # Contrôleurs
-│   ├── Entity/          # Entités Doctrine
-│   ├── EventSubscriber/ # Event subscribers
-│   ├── Form/            # Formulaires
-│   ├── Repository/      # Repositories
-│   ├── Security/        # Authentification
-│   └── Service/         # Services métier
-├── templates/           # Templates Twig
-├── tests/               # Tests
-├── .env                 # Variables d'environnement
-├── composer.json        # Dépendances PHP
-├── docker-compose.yml   # Configuration Docker
-├── package.json         # Dépendances JavaScript
-└── webpack.config.js    # Configuration Webpack Encore
+│   ├── Service/
+│   │   └── NumberToWordsService.php       # NOUVEAU
+│   ├── Entity/
+│   │   ├── ProformaStatusHistory.php      # NOUVEAU
+│   │   ├── Proforma.php                   # Modifié (timeline + Initié)
+│   │   └── Invoice.php                    # Modifié (Initié)
+│   ├── Repository/
+│   │   └── ProformaStatusHistoryRepository.php  # NOUVEAU
+│   └── Controller/
+│       ├── InvoiceController.php          # Modifié (NumberToWords)
+│       └── ProformaController.php         # Modifié (product_id)
+├── templates/
+│   ├── proforma/
+│   │   ├── show.html.twig                 # Timeline + WhatsApp
+│   │   └── index.html.twig                # Stats Initié
+│   ├── invoice/
+│   │   ├── show.html.twig                 # Montant en lettres
+│   │   └── index.html.twig                # Stats Initié
+│   └── product/
+│       └── show.html.twig                 # Bouton créer proforma
+├── migrations/
+│   └── proforma_status_tracking.sql       # Migration BD
+└── apply_patch.sh                          # Script d'application
 ```
 
-## 🔧 Commandes utiles
+## 🚀 Déploiement
 
-### Docker
-
+### Option 1: Script automatique (VPS)
 ```bash
-# Démarrer les conteneurs
-docker compose up -d
-
-# Arrêter les conteneurs
-docker compose down
-
-# Voir les logs
-docker compose logs -f ktc-invoice-app
-
-# Accéder au conteneur PHP
-docker compose exec ktc-invoice-app bash
+scp deploy-v19.sh root@81.169.177.240:/tmp/
+ssh root@81.169.177.240 "chmod +x /tmp/deploy-v19.sh && /tmp/deploy-v19.sh"
 ```
 
-### Symfony
-
+### Option 2: Patch complet
 ```bash
-# Vider le cache
-docker compose exec ktc-invoice-app php bin/console cache:clear
-
-# Créer une migration
-docker compose exec ktc-invoice-app php bin/console make:migration
-
-# Exécuter les migrations
-docker compose exec ktc-invoice-app php bin/console doctrine:migrations:migrate
-
-# Charger les fixtures
-docker compose exec ktc-invoice-app php bin/console doctrine:fixtures:load
+# Sur le VPS
+cd /var/www/html
+unzip patch_v19.zip
+./patch/apply_patch.sh
 ```
 
-### Assets
+## 🗄️ Migration Base de Données
 
-```bash
-# Build développement
-docker compose run --rm node npm run dev
+```sql
+-- Colonnes de suivi
+ALTER TABLE proforma ADD COLUMN sent_at DATETIME NULL;
+ALTER TABLE proforma ADD COLUMN accepted_at DATETIME NULL;
+ALTER TABLE proforma ADD COLUMN refused_at DATETIME NULL;
+ALTER TABLE proforma ADD COLUMN expired_at DATETIME NULL;
+ALTER TABLE proforma ADD COLUMN invoiced_at DATETIME NULL;
 
-# Build production
-docker compose run --rm node npm run build
-
-# Watch mode
-docker compose run --rm node npm run watch
+-- Table historique
+CREATE TABLE proforma_status_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    proforma_id INT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    status_label VARCHAR(100) NULL,
+    changed_by_id INT NULL,
+    changed_at DATETIME NOT NULL,
+    comment TEXT NULL,
+    FOREIGN KEY (proforma_id) REFERENCES proforma(id) ON DELETE CASCADE
+);
 ```
 
-## 🧪 Tests
+## ✅ Tests à effectuer
 
-```bash
-# Exécuter tous les tests
-docker compose exec ktc-invoice-app php bin/phpunit
+1. **Proforma**
+   - [ ] Créer une proforma → statut "Initié" affiché
+   - [ ] Envoyer par WhatsApp → nouvel onglet s'ouvre
+   - [ ] Changer le statut → timeline mise à jour
+   - [ ] Voir la timeline sur la page détail
 
-# Tests avec couverture
-docker compose exec ktc-invoice-app php bin/phpunit --coverage-html coverage
-```
+2. **Facture**
+   - [ ] Créer une facture → statut "Initié" affiché
+   - [ ] Voir le montant en lettres sur la page détail
+   - [ ] Envoyer par WhatsApp → nouvel onglet s'ouvre
 
-## 📧 Configuration Email (Brevo)
+3. **Produit**
+   - [ ] Ouvrir la fiche d'un produit
+   - [ ] Cliquer "Créer une proforma"
+   - [ ] Vérifier que le produit est pré-rempli
 
-1. Créer un compte sur [Brevo](https://www.brevo.com/)
-2. Générer une clé API dans les paramètres
-3. Configurer dans `.env` :
-
-```env
-BREVO_API_KEY=votre_cle_api
-BREVO_SENDER_EMAIL=noreply@votre-domaine.com
-BREVO_SENDER_NAME="KTC-Center"
-```
-
-## 🔐 Sécurité
-
-- Mots de passe hashés avec bcrypt
-- Protection CSRF sur tous les formulaires
-- Sessions sécurisées avec durée de vie limitée
-- Rôles hiérarchiques pour le contrôle d'accès
-- Liens de partage avec expiration et tokens uniques
-
-## 📊 Localisation
-
-- **Timezone** : Africa/Douala
-- **Langue** : Français
-- **Devise** : FCFA
-- **TVA** : 19.25%
-
-## 🤝 Contribution
-
-1. Fork le projet
-2. Créer une branche (`git checkout -b feature/nouvelle-fonctionnalite`)
-3. Commit les changements (`git commit -am 'Ajout nouvelle fonctionnalité'`)
-4. Push la branche (`git push origin feature/nouvelle-fonctionnalite`)
-5. Créer une Pull Request
-
-## 📝 Licence
-
-Propriétaire - KTC-Center Sarl © 2026
-
-## 📞 Support
-
-- **Email** : support@ktc-center.com
-- **Téléphone** : +237 XXX XXX XXX
+4. **Stats**
+   - [ ] Liste proformas → "Initiées" dans les stats
+   - [ ] Liste factures → "Initiées" dans les stats

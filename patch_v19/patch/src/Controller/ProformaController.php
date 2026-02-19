@@ -13,7 +13,6 @@ use App\Repository\ProformaTemplateRepository;
 use App\Repository\CompanySettingsRepository;
 use App\Service\ReferenceGeneratorService;
 use App\Service\PdfGeneratorService;
-use App\Service\NumberToWordsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,8 +33,7 @@ class ProformaController extends AbstractController
         private ProformaTemplateRepository $templateRepository,
         private CompanySettingsRepository $settingsRepository,
         private ReferenceGeneratorService $referenceGenerator,
-        private PdfGeneratorService $pdfGenerator,
-        private NumberToWordsService $numberToWords
+        private PdfGeneratorService $pdfGenerator
     ) {}
 
     #[Route('', name: 'app_proforma_index', methods: ['GET'])]
@@ -225,11 +223,8 @@ class ProformaController extends AbstractController
     #[Route('/{id}', name: 'app_proforma_show', methods: ['GET'])]
     public function show(Proforma $proforma): Response
     {
-        $settings = $this->settingsRepository->getSettings();
-        
         return $this->render('proforma/show.html.twig', [
             'proforma' => $proforma,
-            'totalInWords' => $this->numberToWords->convert($proforma->getTotalTTCFloat(), $settings?->getCurrency() ?? 'FCFA'),
         ]);
     }
 
