@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle proforma depuis un modèle{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <nav class="text-sm text-gray-500 mb-2">
+            <a href="{{ path('app_proforma_index') }}" class="hover:text-primary-600">Proformas</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-700">Depuis un modèle</span>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900">Créer une proforma depuis un modèle</h1>
+        <p class="text-sm text-gray-500 mt-1">Sélectionnez un modèle pour pré-remplir les produits automatiquement</p>
+    </div>
+
+    {% if templates is empty %}
+    <div class="card">
+        <div class="card-body text-center py-12">
+            <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun modèle disponible</h3>
+            <p class="text-gray-500 mb-4">Créez d'abord un modèle de proforma avec des produits pré-définis.</p>
+            <div class="flex justify-center gap-3">
+                <a href="{{ path('app_proforma_template_new') }}" class="btn btn-primary">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Créer un modèle
+                </a>
+                <a href="{{ path('app_proforma_new') }}" class="btn btn-secondary">
+                    Créer de zéro
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    
+    <!-- Sélection du modèle -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for template in templates %}
+        <div class="card hover:shadow-lg transition-shadow cursor-pointer border-2 border-transparent hover:border-primary-500"
+             onclick="selectTemplate({{ template.id }})">
+            <div class="card-body">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <h3 class="font-semibold text-gray-900">{{ template.name }}</h3>
+                        {% if template.code %}
+                        <span class="text-xs text-gray-500">{{ template.code }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="badge badge-{{ template.category == 'software' ? 'info' : (template.category == 'hardware' ? 'warning' : (template.category == 'service' ? 'success' : 'secondary')) }}">
+                        {{ template.categoryLabel }}
+                    </span>
+                </div>
+                
+                {% if template.description %}
+                <p class="text-sm text-gray-500 mb-3 line-clamp-2">{{ template.description }}</p>
+                {% endif %}
+                
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-500">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                        {{ template.itemCount }} produit(s)
+                    </span>
+                    <span class="font-semibold text-primary-600">
+                        {{ template.calculateTotalHT|number_format(0, ',', ' ') }} FCFA
+                    </span>
+                </div>
+                
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <span class="text-xs text-gray-400">
+                        Utilisé {{ template.usageCount }} fois
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal de sélection client -->
+    <div id="clientModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Sélectionner le client</h3>
+                
+                <form id="createForm" method="GET">
+                    <input type="hidden" name="template" id="selectedTemplate" value="">
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Client *</label>
+                        <select name="client" id="clientSelect" class="form-select" required>
+                            <option value="">-- Sélectionner un client --</option>
+                            {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" onclick="closeModal()" class="btn btn-secondary">Annuler</button>
+                        <button type="submit" class="btn btn-primary">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Créer la proforma
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+<script>
+function selectTemplate(templateId) {
+    document.getElementById('selectedTemplate').value = templateId;
+    document.getElementById('createForm').action = "{{ path('app_proforma_new') }}";
+    document.getElementById('clientModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('clientModal').classList.add('hidden');
+}
+
+// Fermer la modal en cliquant à l'extérieur
+document.getElementById('clientModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}

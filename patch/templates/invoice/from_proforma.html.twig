@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une facture depuis une proforma{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Convertir une proforma en facture</h1>
+            <p class="text-gray-600">Sélectionnez une proforma à convertir</p>
+        </div>
+        <a href="{{ path('app_invoice_index') }}" class="btn btn-secondary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour
+        </a>
+    </div>
+
+    {% if proformas|length > 0 %}
+    <div class="card">
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Référence</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Objet</th>
+                        <th class="text-right">Montant TTC</th>
+                        <th>Statut</th>
+                        <th class="text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proforma in proformas %}
+                    <tr>
+                        <td>
+                            <a href="{{ path('app_proforma_show', {id: proforma.id}) }}" class="font-medium text-primary-600 hover:text-primary-700">
+                                {{ proforma.reference }}
+                            </a>
+                        </td>
+                        <td>{{ proforma.client.name }}</td>
+                        <td>{{ proforma.issueDate|date('d/m/Y') }}</td>
+                        <td class="max-w-xs truncate">{{ proforma.object ?: '-' }}</td>
+                        <td class="text-right font-medium">{{ proforma.totalTTC|number_format(0, ',', ' ') }} {{ default_currency }}</td>
+                        <td>
+                            <span class="badge badge-{{ proforma.statusColor }}">
+                                {{ proforma.statusLabel }}
+                            </span>
+                        </td>
+                        <td class="text-right">
+                            <a href="{{ path('app_proforma_convert_to_invoice', {id: proforma.id}) }}" 
+                               class="btn btn-primary btn-sm"
+                               onclick="return confirm('Convertir cette proforma en facture ?')">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Convertir
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-12">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Aucune proforma disponible</h3>
+            <p class="text-gray-500 mb-4">Il n'y a pas de proforma à convertir en facture.</p>
+            <a href="{{ path('app_proforma_new') }}" class="btn btn-primary">
+                Créer une proforma
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

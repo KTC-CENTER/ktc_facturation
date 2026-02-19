@@ -1,0 +1,35 @@
+FROM php:8.3-fpm
+
+RUN apt-get update && apt-get install -y \
+    git curl zip unzip \
+    libpng-dev libonig-dev libxml2-dev libzip-dev \
+    libfreetype6-dev libjpeg62-turbo-dev libwebp-dev libxpm-dev \
+    fontconfig fonts-liberation libicu-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-xpm \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl opcache \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY docker/php/prod.ini /usr/local/etc/php/conf.d/prod.ini
+
+# FIX: Remove default www.conf and replace with ours (no slowlog)
+RUN rm -f /usr/local/etc/php-fpm.d/www.conf
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+
+WORKDIR /var/www/html
+
+COPY --chown=www-data:www-data . /var/www/html
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Create directories and set permissions
+RUN mkdir -p var/cache var/log public/uploads/logo public/uploads/pdf \
+    && chown -R www-data:www-data var public/uploads public/build \
+    && chmod -R 775 var public/uploads
+
+EXPOSE 9000
+
+CMD ["php-fpm"]

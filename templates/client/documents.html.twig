@@ -1,0 +1,135 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Documents de {{ client.name }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {# En-tête #}
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Documents de {{ client.name }}</h1>
+            <p class="text-gray-600">Proformas et factures associées à ce client</p>
+        </div>
+        <a href="{{ path('app_client_show', {id: client.id}) }}" class="btn btn-secondary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour au client
+        </a>
+    </div>
+
+    {# Filtres #}
+    <div class="flex gap-2">
+        <a href="{{ path('app_client_documents', {id: client.id, type: 'all'}) }}"
+           class="px-4 py-2 rounded-md text-sm font-medium {{ type == 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border' }}">
+            Tous
+        </a>
+        <a href="{{ path('app_client_documents', {id: client.id, type: 'proforma'}) }}"
+           class="px-4 py-2 rounded-md text-sm font-medium {{ type == 'proforma' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border' }}">
+            Proformas ({{ client.proformas|length }})
+        </a>
+        <a href="{{ path('app_client_documents', {id: client.id, type: 'invoice'}) }}"
+           class="px-4 py-2 rounded-md text-sm font-medium {{ type == 'invoice' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border' }}">
+            Factures ({{ client.invoices|length }})
+        </a>
+    </div>
+
+    {# Proformas #}
+    {% if type in ['all', 'proforma'] and client.proformas|length > 0 %}
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Proformas</h2>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Objet</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total TTC</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for proforma in client.proformas %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ path('app_proforma_show', {id: proforma.id}) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                            {{ proforma.reference }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">{{ proforma.object|default('-')|slice(0, 50) ~ (proforma.object|default('')|length > 50 ? '...' : '') }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ proforma.statusColor }}-100 text-{{ proforma.statusColor }}-800">
+                            {{ proforma.statusLabel }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">{{ proforma.totalTTCFloat|number_format(0, ',', ' ') }} FCFA</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ proforma.createdAt|date('d/m/Y') }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <a href="{{ path('app_proforma_show', {id: proforma.id}) }}" class="text-blue-600 hover:text-blue-800 text-sm">Voir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {# Factures #}
+    {% if type in ['all', 'invoice'] and client.invoices|length > 0 %}
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Factures</h2>
+        </div>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Objet</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total TTC</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for invoice in client.invoices %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ path('app_invoice_show', {id: invoice.id}) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                            {{ invoice.reference }}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">{{ invoice.object|default('-')|slice(0, 50) ~ (invoice.object|default('')|length > 50 ? '...' : '') }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{{ invoice.statusColor }}-100 text-{{ invoice.statusColor }}-800">
+                            {{ invoice.statusLabel }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">{{ invoice.totalTTCFloat|number_format(0, ',', ' ') }} FCFA</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ invoice.createdAt|date('d/m/Y') }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <a href="{{ path('app_invoice_show', {id: invoice.id}) }}" class="text-blue-600 hover:text-blue-800 text-sm">Voir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% if (type == 'all' and client.proformas|length == 0 and client.invoices|length == 0)
+       or (type == 'proforma' and client.proformas|length == 0)
+       or (type == 'invoice' and client.invoices|length == 0) %}
+    <div class="bg-white rounded-lg shadow p-12 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun document</h3>
+        <p class="mt-1 text-sm text-gray-500">Aucun document trouvé pour ce client.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

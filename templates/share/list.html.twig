@@ -1,0 +1,178 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Partages - {{ document.reference }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <nav class="flex mb-2" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2 text-sm text-gray-500">
+                    <li>
+                        <a href="{{ documentType == 'proforma' ? path('app_proforma_index') : path('app_invoice_index') }}" class="hover:text-primary-600">
+                            {{ documentType == 'proforma' ? 'Proformas' : 'Factures' }}
+                        </a>
+                    </li>
+                    <li><span class="mx-2">/</span></li>
+                    <li>
+                        <a href="{{ documentType == 'proforma' ? path('app_proforma_show', {id: document.id}) : path('app_invoice_show', {id: document.id}) }}" class="hover:text-primary-600">
+                            {{ document.reference }}
+                        </a>
+                    </li>
+                    <li><span class="mx-2">/</span></li>
+                    <li class="text-gray-900">Partages</li>
+                </ol>
+            </nav>
+            <h1 class="text-2xl font-bold text-gray-900">Historique des partages</h1>
+            <p class="text-gray-600 mt-1">{{ documentType == 'proforma' ? 'Proforma' : 'Facture' }} {{ document.reference }}</p>
+        </div>
+        <button onclick="window.dispatchEvent(new CustomEvent('open-share-modal', {detail: {type: '{{ documentType }}', id: {{ document.id }}}}))" 
+                class="btn btn-primary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+            </svg>
+            Nouveau partage
+        </button>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-sm text-gray-500">Total partages</div>
+                <div class="text-2xl font-bold text-gray-900">{{ shares|length }}</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="text-sm text-gray-500">Partages actifs</div>
+                <div class="text-2xl font-bold text-success-600">{{ shares|filter(s => not s.isExpired and not s.isRevoked)|length }}</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="text-sm text-gray-500">Total consultations</div>
+                <div class="text-2xl font-bold text-primary-600">{{ shares|reduce((carry, s) => carry + s.accessCount, 0) }}</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="text-sm text-gray-500">Par email</div>
+                <div class="text-2xl font-bold text-info-600">{{ shares|filter(s => s.shareType == 'email')|length }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des partages -->
+    <div class="card">
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Destinataire</th>
+                        <th>Créé par</th>
+                        <th>Date création</th>
+                        <th>Expiration</th>
+                        <th>Consultations</th>
+                        <th>Statut</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for share in shares %}
+                    <tr>
+                        <td>
+                            {% if share.shareType == 'link' %}
+                            <span class="badge badge-secondary">
+                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                                Lien
+                            </span>
+                            {% elseif share.shareType == 'email' %}
+                            <span class="badge badge-info">
+                                <svg class="w-4 h-4 mr-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                Email
+                            </span>
+                            {% elseif share.shareType == 'whatsapp' %}
+                            <span class="badge badge-success">
+                                <svg class="w-4 h-4 mr-1 inline" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/>
+                                </svg>
+                                WhatsApp
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if share.recipientEmail %}
+                            {{ share.recipientEmail }}
+                            {% elseif share.recipientPhone %}
+                            {{ share.recipientPhone }}
+                            {% else %}
+                            <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ share.createdBy.fullName }}</td>
+                        <td>{{ share.createdAt|date('d/m/Y H:i') }}</td>
+                        <td>{{ share.expiresAt|date('d/m/Y H:i') }}</td>
+                        <td>
+                            <span class="font-medium">{{ share.accessCount }}</span>
+                            {% if share.lastAccessAt %}
+                            <span class="text-xs text-gray-500 block">
+                                Dernier : {{ share.lastAccessAt|date('d/m/Y H:i') }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if share.isRevoked %}
+                            <span class="badge badge-danger">Révoqué</span>
+                            {% elseif share.isExpired %}
+                            <span class="badge badge-warning">Expiré</span>
+                            {% else %}
+                            <span class="badge badge-success">Actif</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            <div class="flex items-center justify-end space-x-2">
+                                {% if not share.isRevoked and not share.isExpired %}
+                                <button onclick="navigator.clipboard.writeText('{{ url('app_share_view', {token: share.token}) }}'); alert('Lien copié !')"
+                                        class="text-gray-400 hover:text-primary-600" title="Copier le lien">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
+                                    </svg>
+                                </button>
+                                <form action="{{ path('app_share_revoke', {id: share.id}) }}" method="post" class="inline"
+                                      onsubmit="return confirm('Révoquer ce partage ?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('revoke' ~ share.id) }}">
+                                    <button type="submit" class="text-gray-400 hover:text-danger-600" title="Révoquer">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-12 text-gray-500">
+                            <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                            </svg>
+                            Aucun partage pour ce document
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% include 'share/_modal.html.twig' %}
+{% endblock %}

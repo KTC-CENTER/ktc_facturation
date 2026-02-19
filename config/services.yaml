@@ -1,0 +1,53 @@
+# KTC Invoice Pro - Configuration des services
+parameters:
+    app.name: '%env(APP_NAME)%'
+    app.locale: '%env(APP_LOCALE)%'
+    app.timezone: '%env(APP_TIMEZONE)%'
+    app.default_currency: '%env(DEFAULT_CURRENCY)%'
+    app.default_tax_rate: '%env(float:DEFAULT_TAX_RATE)%'
+    app.brevo_api_key: '%env(BREVO_API_KEY)%'
+    app.brevo_sender_email: '%env(BREVO_SENDER_EMAIL)%'
+    app.brevo_sender_name: '%env(BREVO_SENDER_NAME)%'
+    app.uploads_directory: '%kernel.project_dir%/public/uploads'
+
+services:
+    # Configuration par défaut pour les services dans ce fichier
+    _defaults:
+        autowire: true      # Injecte automatiquement les dépendances
+        autoconfigure: true # Enregistre automatiquement les services comme commandes, event subscribers, etc.
+        bind:
+            $uploadsDirectory: '%app.uploads_directory%'
+            $defaultCurrency: '%app.default_currency%'
+            $defaultTaxRate: '%app.default_tax_rate%'
+
+    # Rend les classes dans src/ disponibles comme services
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # Contrôleurs
+    App\Controller\:
+        resource: '../src/Controller/'
+        tags: ['controller.service_arguments']
+
+    # Services personnalisés
+    App\Service\PdfGeneratorService:
+        arguments:
+            $uploadsDirectory: '%app.uploads_directory%'
+
+    App\Service\BrevoMailerService:
+        arguments:
+            $brevoApiKey: '%app.brevo_api_key%'
+            $mailSenderEmail: '%app.brevo_sender_email%'
+            $mailSenderName: '%app.brevo_sender_name%'
+
+    App\Service\DocumentShareService:
+        arguments:
+            $uploadsDirectory: '%app.uploads_directory%'
+
+    App\EventSubscriber\TimezoneSubscriber:
+        arguments:
+            $timezone: '%app.timezone%'

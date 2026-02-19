@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Chiffre d'affaires - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Chiffre d'affaires encaissé</h1>
+            <p class="text-sm text-gray-500">{{ invoices.totalItemCount }} facture{{ invoices.totalItemCount > 1 ? 's' : '' }} payée{{ invoices.totalItemCount > 1 ? 's' : '' }}</p>
+        </div>
+        <a href="{{ path('app_report_index') }}" class="btn btn-secondary">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Rapports
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="overflow-x-auto">
+            <table class="table">
+                <thead><tr><th>Référence</th><th>Client</th><th>Date paiement</th><th class="text-right">Montant TTC</th><th></th></tr></thead>
+                <tbody>
+                    {% for i in invoices %}
+                    <tr>
+                        <td class="font-medium text-gray-900">{{ i.reference }}</td>
+                        <td>{{ i.client.name }}</td>
+                        <td class="text-sm text-gray-500">{{ i.paidAt ? i.paidAt|date('d/m/Y') : i.updatedAt|date('d/m/Y') }}</td>
+                        <td class="text-right font-semibold text-emerald-600">{{ i.totalTTC|number_format(0, ',', ' ') }} {{ default_currency }}</td>
+                        <td class="text-right"><a href="{{ path('app_invoice_show', {id: i.id}) }}" class="text-blue-600 hover:text-blue-800 text-sm">Voir →</a></td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center py-8 text-gray-400">Aucun paiement enregistré</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if invoices.totalItemCount > 20 %}
+        <div class="card-footer"><div class="pagination">{{ knp_pagination_render(invoices) }}</div></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

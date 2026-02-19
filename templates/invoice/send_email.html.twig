@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Envoyer la facture {{ invoice.reference }} par email{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <div>
+        <nav class="text-sm text-gray-500 mb-2">
+            <a href="{{ path('app_invoice_index') }}" class="hover:text-blue-600">Factures</a>
+            <span class="mx-2">/</span>
+            <a href="{{ path('app_invoice_show', {id: invoice.id}) }}" class="hover:text-blue-600">{{ invoice.reference }}</a>
+            <span class="mx-2">/</span>
+            <span class="text-gray-900">Envoyer par email</span>
+        </nav>
+        <h1 class="text-2xl font-bold text-gray-900">Envoyer la facture par email</h1>
+        <p class="text-gray-600 mt-1">Envoyer à <strong>{{ invoice.client.name }}</strong> ({{ invoice.client.email }})</p>
+    </div>
+
+    <!-- Aperçu du document -->
+    <div class="card bg-blue-50 border-blue-200">
+        <div class="card-body flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-gray-900">Facture {{ invoice.reference }}</p>
+                <p class="text-sm text-gray-600">{{ invoice.issueDate|date('d/m/Y') }} • {{ invoice.totalTTCFloat|number_format(0, ',', ' ') }} {{ default_currency }}</p>
+            </div>
+            <span class="badge badge-{{ invoice.statusColor }}">{{ invoice.statusLabel }}</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="space-y-6">
+                <div>
+                    <label for="subject" class="form-label">Sujet de l'email</label>
+                    <input type="text" name="subject" id="subject" class="form-input" value="Facture {{ invoice.reference }} - {{ company_name }}">
+                </div>
+                <div>
+                    <label for="message" class="form-label">Message personnalisé (optionnel)</label>
+                    <textarea name="message" id="message" rows="4" class="form-textarea" placeholder="Ajoutez un message personnalisé..."></textarea>
+                    <p class="mt-1 text-xs text-gray-500">Ce message sera affiché dans le corps de l'email.</p>
+                </div>
+                <div>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="attach_pdf" value="1" checked class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <span class="text-sm text-gray-700">Joindre le PDF de la facture</span>
+                    </label>
+                </div>
+                <div class="flex justify-end gap-3 pt-4 border-t">
+                    <a href="{{ path('app_invoice_show', {id: invoice.id}) }}" class="btn btn-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                        Envoyer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

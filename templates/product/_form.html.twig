@@ -1,0 +1,286 @@
+{{ form_start(form, {'attr': {'class': 'space-y-6', 'id': 'product-form'}}) }}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Colonne principale -->
+    <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Informations générales -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">
+                    <svg class="w-5 h-5 inline mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Informations générales
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        {{ form_row(form.name) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.code) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.type) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.category) }}
+                    </div>
+                    <div>
+                        {{ form_row(form.unit) }}
+                    </div>
+                    <div class="md:col-span-2">
+                        {{ form_row(form.description) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarification -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">
+                    <svg class="w-5 h-5 inline mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Tarification
+                </h3>
+            </div>
+            <div class="card-body space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        {{ form_row(form.purchasePrice) }}
+                        <p class="text-xs text-gray-500 mt-1">Coût de revient</p>
+                    </div>
+                    <div>
+                        {{ form_row(form.margin) }}
+                        <p class="text-xs text-gray-500 mt-1">Marge bénéficiaire</p>
+                    </div>
+                    <div>
+                        {{ form_row(form.unitPrice) }}
+                        <p class="text-xs text-gray-500 mt-1">Prix de vente HT</p>
+                    </div>
+                    <div>
+                        {{ form_row(form.taxRate) }}
+                        <p class="text-xs text-gray-500 mt-1">TVA applicable</p>
+                    </div>
+                </div>
+                
+                <!-- Calcul automatique -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div class="flex items-center text-sm text-blue-700">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            <span><strong>Formule :</strong> Prix vente = Prix achat × (1 + Marge/100)</span>
+                        </div>
+                        <button type="button" id="calculate-price" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Calculer automatiquement
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Caractéristiques spécifiques -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">
+                    <svg class="w-5 h-5 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    Caractéristiques spécifiques
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Logiciel -->
+                <div class="product-fields product-fields-logiciel" style="display: none;">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% if form.version is defined %}
+                        <div>{{ form_row(form.version) }}</div>
+                        {% endif %}
+                        {% if form.licenseType is defined %}
+                        <div>{{ form_row(form.licenseType) }}</div>
+                        {% endif %}
+                        {% if form.licenseDuration is defined %}
+                        <div>{{ form_row(form.licenseDuration) }}</div>
+                        {% endif %}
+                        {% if form.maxUsers is defined %}
+                        <div>{{ form_row(form.maxUsers) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Matériel -->
+                <div class="product-fields product-fields-materiel" style="display: none;">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {% if form.brand is defined %}
+                        <div>{{ form_row(form.brand) }}</div>
+                        {% endif %}
+                        {% if form.model is defined %}
+                        <div>{{ form_row(form.model) }}</div>
+                        {% endif %}
+                        {% if form.warrantyMonths is defined %}
+                        <div>{{ form_row(form.warrantyMonths) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Service -->
+                <div class="product-fields product-fields-service" style="display: none;">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% if form.durationHours is defined %}
+                        <div>{{ form_row(form.durationHours) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Caractéristiques techniques (tous types) -->
+                {% if form.characteristics is defined %}
+                <div class="mt-4">
+                    {{ form_row(form.characteristics) }}
+                </div>
+                {% endif %}
+                
+                <!-- Message si pas de champs spécifiques -->
+                <div class="product-fields-empty text-center py-6 text-gray-500" style="display: none;">
+                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <p>Sélectionnez un type de produit pour voir les champs spécifiques</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+        <!-- Statut -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="font-semibold text-gray-900">Statut</h3>
+            </div>
+            <div class="card-body">
+                <label class="flex items-center cursor-pointer">
+                    {{ form_widget(form.isActive) }}
+                    <span class="ml-3 text-sm font-medium text-gray-700">Produit actif</span>
+                </label>
+                <p class="text-xs text-gray-500 mt-2">Un produit inactif n'apparaîtra pas dans les listes de sélection</p>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-body space-y-3">
+                <button type="submit" class="btn btn-primary w-full">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    {{ button_label|default('Enregistrer') }}
+                </button>
+                <a href="{{ path('app_product_index') }}" class="btn btn-secondary w-full">
+                    Annuler
+                </a>
+            </div>
+        </div>
+
+        <!-- Aide -->
+        <div class="card bg-yellow-50 border-yellow-200">
+            <div class="card-body">
+                <h4 class="font-medium text-yellow-800 mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Astuce
+                </h4>
+                <p class="text-sm text-yellow-700">
+                    Saisissez le prix d'achat et la marge souhaitée, puis cliquez sur "Calculer" pour obtenir automatiquement le prix de vente.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Champs restants cachés - IMPORTANT: avant la fermeture du form -->
+<div class="hidden">{{ form_rest(form) }}</div>
+
+{{ form_end(form, {'render_rest': false}) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.querySelector('[name="product[type]"]');
+    const purchasePriceInput = document.querySelector('[name="product[purchasePrice]"]');
+    const marginInput = document.querySelector('[name="product[margin]"]');
+    const unitPriceInput = document.querySelector('[name="product[unitPrice]"]');
+    const calculateBtn = document.getElementById('calculate-price');
+    
+    // Afficher/masquer les champs selon le type
+    function updateFields() {
+        const type = typeSelect ? typeSelect.value.toLowerCase() : '';
+        
+        // Masquer tous les champs spécifiques
+        document.querySelectorAll('.product-fields').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Afficher les champs du type sélectionné
+        if (type) {
+            const fields = document.querySelector('.product-fields-' + type);
+            if (fields) {
+                fields.style.display = 'block';
+            }
+            // Masquer le message "vide"
+            const emptyMsg = document.querySelector('.product-fields-empty');
+            if (emptyMsg) emptyMsg.style.display = 'none';
+        } else {
+            // Afficher le message si aucun type
+            const emptyMsg = document.querySelector('.product-fields-empty');
+            if (emptyMsg) emptyMsg.style.display = 'block';
+        }
+    }
+    
+    // Calculer le prix de vente = prix d'achat × (1 + marge/100)
+    function calculateSellingPrice() {
+        const purchasePrice = parseFloat(purchasePriceInput?.value) || 0;
+        const margin = parseFloat(marginInput?.value) || 0;
+        
+        if (purchasePrice > 0 && unitPriceInput) {
+            const sellingPrice = purchasePrice * (1 + margin / 100);
+            unitPriceInput.value = sellingPrice.toFixed(2);
+            
+            // Animation visuelle
+            unitPriceInput.classList.add('bg-green-50', 'border-green-500');
+            setTimeout(() => {
+                unitPriceInput.classList.remove('bg-green-50', 'border-green-500');
+            }, 1000);
+        }
+    }
+    
+    // Event listeners
+    if (typeSelect) {
+        typeSelect.addEventListener('change', updateFields);
+        updateFields();
+    }
+    
+    if (calculateBtn) {
+        calculateBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            calculateSellingPrice();
+        });
+    }
+    
+    if (purchasePriceInput) {
+        purchasePriceInput.addEventListener('input', calculateSellingPrice);
+    }
+    
+    if (marginInput) {
+        marginInput.addEventListener('input', calculateSellingPrice);
+    }
+});
+</script>

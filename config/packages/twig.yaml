@@ -1,0 +1,30 @@
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    
+    globals:
+        app_name: '%app.name%'
+        default_currency: '%app.default_currency%'
+        default_tax_rate: '%app.default_tax_rate%'
+    
+    date:
+        format: 'd/m/Y'
+        interval_format: '%d jours'
+        timezone: '%app.timezone%'
+    
+    number_format:
+        decimals: 0
+        decimal_point: ','
+        thousands_separator: ' '
+
+    strict_variables: false
+
+    form_themes:
+        - 'form/tailwind_theme.html.twig'
+
+when@test:
+    twig:
+        strict_variables: true
+
+when@prod:
+    twig:
+        strict_variables: false

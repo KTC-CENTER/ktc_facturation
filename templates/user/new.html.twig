@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel utilisateur - {{ parent() }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- En-tête -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Nouvel utilisateur</h1>
+            <p class="mt-1 text-sm text-gray-500">Créez un nouveau compte utilisateur</p>
+        </div>
+        <a href="{{ path('app_user_index') }}" class="btn btn-secondary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour
+        </a>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="card">
+        {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form_label(form.firstName, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.firstName, {'attr': {'class': 'form-input'}}) }}
+                {{ form_errors(form.firstName) }}
+            </div>
+            
+            <div>
+                {{ form_label(form.lastName, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.lastName, {'attr': {'class': 'form-input'}}) }}
+                {{ form_errors(form.lastName) }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.email, {'attr': {'class': 'form-input'}}) }}
+                {{ form_errors(form.email) }}
+            </div>
+            
+            <div>
+                {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.phone, {'attr': {'class': 'form-input'}}) }}
+                {{ form_errors(form.phone) }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form_label(form.plainPassword, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.plainPassword, {'attr': {'class': 'form-input', 'autocomplete': 'new-password'}}) }}
+                {{ form_errors(form.plainPassword) }}
+                <p class="mt-1 text-xs text-gray-500">Minimum 8 caractères</p>
+            </div>
+            
+            <div>
+                {{ form_label(form.roles, 'Rôle', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.roles, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.roles) }}
+            </div>
+        </div>
+
+        <div>
+            <label class="flex items-center">
+                {{ form_widget(form.isActive, {'attr': {'class': 'form-checkbox'}}) }}
+                <span class="ml-2 text-sm text-gray-700">Compte actif</span>
+            </label>
+            {{ form_errors(form.isActive) }}
+        </div>
+
+        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+            <a href="{{ path('app_user_index') }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Créer l'utilisateur
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

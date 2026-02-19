@@ -1,0 +1,92 @@
+services:
+  # Application PHP-FPM
+  ktc-invoice-app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: ktc-invoice-app-local
+    restart: unless-stopped
+    user: "1000:1000"
+    ports:
+      - 8090:8010
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+    depends_on:
+        ktc-invoice-db:
+          condition: service_healthy
+    networks:
+      - ktc-invoice-local
+      
+
+  # Base de données MySQL
+  ktc-invoice-db:
+    image: mysql:8.0
+    container_name: ktc-invoice-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: verysecret
+      MYSQL_DATABASE: ktc_invoice
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: verysecret
+    volumes:
+      - ktc-invoice-mysql-data:/var/lib/mysql
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - ktc-invoice-local
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # phpMyAdmin
+  ktc-invoice-pma:
+    image: phpmyadmin:latest
+    container_name: ktc-invoice-pma-local
+    restart: unless-stopped
+    ports:
+      - 8091:80
+    environment:
+      PMA_HOST: ktc-invoice-db
+      PMA_PASSWORD: verysecret
+      UPLOAD_LIMIT: 100M
+    networks:
+      - ktc-invoice-local
+    depends_on:
+      - ktc-invoice-db
+
+  # MailHog pour les tests email en développement
+  ktc-invoice-mail:
+    image: mailhog/mailhog:latest
+    container_name: ktc-invoice-mail-local
+    restart: unless-stopped
+    ports:
+      - 1026:1025
+      - 8026:8025
+    networks:
+      - ktc-invoice-local
+
+  # Node.js pour Webpack Encore
+  ktc-invoice-node:
+    image: node:20-alpine
+    container_name: ktc-invoice-node-local
+    working_dir: /var/www/html
+    user: "1000:1000"
+    volumes:
+      - .:/var/www/html
+    command: sh -c "npm install && npm run watch"
+    stdin_open: true
+    tty: true
+    networks:
+      - ktc-invoice-local
+
+networks:
+  ktc-invoice-local:
+    driver: bridge
+
+volumes:
+  ktc-invoice-mysql-data:
+    driver: local

@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil - KTC Invoice Pro{% endblock %}
+{% block page_title %}Mon profil{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+    {# Informations du profil #}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-900">Informations personnelles</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="space-y-6">
+                <input type="hidden" name="_action" value="update_profile">
+
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-600">
+                        <span class="text-xl font-semibold text-white">
+                            {{ user.firstName|first }}{{ user.lastName|first }}
+                        </span>
+                    </span>
+                    <div>
+                        <p class="text-lg font-semibold text-gray-900">{{ user.fullName }}</p>
+                        <p class="text-sm text-gray-500">{{ user.email }}</p>
+                        <span class="badge badge-info mt-1">
+                            {% if 'ROLE_SUPER_ADMIN' in user.roles %}Super Admin
+                            {% elseif 'ROLE_ADMIN' in user.roles %}Administrateur
+                            {% elseif 'ROLE_COMMERCIAL' in user.roles %}Commercial
+                            {% else %}Lecteur{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">Prénom</label>
+                        <input type="text" name="firstName" value="{{ user.firstName }}" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom</label>
+                        <input type="text" name="lastName" value="{{ user.lastName }}" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" value="{{ user.email }}" class="form-input bg-gray-50" disabled>
+                        <p class="form-hint">L'email ne peut pas être modifié ici.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Téléphone</label>
+                        <input type="text" name="phone" value="{{ user.phone|default('') }}" class="form-input" placeholder="+237 6XX XXX XXX">
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t">
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Changer le mot de passe #}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-900">Changer le mot de passe</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="space-y-6">
+                <input type="hidden" name="_action" value="change_password">
+
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Mot de passe actuel</label>
+                        <input type="password" name="current_password" class="form-input" required autocomplete="current-password">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="form-label">Nouveau mot de passe</label>
+                            <input type="password" name="new_password" class="form-input" required minlength="6" autocomplete="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirmer le mot de passe</label>
+                            <input type="password" name="confirm_password" class="form-input" required minlength="6" autocomplete="new-password">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t">
+                    <button type="submit" class="btn btn-warning">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                        Modifier le mot de passe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Informations du compte #}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-900">Informations du compte</h3>
+        </div>
+        <div class="card-body">
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <dt class="text-gray-500">Créé le</dt>
+                    <dd class="font-medium text-gray-900">{{ user.createdAt|date('d/m/Y à H:i') }}</dd>
+                </div>
+                {% if user.lastLoginAt %}
+                <div>
+                    <dt class="text-gray-500">Dernière connexion</dt>
+                    <dd class="font-medium text-gray-900">{{ user.lastLoginAt|date('d/m/Y à H:i') }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt class="text-gray-500">Statut</dt>
+                    <dd>
+                        {% if user.isActive %}
+                            <span class="badge badge-success">Actif</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inactif</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}

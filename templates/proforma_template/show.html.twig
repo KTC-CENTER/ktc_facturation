@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ template.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <nav class="text-sm text-gray-500 mb-2">
+                <a href="{{ path('app_proforma_template_index') }}" class="hover:text-blue-600">Modèles</a>
+                <span class="mx-2">/</span>
+                <span class="text-gray-900">{{ template.name }}</span>
+            </nav>
+            <h1 class="text-2xl font-bold text-gray-900">{{ template.name }}</h1>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ path('app_proforma_template_edit', {id: template.id}) }}" class="btn btn-secondary">Modifier</a>
+            <a href="{{ path('app_proforma_template_use', {id: template.id}) }}" class="btn btn-primary">Utiliser</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body space-y-4">
+            {% if template.description %}
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Description</h4>
+                <p class="text-gray-900">{{ template.description }}</p>
+            </div>
+            {% endif %}
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500">Validité</h4>
+                    <p class="text-gray-900">{{ template.validityDays }} jours</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500">Taux TVA</h4>
+                    <p class="text-gray-900">{{ template.taxRateFloat }}%</p>
+                </div>
+            </div>
+            {% if template.conditions %}
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Conditions</h4>
+                <p class="text-gray-900 whitespace-pre-line">{{ template.conditions }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
