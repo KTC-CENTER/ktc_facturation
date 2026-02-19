@@ -55,6 +55,7 @@ Thumbs.db
 ###> Backups ###
 *.sql.gz
 *.gz
+*.zip
 /backups/
 ###< Backups ###
 

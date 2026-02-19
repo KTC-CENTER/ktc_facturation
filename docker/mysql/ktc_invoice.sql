@@ -375,7 +375,7 @@ INSERT INTO `company_settings` (
   'RC/YAO/2016/A/3141', 'M016200025487C', 'FCFA', 19.25, 30.00,
   'PROV', 'FAC', 1, 1, 0, 0, 30, 30,
   'sale@kamer-center.net', 'KTC-CENTER', 'sale@kamer-center.net',
-  '',
+  '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',
   'Validité de l''offre : 30 jours\nPaiement : 100% à la commande\nLivraison : Sous 7 jours ouvrés après confirmation',
   'Conditions de paiement : 30 jours date de facture\nPénalités de retard : 1.5% par mois\nEscompte : Aucun',
   'Africa/Douala', 'fr', 'd/m/Y', NOW(), NOW()
