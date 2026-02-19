@@ -90,3 +90,4 @@ networks:
 volumes:
   ktc-invoice-mysql-data:
     driver: local
+    uploads-data:

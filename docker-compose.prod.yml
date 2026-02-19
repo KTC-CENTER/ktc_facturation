@@ -54,6 +54,7 @@ services:
       MYSQL_PASSWORD: "${DB_PASSWORD}"
     volumes:
       - ktc-invoice-mysql-data:/var/lib/mysql
+      - ./docker/mysql:/docker-entrypoint-initdb.d
     networks:
       - ktc-invoice-prod
     healthcheck:
