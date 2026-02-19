@@ -171,7 +171,7 @@ class ClientController extends AbstractController
                 $companyName = $settings->getCompanyName() ?? 'KTC-Center';
 
                 $htmlBody = $this->buildClientEmailHtml($companyName, $client->getName(), $subject, $message);
-                $success = $mailer->send($client->getEmail(), $subject, $htmlBody);
+                $success = $mailer->sendRawEmail($client->getEmail(), $subject, $htmlBody);
 
                 if ($success) {
                     $this->addFlash('success', 'Email envoyé avec succès à ' . $client->getEmail());

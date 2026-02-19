@@ -61,7 +61,7 @@ class NotificationController extends AbstractController
 
             $htmlBody = $this->buildMassEmailHtml($companyName, $client->getName(), $subject, $message);
             
-            if ($this->mailer->send($client->getEmail(), $subject, $htmlBody)) {
+            if ($this->mailer->sendRawEmail($client->getEmail(), $subject, $htmlBody)) {
                 $sent++;
             } else {
                 $failed++;

@@ -6,6 +6,7 @@ use App\Entity\Proforma;
 use App\Entity\Invoice;
 use App\Entity\CompanySettings;
 use App\Repository\CompanySettingsRepository;
+use App\Service\NumberToWordsService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -14,17 +15,20 @@ use Twig\Environment;
 class PdfGeneratorService
 {
     private CompanySettingsRepository $settingsRepository;
+    private NumberToWordsService $numberToWords;
     private Environment $twig;
     private string $projectDir;
     private string $uploadsDir;
 
     public function __construct(
         CompanySettingsRepository $settingsRepository,
+        NumberToWordsService $numberToWords,
         Environment $twig,
         KernelInterface $kernel,
         string $uploadsDirectory
     ) {
         $this->settingsRepository = $settingsRepository;
+        $this->numberToWords = $numberToWords;
         $this->twig = $twig;
         $this->projectDir = $kernel->getProjectDir();
         $this->uploadsDir = $uploadsDirectory;
@@ -38,11 +42,13 @@ class PdfGeneratorService
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
         $logoBase64 = $this->getLogoBase64($settings);
+        $currency = $settings->getCurrency() ?? 'FCFA';
         
         $html = $this->twig->render('pdf/proforma.html.twig', [
             'proforma' => $proforma,
             'settings' => $settings,
             'logo_base64' => $logoBase64,
+            'totalInWords' => $this->numberToWords->convert($proforma->getTotalTTCFloat(), $currency),
         ]);
 
         return $this->generatePdf($html, "proforma_{$proforma->getReference()}.pdf", $saveToFile);
@@ -56,11 +62,13 @@ class PdfGeneratorService
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
         $logoBase64 = $this->getLogoBase64($settings);
+        $currency = $settings->getCurrency() ?? 'FCFA';
         
         $html = $this->twig->render('pdf/invoice.html.twig', [
             'invoice' => $invoice,
             'settings' => $settings,
             'logo_base64' => $logoBase64,
+            'totalInWords' => $this->numberToWords->convert($invoice->getTotalTTCFloat(), $currency),
         ]);
 
         return $this->generatePdf($html, "facture_{$invoice->getReference()}.pdf", $saveToFile);
@@ -73,11 +81,13 @@ class PdfGeneratorService
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
         $logoBase64 = $this->getLogoBase64($settings);
+        $currency = $settings->getCurrency() ?? 'FCFA';
         
         return $this->twig->render('pdf/proforma.html.twig', [
             'proforma' => $proforma,
             'settings' => $settings,
             'logo_base64' => $logoBase64,
+            'totalInWords' => $this->numberToWords->convert($proforma->getTotalTTCFloat(), $currency),
         ]);
     }
 
@@ -85,11 +95,13 @@ class PdfGeneratorService
     {
         $settings = $this->settingsRepository->getOrCreateSettings();
         $logoBase64 = $this->getLogoBase64($settings);
+        $currency = $settings->getCurrency() ?? 'FCFA';
         
         return $this->twig->render('pdf/invoice.html.twig', [
             'invoice' => $invoice,
             'settings' => $settings,
             'logo_base64' => $logoBase64,
+            'totalInWords' => $this->numberToWords->convert($invoice->getTotalTTCFloat(), $currency),
         ]);
     }
 

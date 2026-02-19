@@ -188,7 +188,7 @@ function addItem() {
 function removeItem(btn) {
     var row = btn.closest('.document-item');
     var count = document.querySelectorAll('#items-container .document-item').length;
-    if (count <= 1) { alert('Vous devez avoir au moins une ligne.'); return; }
+    if (count <= 1) { Swal.fire({icon:'warning',title:'Attention',text:'Vous devez avoir au moins une ligne.',confirmButtonText:'OK'}); return; }
     row.style.opacity = '0.3';
     setTimeout(function() { row.remove(); calcTotals(); }, 150);
 }

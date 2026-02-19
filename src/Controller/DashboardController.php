@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Repository\ClientRepository;
 use App\Repository\ProformaRepository;
 use App\Repository\InvoiceRepository;
@@ -31,8 +32,6 @@ class DashboardController extends AbstractController
     #[Route('', name: 'app_dashboard')]
     public function index(): Response
     {
-        $user = $this->getUser();
-        
         // Statistiques générales
         $stats = [
             'clients' => $this->clientRepository->count(['isArchived' => false]),
@@ -77,7 +76,12 @@ class DashboardController extends AbstractController
     #[Route('/profile', name: 'app_profile')]
     public function profile(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
 
         // Update profile
         if ($request->isMethod('POST') && $request->request->get('_action') === 'update_profile') {

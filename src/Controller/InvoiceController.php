@@ -178,8 +178,8 @@ class InvoiceController extends AbstractController
     #[IsGranted('ROLE_COMMERCIAL')]
     public function edit(Request $request, Invoice $invoice): Response
     {
-        if ($invoice->getStatus() === Invoice::STATUS_PAID) {
-            $this->addFlash('error', 'Une facture payée ne peut pas être modifiée.');
+        if (!$invoice->canBeEdited()) {
+            $this->addFlash('error', 'Cette facture ne peut pas être modifiée dans son statut actuel.');
             return $this->redirectToRoute('app_invoice_show', ['id' => $invoice->getId()]);
         }
 
@@ -216,7 +216,7 @@ class InvoiceController extends AbstractController
     #[Route('/{id}/pdf', name: 'app_invoice_pdf', methods: ['GET'])]
     public function pdf(Invoice $invoice): Response
     {
-        $pdfContent = $this->pdfGenerator->generateInvoicePdf($invoice);
+        $pdfContent = $this->pdfGenerator->generateInvoicePdf($invoice, false);
         
         return new Response($pdfContent, 200, [
             'Content-Type' => 'application/pdf',
@@ -227,12 +227,18 @@ class InvoiceController extends AbstractController
     #[Route('/{id}/pdf/download', name: 'app_invoice_pdf_download', methods: ['GET'])]
     public function pdfDownload(Invoice $invoice): Response
     {
-        $pdfContent = $this->pdfGenerator->generateInvoicePdf($invoice);
+        $pdfContent = $this->pdfGenerator->generateInvoicePdf($invoice, false);
         
         return new Response($pdfContent, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="Facture_' . $invoice->getReference() . '.pdf"',
         ]);
+    }
+
+    #[Route('/{id}/preview', name: 'app_invoice_preview', methods: ['GET'])]
+    public function preview(Invoice $invoice): Response
+    {
+        return new Response($this->pdfGenerator->generateInvoicePreview($invoice));
     }
 
     #[Route('/{id}/send-email', name: 'app_invoice_send_email', methods: ['GET', 'POST'])]

@@ -491,7 +491,7 @@ class Invoice
 
     public function canBeEdited(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT]);
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SENT]);
     }
 
     public function canBeSent(): bool
@@ -501,7 +501,7 @@ class Invoice
 
     public function canBePaid(): bool
     {
-        return in_array($this->status, [self::STATUS_SENT, self::STATUS_PARTIAL, self::STATUS_OVERDUE]);
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SENT, self::STATUS_PARTIAL, self::STATUS_OVERDUE]);
     }
 
     public function canBeCancelled(): bool

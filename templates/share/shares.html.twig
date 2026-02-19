@@ -111,7 +111,7 @@
                                 </svg>
                             </a>
                             <form action="{{ path('app_share_revoke', {id: share.id}) }}" method="post" class="inline"
-                                  onsubmit="return confirm('Révoquer ce partage ?')">
+                                  data-swal-confirm data-swal-title="Révoquer ce partage ?" data-swal-confirm-btn="Oui, révoquer">
                                 <input type="hidden" name="_token" value="{{ csrf_token('revoke' ~ share.id) }}">
                                 <button type="submit" class="text-red-400 hover:text-red-600" title="Révoquer">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,7 +181,7 @@ function closeModal() {
 
 function copyLink(url) {
     navigator.clipboard.writeText(url).then(() => {
-        alert('Lien copié dans le presse-papier !');
+        Swal.fire({icon:'success',title:'Lien copié !',toast:true,position:'top-end',showConfirmButton:false,timer:2000});
     });
 }
 </script>

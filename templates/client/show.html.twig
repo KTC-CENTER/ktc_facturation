@@ -229,7 +229,7 @@
                         </button>
                     </form>
                     {% if client.documentsCount == 0 %}
-                    <form action="{{ path('app_client_delete', {'id': client.id}) }}" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce client ?')">
+                    <form action="{{ path('app_client_delete', {'id': client.id}) }}" method="post" data-swal-confirm data-swal-title="Supprimer ce client ?" data-swal-text="Cette action est irréversible." data-swal-icon="error" data-swal-confirm-btn="Oui, supprimer">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ client.id) }}">
                         <button type="submit" class="btn btn-danger w-full justify-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

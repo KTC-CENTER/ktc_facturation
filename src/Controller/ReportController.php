@@ -32,10 +32,10 @@ class ReportController extends AbstractController
         $monthlyRevenue = [];
         try {
             $sql = "SELECT DATE_FORMAT(i.issue_date, '%Y-%m') as month, 
-                           SUM(i.total_ttc) as total,
+                           SUM(i.amount_paid) as total,
                            COUNT(i.id) as count
-                    FROM invoice i 
-                    WHERE i.status = 'PAID' 
+                    FROM invoices i 
+                    WHERE i.status = 'paid' 
                       AND i.issue_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
                     GROUP BY month ORDER BY month ASC";
             $monthlyRevenue = $conn->fetchAllAssociative($sql);
@@ -44,9 +44,9 @@ class ReportController extends AbstractController
         // Top clients by revenue
         $topClients = [];
         try {
-            $sql = "SELECT c.name, SUM(i.total_ttc) as revenue, COUNT(i.id) as invoice_count
-                    FROM invoice i JOIN client c ON i.client_id = c.id
-                    WHERE i.status = 'PAID'
+            $sql = "SELECT c.name, SUM(i.amount_paid) as revenue, COUNT(i.id) as invoice_count
+                    FROM invoices i JOIN client c ON i.client_id = c.id
+                    WHERE i.status IN ('paid','partial')
                     GROUP BY c.id, c.name ORDER BY revenue DESC LIMIT 10";
             $topClients = $conn->fetchAllAssociative($sql);
         } catch (\Exception $e) {}
@@ -54,7 +54,7 @@ class ReportController extends AbstractController
         // Status breakdown
         $invoicesByStatus = [];
         try {
-            $sql = "SELECT status, COUNT(*) as count, SUM(total_ttc) as total FROM invoice GROUP BY status";
+            $sql = "SELECT status, COUNT(*) as count, SUM(total_ttc) as total FROM invoices GROUP BY status";
             $invoicesByStatus = $conn->fetchAllAssociative($sql);
         } catch (\Exception $e) {}
 
@@ -67,12 +67,14 @@ class ReportController extends AbstractController
         // Totals
         $totalRevenue = 0;
         $totalPending = 0;
+        $totalCollected = 0;
         $totalInvoices = 0;
         $totalProformas = 0;
         try {
-            $totalRevenue = (float)($conn->fetchOne("SELECT COALESCE(SUM(total_ttc),0) FROM invoice WHERE status = 'PAID'") ?? 0);
-            $totalPending = (float)($conn->fetchOne("SELECT COALESCE(SUM(total_ttc),0) FROM invoice WHERE status IN ('SENT','OVERDUE')") ?? 0);
-            $totalInvoices = (int)($conn->fetchOne("SELECT COUNT(*) FROM invoice") ?? 0);
+            $totalRevenue = (float)($conn->fetchOne("SELECT COALESCE(SUM(total_ttc),0) FROM invoices WHERE status = 'paid'") ?? 0);
+            $totalCollected = (float)($conn->fetchOne("SELECT COALESCE(SUM(amount_paid),0) FROM invoices WHERE amount_paid > 0") ?? 0);
+            $totalPending = (float)($conn->fetchOne("SELECT COALESCE(SUM(total_ttc - amount_paid),0) FROM invoices WHERE status IN ('sent','overdue','partial')") ?? 0);
+            $totalInvoices = (int)($conn->fetchOne("SELECT COUNT(*) FROM invoices") ?? 0);
             $totalProformas = (int)($conn->fetchOne("SELECT COUNT(*) FROM proforma") ?? 0);
         } catch (\Exception $e) {}
 
@@ -82,6 +84,7 @@ class ReportController extends AbstractController
             'invoicesByStatus' => $invoicesByStatus,
             'proformasByStatus' => $proformasByStatus,
             'totalRevenue' => $totalRevenue,
+            'totalCollected' => $totalCollected,
             'totalPending' => $totalPending,
             'totalInvoices' => $totalInvoices,
             'totalProformas' => $totalProformas,
@@ -134,7 +137,7 @@ class ReportController extends AbstractController
         $qb = $this->invoiceRepository->createQueryBuilder('i')
             ->leftJoin('i.client', 'c')->addSelect('c')
             ->where('i.status IN (:statuses)')
-            ->setParameter('statuses', ['SENT', 'OVERDUE'])
+            ->setParameter('statuses', ['sent', 'overdue', 'partial'])
             ->orderBy('i.dueDate', 'ASC');
 
         $pagination = $paginator->paginate($qb, $request->query->getInt('page', 1), 20);
@@ -150,7 +153,7 @@ class ReportController extends AbstractController
         $qb = $this->invoiceRepository->createQueryBuilder('i')
             ->leftJoin('i.client', 'c')->addSelect('c')
             ->where('i.status = :status')
-            ->setParameter('status', 'PAID')
+            ->setParameter('status', 'paid')
             ->orderBy('i.paidAt', 'DESC');
 
         $pagination = $paginator->paginate($qb, $request->query->getInt('page', 1), 20);

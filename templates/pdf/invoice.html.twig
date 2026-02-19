@@ -58,6 +58,8 @@
             margin-top: 3px;
         }
         .status-paid { background: #d4edda; color: #155724; }
+        .status-draft { background: #e2e3e5; color: #383d41; }
+        .status-sent { background: #cce5ff; color: #004085; }
         .status-pending { background: #fff3cd; color: #856404; }
         .status-overdue { background: #f8d7da; color: #721c24; }
         .status-partial { background: #d1ecf1; color: #0c5460; }
@@ -325,7 +327,7 @@
 
     <!-- AMOUNT -->
     <div class="amount-section">
-        Arrêté à : <span class="amount-value">{{ invoice.amountInWords ?? (invoice.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
+        Arrêté à : <span class="amount-value">{{ totalInWords ?? (invoice.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
     </div>
 
     <!-- BANK INFO -->

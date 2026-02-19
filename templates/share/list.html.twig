@@ -139,14 +139,14 @@
                         <td class="text-right">
                             <div class="flex items-center justify-end space-x-2">
                                 {% if not share.isRevoked and not share.isExpired %}
-                                <button onclick="navigator.clipboard.writeText('{{ url('app_share_view', {token: share.token}) }}'); alert('Lien copié !')"
+                                <button onclick="navigator.clipboard.writeText('{{ url('app_share_view', {token: share.token}) }}'); Swal.fire({icon:'success',title:'Lien copié !',toast:true,position:'top-end',showConfirmButton:false,timer:2000})"
                                         class="text-gray-400 hover:text-primary-600" title="Copier le lien">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/>
                                     </svg>
                                 </button>
                                 <form action="{{ path('app_share_revoke', {id: share.id}) }}" method="post" class="inline"
-                                      onsubmit="return confirm('Révoquer ce partage ?')">
+                                      data-swal-confirm data-swal-title="Révoquer ce partage ?" data-swal-confirm-btn="Oui, révoquer">
                                     <input type="hidden" name="_token" value="{{ csrf_token('revoke' ~ share.id) }}">
                                     <button type="submit" class="text-gray-400 hover:text-danger-600" title="Révoquer">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

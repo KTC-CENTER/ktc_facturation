@@ -20,9 +20,9 @@ class Proforma
     public const STATUS_EXPIRED = 'EXPIRED';
     public const STATUS_INVOICED = 'INVOICED';
 
-    // CHANGED: "Brouillon" -> "Initié"
+    // CHANGED: "Brouillon" -> "Initiée"
     public const STATUSES = [
-        self::STATUS_DRAFT => 'Initié',
+        self::STATUS_DRAFT => 'Initiée',
         self::STATUS_SENT => 'Envoyée',
         self::STATUS_ACCEPTED => 'Acceptée',
         self::STATUS_REFUSED => 'Refusée',

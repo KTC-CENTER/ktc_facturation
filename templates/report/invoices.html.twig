@@ -20,7 +20,7 @@
 
     <div class="flex flex-wrap gap-2">
         <a href="{{ path('app_report_invoices') }}" class="px-3 py-1.5 rounded-full text-sm font-medium {{ not currentStatus ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">Toutes</a>
-        {% for status, label in {'DRAFT': 'Brouillon', 'SENT': 'Envoyée', 'PAID': 'Payée', 'OVERDUE': 'En retard', 'PARTIAL': 'Partielle', 'CANCELLED': 'Annulée'} %}
+        {% for status, label in {'draft': 'Initiée', 'sent': 'Envoyée', 'paid': 'Payée', 'overdue': 'En retard', 'partial': 'Partielle', 'cancelled': 'Annulée'} %}
             <a href="{{ path('app_report_invoices', {status: status}) }}" class="px-3 py-1.5 rounded-full text-sm font-medium {{ currentStatus == status ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">{{ label }}</a>
         {% endfor %}
     </div>

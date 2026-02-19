@@ -16,7 +16,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-emerald-100 text-sm font-medium">CA Encaissé</p>
-                    <p class="text-2xl font-bold mt-1">{{ totalRevenue|number_format(0, ',', ' ') }}</p>
+                    <p class="text-2xl font-bold mt-1">{{ totalCollected|number_format(0, ',', ' ') }}</p>
                     <p class="text-emerald-200 text-xs mt-1">{{ default_currency }}</p>
                 </div>
                 <div class="bg-white/20 rounded-lg p-3">
@@ -77,12 +77,12 @@
                     <div class="space-y-3">
                         {% for item in invoicesByStatus %}
                             {% set statusColors = {
-                                'DRAFT': 'gray', 'SENT': 'blue', 'PAID': 'emerald', 
-                                'OVERDUE': 'red', 'CANCELLED': 'gray', 'PARTIAL': 'amber'
+                                'draft': 'gray', 'sent': 'blue', 'paid': 'emerald', 
+                                'overdue': 'red', 'cancelled': 'gray', 'partial': 'amber'
                             } %}
                             {% set statusLabels = {
-                                'DRAFT': 'Brouillon', 'SENT': 'Envoyée', 'PAID': 'Payée',
-                                'OVERDUE': 'En retard', 'CANCELLED': 'Annulée', 'PARTIAL': 'Partielle'
+                                'draft': 'Initiée', 'sent': 'Envoyée', 'paid': 'Payée',
+                                'overdue': 'En retard', 'cancelled': 'Annulée', 'partial': 'Partielle'
                             } %}
                             {% set color = statusColors[item.status]|default('gray') %}
                             <div class="flex items-center justify-between p-3 bg-{{ color }}-50 rounded-lg border border-{{ color }}-100">
@@ -114,11 +114,11 @@
                         {% for item in proformasByStatus %}
                             {% set statusColors = {
                                 'DRAFT': 'gray', 'SENT': 'blue', 'ACCEPTED': 'emerald',
-                                'REJECTED': 'red', 'EXPIRED': 'amber', 'CONVERTED': 'violet'
+                                'REFUSED': 'red', 'EXPIRED': 'amber', 'INVOICED': 'violet'
                             } %}
                             {% set statusLabels = {
-                                'DRAFT': 'Brouillon', 'SENT': 'Envoyée', 'ACCEPTED': 'Acceptée',
-                                'REJECTED': 'Rejetée', 'EXPIRED': 'Expirée', 'CONVERTED': 'Convertie'
+                                'DRAFT': 'Initiée', 'SENT': 'Envoyée', 'ACCEPTED': 'Acceptée',
+                                'REFUSED': 'Refusée', 'EXPIRED': 'Expirée', 'INVOICED': 'Facturée'
                             } %}
                             {% set color = statusColors[item.status]|default('gray') %}
                             <div class="flex items-center justify-between p-3 bg-{{ color }}-50 rounded-lg border border-{{ color }}-100">

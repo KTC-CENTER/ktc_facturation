@@ -301,7 +301,7 @@
                 console.error('Error loading template:', error);
                 clearAllItems();
                 addItem();
-                alert('Erreur lors du chargement du modèle');
+                Swal.fire({icon:'error',title:'Erreur',text:'Erreur lors du chargement du modèle',confirmButtonText:'OK'});
             });
     }
     
@@ -322,7 +322,23 @@
                 });
                 
                 if (hasData && templateId) {
-                    if (!confirm('Les produits actuels seront remplacés par ceux du modèle. Continuer ?')) return;
+                    Swal.fire({
+                        title: 'Changer de modèle ?',
+                        text: 'Les produits actuels seront remplacés par ceux du modèle.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Oui, remplacer',
+                        cancelButtonText: 'Annuler'
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            loadTemplateItems(templateId);
+                        } else {
+                            templateSelect.value = '';
+                        }
+                    });
+                    return;
                 }
                 
                 loadTemplateItems(templateId);

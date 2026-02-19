@@ -264,7 +264,7 @@
 
     <!-- AMOUNT -->
     <div class="amount-section">
-        Arrêté à : <span class="amount-value">{{ proforma.amountInWords ?? (proforma.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
+        Arrêté à : <span class="amount-value">{{ totalInWords ?? (proforma.totalTTCFloat|number_format(0, ' ', ' ') ~ ' FCFA') }}</span>
     </div>
 
     <!-- CONDITIONS -->
