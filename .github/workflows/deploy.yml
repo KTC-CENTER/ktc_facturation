@@ -87,6 +87,8 @@ jobs:
           BREVO_SENDER_NAME="${{ secrets.BREVO_SENDER_NAME }}"
           ENVEOF
           sed -i 's/^[[:space:]]*//' /tmp/.env
+          sed -i 's/[[:space:]]*$//' /tmp/.env
+          sed -i 's/\r$//' /tmp/.env
           scp /tmp/.env root@${{ env.VPS_IP }}:${{ env.APP_DIR }}/.env
           rm -f /tmp/.env
 
@@ -151,6 +153,10 @@ jobs:
               echo ">>> Permissions..."
               docker exec ktc-invoice-app chown -R www-data:www-data var public/uploads public/build
               docker exec ktc-invoice-app chmod -R 775 var public/uploads
+
+              echo ">>> Test connexion Brevo..."
+              docker exec ktc-invoice-app php bin/console app:brevo:test --env=prod || echo "⚠️ Brevo test failed (voir logs ci-dessus)"
+
               echo "✅ Deployment completed!"
             else
               docker logs ktc-invoice-app --tail 50
