@@ -138,14 +138,15 @@ jobs:
                 sleep 5
               done
 
-              # ── 4. Schema update (toujours exécuté) ──
-              echo ">>> Schema update (force)..."
-              docker exec ktc-invoice-app php bin/console doctrine:schema:update --dump-sql --complete --env=prod || true
-              docker exec ktc-invoice-app php bin/console doctrine:schema:update --force
-
+              # ── 4. Cache clear AVANT schema update (métadonnées fraîches) ──
               echo ">>> Cache clear..."
               docker exec ktc-invoice-app php bin/console cache:clear --env=prod
               docker exec ktc-invoice-app php bin/console cache:warmup --env=prod
+
+              # ── 5. Schema update (toujours exécuté) ──
+              echo ">>> Schema update (force)..."
+              docker exec ktc-invoice-app php bin/console doctrine:schema:update --dump-sql --complete --env=prod || true
+              docker exec ktc-invoice-app php bin/console doctrine:schema:update --force --complete --env=prod
 
               echo ">>> Permissions..."
               docker exec ktc-invoice-app chown -R www-data:www-data var public/uploads public/build
