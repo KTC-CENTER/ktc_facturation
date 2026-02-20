@@ -94,24 +94,49 @@ jobs:
         run: |
           ssh root@${{ env.VPS_IP }} 'cd ${{ env.APP_DIR }} && \
             docker network create proxy-network 2>/dev/null || true && \
-            docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true && \
-            docker compose -f docker-compose.prod.yml build --no-cache && \
-            docker compose -f docker-compose.prod.yml up -d && \
-            echo "Waiting for containers..." && \
-            sleep 20 && \
+
+            # ── Démarrer la DB si elle ne tourne pas encore ──
+            if ! docker ps --filter "name=ktc-invoice-mysql" -q | grep -q .; then
+              echo ">>> DB not running, starting..."
+              docker compose -f docker-compose.prod.yml up -d ktc-invoice-db
+              echo "Waiting for DB healthy..."
+              sleep 25
+            fi && \
+
+            # ── Rebuild + recreate uniquement app + nginx (jamais la DB) ──
+            echo ">>> Building app container..."
+            docker compose -f docker-compose.prod.yml build --no-cache ktc-invoice-app && \
+            echo ">>> Stopping old app + nginx..."
+            docker compose -f docker-compose.prod.yml stop ktc-invoice-app ktc-invoice-nginx 2>/dev/null || true && \
+            docker compose -f docker-compose.prod.yml rm -f ktc-invoice-app ktc-invoice-nginx 2>/dev/null || true && \
+            echo ">>> Starting new app + nginx..."
+            docker compose -f docker-compose.prod.yml up -d --no-deps ktc-invoice-app ktc-invoice-nginx ktc-invoice-pma && \
+
+            echo "Waiting for app..." && \
+            sleep 15 && \
+
             if docker ps | grep -q ktc-invoice-app; then
               echo "Container running, configuring..."
-              echo ">>> Migrations..."
-              docker exec ktc-invoice-app php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true
+
+              echo ">>> Waiting for DB connection..."
+              for i in 1 2 3 4 5; do
+                docker exec ktc-invoice-app php bin/console dbal:run-sql "SELECT 1" --env=prod 2>/dev/null && break
+                echo "  retry $i..."
+                sleep 5
+              done
+
               echo ">>> Schema update (force)..."
-              docker exec ktc-invoice-app php bin/console doctrine:schema:update --force --complete
+              docker exec ktc-invoice-app php bin/console doctrine:schema:update --dump-sql --env=prod || true
+              docker exec ktc-invoice-app php bin/console doctrine:schema:update --force --complete --env=prod
+
               echo ">>> Cache clear..."
               docker exec ktc-invoice-app php bin/console cache:clear --env=prod
               docker exec ktc-invoice-app php bin/console cache:warmup --env=prod
+
               echo ">>> Permissions..."
               docker exec ktc-invoice-app chown -R www-data:www-data var public/uploads public/build
               docker exec ktc-invoice-app chmod -R 775 var public/uploads
-              echo "Deployment completed!"
+              echo "✅ Deployment completed!"
             else
               docker logs ktc-invoice-app --tail 50
               exit 1
