@@ -93,9 +93,10 @@ jobs:
       - name: Deploy with Docker
         run: |
           ssh root@${{ env.VPS_IP }} 'cd ${{ env.APP_DIR }} && \
+            export $(grep -v "^#" .env | xargs) && \
             docker network create proxy-network 2>/dev/null || true && \
 
-            # ── Démarrer la DB si elle ne tourne pas encore ──
+            # ── 1. Démarrer la DB si elle ne tourne pas ──
             if ! docker ps --filter "name=ktc-invoice-mysql" -q | grep -q .; then
               echo ">>> DB not running, starting..."
               docker compose -f docker-compose.prod.yml up -d ktc-invoice-db
@@ -103,7 +104,19 @@ jobs:
               sleep 25
             fi && \
 
-            # ── Rebuild + recreate uniquement app + nginx (jamais la DB) ──
+            # ── 2. Vérifier si la BD est vide (premier déploiement) ──
+            echo ">>> Checking if database needs initialization..."
+            TABLE_COUNT=$(docker exec ktc-invoice-mysql mysql -u admin -p"${DB_PASSWORD}" -D ktc_invoice -sN -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"'"'ktc_invoice'"'"';" 2>/dev/null || echo "0") && \
+
+            if [ "$TABLE_COUNT" -le 1 ]; then
+              echo ">>> ⚡ Fresh database detected ($TABLE_COUNT tables). Initializing..."
+              docker exec -i ktc-invoice-mysql mysql -u admin -p"${DB_PASSWORD}" ktc_invoice < docker/mysql/ktc_invoice.sql
+              echo ">>> Database initialized!"
+            else
+              echo ">>> ✅ Database exists ($TABLE_COUNT tables). Skipping init."
+            fi && \
+
+            # ── 3. Rebuild uniquement app + nginx (jamais la DB) ──
             echo ">>> Building app container..."
             docker compose -f docker-compose.prod.yml build --no-cache ktc-invoice-app && \
             echo ">>> Stopping old app + nginx..."
@@ -125,6 +138,7 @@ jobs:
                 sleep 5
               done
 
+              # ── 4. Schema update (toujours exécuté) ──
               echo ">>> Schema update (force)..."
               docker exec ktc-invoice-app php bin/console doctrine:schema:update --dump-sql --env=prod || true
               docker exec ktc-invoice-app php bin/console doctrine:schema:update --force --complete --env=prod
