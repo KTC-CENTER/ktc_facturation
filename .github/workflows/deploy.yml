@@ -101,10 +101,14 @@ jobs:
             sleep 20 && \
             if docker ps | grep -q ktc-invoice-app; then
               echo "Container running, configuring..."
+              echo ">>> Migrations..."
               docker exec ktc-invoice-app php bin/console doctrine:migrations:migrate --no-interaction 2>/dev/null || true
-              docker exec ktc-invoice-app php bin/console doctrine:schema:update --force 2>/dev/null || true
-              docker exec ktc-invoice-app php bin/console cache:clear --env=prod || true
-              docker exec ktc-invoice-app php bin/console cache:warmup --env=prod || true
+              echo ">>> Schema update (force)..."
+              docker exec ktc-invoice-app php bin/console doctrine:schema:update --force --complete
+              echo ">>> Cache clear..."
+              docker exec ktc-invoice-app php bin/console cache:clear --env=prod
+              docker exec ktc-invoice-app php bin/console cache:warmup --env=prod
+              echo ">>> Permissions..."
               docker exec ktc-invoice-app chown -R www-data:www-data var public/uploads public/build
               docker exec ktc-invoice-app chmod -R 775 var public/uploads
               echo "Deployment completed!"
